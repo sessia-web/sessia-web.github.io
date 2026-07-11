@@ -1,5 +1,7 @@
 <!doctype html><html lang='ru'><head><meta charset='utf-8'></head><body><meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Тренажёр — математические методы физики</title>
+<link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#14181D">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 100 100%27%3E%3Ctext y=%27.9em%27 font-size=%2790%27%3E%E2%88%AB%3C/text%3E%3C/svg%3E">
 <style>
 :root{
@@ -176,7 +178,7 @@ footer.app button{appearance:none;border:0;background:none;color:var(--muted);te
   <button id="unfocus" onclick="toggleFocus()">✕ выйти из фокуса</button>
   <footer class="app">
     <span>Подсказки: <kbd>Пробел</kbd> — перевернуть, <kbd>1</kbd>–<kbd>4</kbd> — ответ, <kbd>→</kbd> — дальше</span>
-    <button onclick="resetProgress()">Сбросить прогресс</button>
+    <span><button onclick="exportProgress()">Экспорт прогресса</button> · <button onclick="importProgress()">Импорт</button> · <button onclick="resetProgress()">Сбросить прогресс</button></span>
   </footer>
 </div>
 
@@ -210,11 +212,13 @@ var GNS='sessia-mmf', GAPI='https://abacus.jasoncameron.dev';
 var GSTATS=null, _gload=false;
 function loadGStats(){
   if(_gload || !/^https?:$/.test(location.protocol)) return; _gload=true;
+  try{ var c=JSON.parse(localStorage.getItem('gstats-cache-'+GNS)||'null');
+       if(c && c.d && Date.now()-c.t < 600000){ GSTATS=c.d; headerSync(); if(mode==='list') render(); return; } }catch(e){}
   try{
     var res={}, todo=[];
     DATA.forEach(function(d){ todo.push(['a',d.n]); todo.push(['w',d.n]); });
     var i=0, act=0, done=0;
-    function fin(){ GSTATS=res; headerSync(); if(mode==='list') render(); }
+    function fin(){ GSTATS=res; try{ localStorage.setItem('gstats-cache-'+GNS, JSON.stringify({t:Date.now(), d:res})); }catch(e){} headerSync(); if(mode==='list') render(); }
     function one(t){
       act++;
       fetch(GAPI+'/get/'+GNS+'/q'+t[1]+t[0]).then(function(r){ return r.ok?r.json():null; })
@@ -646,8 +650,31 @@ document.addEventListener('keydown',function(e){
   }
 });
 
+
+function exportProgress(){
+  try{
+    var raw = localStorage.getItem('mmf-trainer-v1')||'{}';
+    var code = 'MMF1.' + btoa(unescape(encodeURIComponent(raw)));
+    var done = function(){ alert('Код прогресса скопирован. На другом устройстве нажми «Импорт» и вставь его.'); };
+    if(navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(code).then(done, function(){ prompt('Скопируй код вручную:', code); });
+    else prompt('Скопируй код вручную:', code);
+  }catch(e){ alert('Не удалось выполнить экспорт'); }
+}
+function importProgress(){
+  var code = prompt('Вставь код прогресса (начинается с MMF1.):');
+  if(!code) return;
+  try{
+    code = code.trim();
+    if(code.indexOf('MMF1.')===0) code = code.slice(5);
+    var raw = decodeURIComponent(escape(atob(code)));
+    JSON.parse(raw);
+    localStorage.setItem('mmf-trainer-v1', raw);
+    location.reload();
+  }catch(e){ alert('Код не распознан — проверь, что скопирован целиком.'); }
+}
 startLearn();
 loadGStats();
 render();
+if(/^https?:$/.test(location.protocol) && 'serviceWorker' in navigator){ try{ navigator.serviceWorker.register('/sw.js'); }catch(e){} }
 </script>
 </body></html>
