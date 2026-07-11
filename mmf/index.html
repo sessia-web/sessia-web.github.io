@@ -316,7 +316,7 @@ function headerSync(){
   snd.textContent=store.sound?'🔊 Звук':'🔇 Звук';
   snd.classList.toggle('on',store.sound);
   document.getElementById('f-focus').classList.toggle('on',document.body.classList.contains('focusmode'));
-  document.getElementById('statlink').style.display='none';
+  document.getElementById('statlink').style.display='';
   var p=pool();
   var txt;
   if(mode==='learn'){

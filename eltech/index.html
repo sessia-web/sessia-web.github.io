@@ -185,6 +185,7 @@ math{font-size:1.08em;white-space:nowrap}
       <button class="chip" id="f-hard" onclick="toggleHard()" title="Только карточки, отмеченные как сложные или ещё не выученные">Только невыученные</button>
       <button class="chip" id="f-sound" onclick="toggleSound()">🔊 Звук</button>
       <button class="chip" id="f-focus" onclick="toggleFocus()" title="Скрыть всё лишнее">🎯 Фокус</button>
+      <a class="chip" id="statlink" href="stats.html" style="display:none;text-decoration:none" title="Таблица ошибок — твои и всей группы">📊 Статистика</a>
       <span class="stats" id="stats"></span>
     </div>
   </header>
@@ -625,6 +626,6 @@ document.addEventListener('keydown',function(e){
 });
 startLearn();
 render();
-if(/^https?:$/.test(location.protocol)){ var _th=document.getElementById('tohub'); if(_th) _th.style.display='inline-block'; }
+if(/^https?:$/.test(location.protocol)){ var _th=document.getElementById('tohub'); if(_th) _th.style.display='inline-block'; var _sl=document.getElementById('statlink'); if(_sl) _sl.style.display='inline-block'; }
 </script>
 </body></html>
