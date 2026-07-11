@@ -1,0 +1,653 @@
+<!doctype html><html lang='ru'><head><meta charset='utf-8'></head><body><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Тренажёр — математические методы физики</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 100 100%27%3E%3Ctext y=%27.9em%27 font-size=%2790%27%3E%E2%88%AB%3C/text%3E%3C/svg%3E">
+<style>
+:root{
+  --bg:#F6F7F4; --surface:#FFFFFF; --ink:#20262B; --muted:#66707A; --line:#DDE2E0;
+  --accent:#2B4BB5; --accent-ink:#FFFFFF; --accent-soft:#E9EDFA;
+  --ok:#177A4C; --ok-bg:#E7F4EC; --bad:#B3362E; --bad-bg:#F9EAE8;
+  --chip:#ECEFF3; --grid:rgba(43,75,181,.045); --shadow:0 1px 2px rgba(24,32,44,.06),0 6px 18px rgba(24,32,44,.07);
+}
+@media (prefers-color-scheme: dark){
+  :root{
+    --bg:#14181D; --surface:#1D232A; --ink:#E8ECEF; --muted:#98A2AB; --line:#2C343C;
+    --accent:#7C93E8; --accent-ink:#101625; --accent-soft:#232C42;
+    --ok:#4CC38A; --ok-bg:rgba(76,195,138,.13); --bad:#E5766C; --bad-bg:rgba(229,118,108,.13);
+    --chip:#252C34; --grid:rgba(124,147,232,.05); --shadow:0 1px 2px rgba(0,0,0,.4),0 8px 22px rgba(0,0,0,.35);
+  }
+}
+:root[data-theme="light"]{
+  --bg:#F6F7F4; --surface:#FFFFFF; --ink:#20262B; --muted:#66707A; --line:#DDE2E0;
+  --accent:#2B4BB5; --accent-ink:#FFFFFF; --accent-soft:#E9EDFA;
+  --ok:#177A4C; --ok-bg:#E7F4EC; --bad:#B3362E; --bad-bg:#F9EAE8;
+  --chip:#ECEFF3; --grid:rgba(43,75,181,.045); --shadow:0 1px 2px rgba(24,32,44,.06),0 6px 18px rgba(24,32,44,.07);
+}
+:root[data-theme="dark"]{
+  --bg:#14181D; --surface:#1D232A; --ink:#E8ECEF; --muted:#98A2AB; --line:#2C343C;
+  --accent:#7C93E8; --accent-ink:#101625; --accent-soft:#232C42;
+  --ok:#4CC38A; --ok-bg:rgba(76,195,138,.13); --bad:#E5766C; --bad-bg:rgba(229,118,108,.13);
+  --chip:#252C34; --grid:rgba(124,147,232,.05); --shadow:0 1px 2px rgba(0,0,0,.4),0 8px 22px rgba(0,0,0,.35);
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  background:var(--bg);
+  background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);
+  background-size:24px 24px;
+  color:var(--ink);
+  font:16px/1.5 "Segoe UI",-apple-system,"Helvetica Neue",Arial,sans-serif;
+  min-height:100vh;
+}
+.wrap{max-width:760px;margin:0 auto;padding:20px 16px 64px}
+header.app h1{font-family:Georgia,"Times New Roman",serif;font-size:26px;margin:0 0 2px;letter-spacing:.2px;text-wrap:balance}
+header.app .sub{color:var(--muted);font-size:13.5px;margin:0 0 16px}
+.tabs{display:flex;gap:0;border:1px solid var(--line);border-radius:10px;overflow:hidden;background:var(--surface);width:fit-content;box-shadow:var(--shadow)}
+.tabs button{appearance:none;border:0;background:transparent;color:var(--muted);font:600 14.5px/1 "Segoe UI",sans-serif;padding:11px 18px;cursor:pointer;border-right:1px solid var(--line)}
+.tabs button:last-child{border-right:0}
+.tabs button.on{background:var(--accent);color:var(--accent-ink)}
+.tabs button:focus-visible,.chip:focus-visible,.btn:focus-visible,.opt:focus-visible,.card3d:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.filters{display:flex;flex-wrap:wrap;gap:8px;margin:14px 0 6px;align-items:center}
+.chip{appearance:none;border:1px solid var(--line);background:var(--chip);color:var(--ink);border-radius:999px;padding:7px 14px;font:500 13px/1 "Segoe UI",sans-serif;cursor:pointer}
+.chip.on{background:var(--accent-soft);border-color:var(--accent);color:var(--accent);font-weight:700}
+.stats{margin-left:auto;color:var(--muted);font:500 12.5px/1.2 Consolas,ui-monospace,monospace;font-variant-numeric:tabular-nums}
+main{margin-top:14px}
+.progress{height:5px;background:var(--chip);border-radius:99px;overflow:hidden;margin:0 0 14px}
+.progress i{display:block;height:100%;background:var(--accent);border-radius:99px;transition:width .25s ease}
+.meta{display:flex;justify-content:space-between;align-items:baseline;color:var(--muted);font:500 13px/1.3 Consolas,ui-monospace,monospace;font-variant-numeric:tabular-nums;margin-bottom:10px;gap:12px;flex-wrap:wrap}
+.badge{display:inline-block;background:var(--accent);color:var(--accent-ink);border-radius:6px;padding:1px 8px;font:700 12.5px/1.5 Consolas,monospace;margin-right:8px;vertical-align:1px}
+.tag{color:var(--muted);font-size:12px;letter-spacing:.4px;text-transform:uppercase}
+/* flashcard */
+.scene{perspective:1400px}
+.card3d{position:relative;display:grid;transform-style:preserve-3d;transition:transform .45s cubic-bezier(.2,.7,.3,1);cursor:pointer;border:0;background:transparent;padding:0;text-align:left;width:100%;font:inherit;color:inherit}
+.card3d.flip{transform:rotateY(180deg)}
+@media (prefers-reduced-motion: reduce){.card3d{transition:none}.progress i{transition:none}}
+.face{grid-area:1/1;background:var(--surface);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow);padding:22px 22px 18px;backface-visibility:hidden;-webkit-backface-visibility:hidden;min-height:340px;display:flex;flex-direction:column}
+.face.back{transform:rotateY(180deg)}
+.face .q{font-size:17.5px;font-weight:650;margin:10px 0 12px;text-wrap:balance}
+.face ol{margin:0 0 8px;padding-left:24px;color:var(--muted)}
+.face ol li{margin:5px 0;font-size:14.5px}
+.hint{margin-top:auto;color:var(--muted);font-size:12.5px;text-align:center;padding-top:14px}
+.ansbox{background:var(--ok-bg);border-left:3px solid var(--ok);border-radius:8px;padding:12px 14px;margin:8px 0 10px}
+.ansbox .lbl{color:var(--ok);font-weight:700;font-size:12px;letter-spacing:.6px;text-transform:uppercase}
+.ansbox .txt{font-size:16.5px;font-weight:650;margin-top:4px}
+.note{color:var(--muted);font-size:14px;border-top:1px dashed var(--line);padding-top:10px;margin-top:2px}
+.rowbtns{display:flex;gap:10px;margin-top:14px}
+.btn{appearance:none;border:1px solid var(--line);border-radius:10px;background:var(--surface);color:var(--ink);font:600 15px/1 "Segoe UI",sans-serif;padding:13px 18px;cursor:pointer;flex:1;box-shadow:var(--shadow)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.btn.okb{background:var(--ok-bg);border-color:var(--ok);color:var(--ok)}
+.btn.badb{background:var(--bad-bg);border-color:var(--bad);color:var(--bad)}
+.btn.ghost{background:transparent;box-shadow:none}
+.btn:disabled{opacity:.45;cursor:default}
+kbd{border:1px solid var(--line);border-bottom-width:2px;border-radius:5px;background:var(--chip);padding:0 5px;font:600 11px/1.6 Consolas,monospace;color:var(--muted)}
+math{font-size:1.08em}
+math[display='block']{display:block math;text-align:left;margin:3px 0}
+.opt math[display='block']{margin:1px 0}
+/* fx: конфетти, стрик, фокус */
+#fx{position:fixed;inset:0;pointer-events:none;z-index:99}
+.streak{display:inline-block;background:linear-gradient(135deg,#ff9a3d,#ff5e3a);color:#fff;border-radius:999px;padding:2px 10px;font:700 12.5px/1.5 Consolas,monospace;animation:spop .25s ease}
+@keyframes spop{0%{transform:scale(.6)}70%{transform:scale(1.15)}100%{transform:scale(1)}}
+@keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-7px)}40%{transform:translateX(6px)}60%{transform:translateX(-4px)}80%{transform:translateX(3px)}}
+.qcard.shake{animation:shake .35s ease}
+@media (prefers-reduced-motion: reduce){.qcard.shake{animation:none}.streak{animation:none}}
+#unfocus{display:none;position:fixed;top:10px;right:12px;z-index:100;appearance:none;border:1px solid var(--line);border-radius:999px;background:var(--surface);color:var(--muted);font:600 13px/1 "Segoe UI",sans-serif;padding:8px 14px;cursor:pointer;box-shadow:var(--shadow)}
+body.focusmode header.app h1,body.focusmode header.app .sub,body.focusmode .filters,body.focusmode footer.app{display:none}
+body.focusmode #unfocus{display:block}
+body.focusmode .tabs{margin-bottom:2px}
+/* learn */
+.pips{display:inline-flex;gap:4px;margin-left:10px;vertical-align:1px}
+.pip{width:9px;height:9px;border-radius:50%;border:1.5px solid var(--accent);display:inline-block}
+.pip.f{background:var(--accent)}
+.lstat{display:flex;gap:14px;justify-content:center;margin:14px 0 20px;flex-wrap:wrap}
+.lstat .b{background:var(--chip);border:1px solid var(--line);border-radius:10px;padding:10px 16px;text-align:center;min-width:104px}
+.lstat .b .v{font-family:Georgia,"Times New Roman",serif;font-size:26px;font-variant-numeric:tabular-nums}
+.lstat .b .l{color:var(--muted);font-size:11.5px;letter-spacing:.4px;text-transform:uppercase}
+.lstat .b.g .v{color:var(--ok)} .lstat .b.a .v{color:var(--accent)}
+/* quiz */
+.qcard{background:var(--surface);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow);padding:22px}
+.qcard .q{font-size:17.5px;font-weight:650;margin:10px 0 16px;text-wrap:balance}
+.opts{display:flex;flex-direction:column;gap:9px}
+.opt{appearance:none;text-align:left;border:1.5px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink);font:500 15px/1.45 "Segoe UI",sans-serif;padding:12px 14px;cursor:pointer;display:flex;gap:10px;align-items:flex-start}
+.opt .k{font:700 12.5px/1.7 Consolas,monospace;color:var(--muted);border:1px solid var(--line);border-radius:6px;padding:0 6px;flex:none;margin-top:1px}
+.opt:not(:disabled):hover{border-color:var(--accent)}
+.opt.correct{background:var(--ok-bg);border-color:var(--ok)}
+.opt.correct .k{color:var(--ok);border-color:var(--ok)}
+.opt.wrong{background:var(--bad-bg);border-color:var(--bad)}
+.opt.wrong .k{color:var(--bad);border-color:var(--bad)}
+.opt:disabled{cursor:default;color:var(--ink)}
+.verdict{font-weight:700;margin:14px 0 4px}
+.verdict.good{color:var(--ok)} .verdict.badv{color:var(--bad)}
+/* result */
+.result{background:var(--surface);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow);padding:34px 24px;text-align:center}
+.result .big{font-family:Georgia,"Times New Roman",serif;font-size:56px;line-height:1;font-variant-numeric:tabular-nums}
+.result .big.good{color:var(--ok)} .result .big.mid{color:var(--accent)} .result .big.badv{color:var(--bad)}
+.result p{color:var(--muted);margin:10px 0 20px}
+/* list */
+.listbar{display:flex;gap:8px;margin-bottom:14px}
+.listbar .search{flex:1;margin-bottom:0}
+select.sel{border:1px solid var(--line);border-radius:10px;background:var(--surface);color:var(--ink);font:500 14px/1 "Segoe UI",sans-serif;padding:0 10px;cursor:pointer}
+.errstat{font-size:12.5px;color:var(--muted);margin:2px 0 8px}
+.errstat b.bad{color:var(--bad)} .errstat b.okc{color:var(--ok)}
+.search{width:100%;border:1px solid var(--line);border-radius:10px;background:var(--surface);color:var(--ink);font:500 15px/1 "Segoe UI",sans-serif;padding:12px 14px;margin-bottom:14px}
+.search::placeholder{color:var(--muted)}
+.litem{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px 16px;margin-bottom:10px}
+.litem .q{font-weight:650;margin:0 0 8px}
+.litem ol{margin:0;padding-left:24px}
+.litem ol li{margin:3px 0;font-size:14px;color:var(--muted)}
+.litem ol li.ok{color:var(--ok);font-weight:700}
+.litem .note{margin-top:8px}
+.litem .st{float:right;font-size:11.5px;letter-spacing:.4px;text-transform:uppercase;font-weight:700}
+.litem .st.known{color:var(--ok)} .litem .st.hard{color:var(--bad)}
+footer.app{margin-top:26px;color:var(--muted);font-size:12.5px;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;align-items:center}
+footer.app button{appearance:none;border:0;background:none;color:var(--muted);text-decoration:underline;cursor:pointer;font:inherit;padding:0}
+.empty{text-align:center;color:var(--muted);padding:40px 10px}
+@media (max-width:520px){
+  .wrap{padding:14px 10px 48px}
+  .tabs{width:100%} .tabs button{flex:1;padding:11px 6px}
+  .face{padding:16px 14px 14px;min-height:300px}
+  .qcard{padding:16px 14px}
+  .stats{margin-left:0;width:100%}
+}
+</style>
+
+<div class="wrap">
+  <header class="app">
+    <a id="tohub" href="../" style="color:var(--muted);font-size:12.5px;text-decoration:none">&#8592; все предметы</a>
+  <h1>Тренажёр: математические методы физики</h1>
+    <p class="sub">105 вопросов теста · заучивание порциями по 10, вопрос закрывается после 3 верных ответов · прогресс сохраняется в браузере</p>
+    <div class="tabs" role="tablist">
+      <button id="tab-learn" class="on" onclick="setMode('learn')">Заучивание</button>
+      <button id="tab-cards" onclick="setMode('cards')">Карточки</button>
+      <button id="tab-quiz" onclick="setMode('quiz')">Тест</button>
+      <button id="tab-list" onclick="setMode('list')">Разбор</button>
+    </div>
+    <div class="filters">
+      <button class="chip on" id="f-all" onclick="setFilter('all')">Все вопросы</button>
+      <button class="chip" id="f-num" onclick="setFilter('num')">Численные методы</button>
+      <button class="chip" id="f-opt" onclick="setFilter('opt')">Оптимизация</button>
+      <button class="chip" id="f-hard" onclick="toggleHard()" title="Показывать только карточки, отмеченные как сложные или ещё не выученные">Только невыученные</button>
+      <button class="chip" id="f-sound" onclick="toggleSound()" title="Звуки при ответах">🔊 Звук</button>
+      <button class="chip" id="f-focus" onclick="toggleFocus()" title="Скрыть всё лишнее — только вопрос">🎯 Фокус</button>
+      <a class="chip" id="statlink" href="stats.html" style="display:none;text-decoration:none" title="Таблица и графики ошибок — твои и всей группы">📊 Статистика</a>
+      <span class="stats" id="stats"></span>
+    </div>
+  </header>
+  <main id="main"></main>
+  <canvas id="fx"></canvas>
+  <button id="unfocus" onclick="toggleFocus()">✕ выйти из фокуса</button>
+  <footer class="app">
+    <span>Подсказки: <kbd>Пробел</kbd> — перевернуть, <kbd>1</kbd>–<kbd>4</kbd> — ответ, <kbd>→</kbd> — дальше</span>
+    <button onclick="resetProgress()">Сбросить прогресс</button>
+  </footer>
+</div>
+
+<script>
+"use strict";
+var DATA = [{"n": 1, "q": "В чем заключается задача отделения корней?", "opts": ["В установлении количества корней;", "В установлении количества корней, а также наиболее тесных промежутков, каждый из которых содержит только один корень;", "В установлении корня решения уравнения;", "В назначении количества корней."], "a": 2, "note": "Отделить корни — значит найти количество корней и такие малые отрезки, в каждом из которых лежит ровно один корень.", "sec": "Численные методы"}, {"n": 2, "q": "К методам уточнения корней не относится …", "opts": ["метод дихотомии;", "метод хорд;", "метод касательных;", "метод аппроксимации."], "a": 4, "note": "Дихотомия, хорды и касательные — классические методы уточнения корня. «Метод аппроксимации» таковым не является.", "sec": "Численные методы"}, {"n": 3, "q": "Суть комбинированного метода хорд и касательных?", "opts": ["Метод хорд и касательных дают приближения к корню с разных сторон;", "При реализации метода при каждой итерации необходимо вычислять не только значения функции, но и её производной;", "Метод ограничивается вычислениями только значения функции;", "Нет правильного ответа."], "a": 1, "note": "Хорды и касательные приближаются к корню с противоположных сторон — корень зажимается в сужающийся интервал.", "sec": "Численные методы"}, {"n": 4, "q": "Интерполяция – это …", "opts": ["способ нахождения промежуточных значений величины по имеющемуся дискретному набору известных значений;", "продолжение функции, принадлежащей заданному классу, за пределы её области определения;", "замена одних математических объектов другими, в том или ином смысле близкими к исходным;", "метод решения задач, при котором объекты разного рода объединяются общим понятием."], "a": 1, "note": "Вариант 2 — экстраполяция, вариант 3 — аппроксимация.", "sec": "Численные методы"}, {"n": 5, "q": "Интерполяция бывает …", "opts": ["кусочная и локальная;", "локальная и глобальная;", "кусочная и априорная;", "максимальная и минимальная."], "a": 2, "note": "Стандартная классификация: локальная (кусочная, на части узлов) и глобальная (один многочлен по всем узлам).", "sec": "Численные методы"}, {"n": 6, "q": "Итерация – это ….", "opts": ["повторение. Результат повторного применения какой-либо математической операции;", "замена одних математических объектов другими, в том или ином смысле близкими к исходным;", "число, изображаемое единицей и 18 нулями;", "продолжение функции, принадлежащей заданному классу, за пределы её области определения."], "a": 1, "note": "От лат. iteratio — «повторение».", "sec": "Численные методы"}, {"n": 7, "q": "Золотое сечение – это …", "opts": ["такое пропорциональное деление отрезка на части, при котором меньший отрезок относится к большему, как больший ко всему;", "непропорциональное деление отрезка на части, при котором меньший отрезок относится к большему, как больший ко всему;", "непропорциональное деление отрезка на части, при котором больший отрезок относится к меньшему, как больший ко всему;", "такое пропорциональное деление отрезка на части, при котором больший отрезок относится к меньшему, как больший ко всему."], "a": 1, "note": "Классическая пропорция: b : a = a : (a+b) — меньший к большему как больший ко всему.", "sec": "Численные методы"}, {"n": 8, "q": "В основе какого метода лежит идея графического построения решения дифференциального уравнения, однако этот метод дает одновременно и способ нахождения искомой функции в численной форме?", "opts": ["Метод Лагранжа;", "Метод Ньютона;", "Метод Рунге;", "Метод Эйлера."], "a": 4, "note": "Ломаная Эйлера — графическое построение интегральной кривой, одновременно дающее численные значения.", "sec": "Численные методы"}, {"n": 9, "q": "Метод Рунге-Кутты 4-го порядка пригоден для решения ОДУ …", "opts": ["только первого порядка;", "только второго порядка;", "только четвертого порядка;", "любого порядка."], "a": 4, "note": "«4-й порядок» — это порядок точности. ОДУ любого порядка сводится к системе уравнений 1-го порядка, к которой применим метод.", "sec": "Численные методы"}, {"n": 10, "q": "Метод, представляющий собой конечный алгоритм для вычисления корней функции – это …", "opts": ["точный метод;", "метод релаксаций;", "метод итераций;", "приближенный метод."], "a": 1, "note": "Точные (прямые) методы дают корень за конечное число операций.", "sec": "Численные методы"}, {"n": 11, "q": "Метод позволяющий получить корни уравнения с заданной точностью путем сходящихся бесконечных процессов – это …", "opts": ["итерационный метод;", "точный метод;", "приближенный метод;", "относительный метод."], "a": 1, "note": "Итерационные методы строят сходящуюся последовательность приближений — бесконечный процесс, обрываемый при достижении нужной точности.", "sec": "Численные методы"}, {"n": 12, "q": "Этот метод является наиболее распространенным приемом решения систем линейных уравнений.", "opts": ["Метод Гаусса;", "Метод простых итераций;", "Метод обратных матриц;", "Метод Зейделя."], "a": 1, "note": "Метод Гаусса (последовательное исключение неизвестных) — основной прямой метод решения СЛАУ.", "sec": "Численные методы"}, {"n": 13, "q": "Как иначе называют метод бисекций?", "opts": ["Метод половинного деления;", "Метод хорд;", "Метод пропорциональных частей;", "Метод «начального отрезка»."], "a": 1, "note": "Бисекция = деление отрезка пополам.", "sec": "Численные методы"}, {"n": 14, "q": "Методы решения уравнений делятся на …", "opts": ["прямые и итеративные;", "прямые и косвенные;", "начальные и конечные;", "определенные и неопределенные."], "a": 1, "note": "", "sec": "Численные методы"}, {"n": 15, "q": "Кто опубликовал формулу для решения кубического уравнения?", "opts": ["Кардано;", "Галуа;", "Абель;", "Дарбу."], "a": 1, "note": "Формула Кардано (1545, «Ars Magna»).", "sec": "Численные методы"}, {"n": 16, "q": "Основная теорема алгебры:", "opts": ["Полином степени n имеет ровно n корней, вещественных или комплексно сопряженных;", "Если функция f(x) определена и непрерывна на отрезке [a;b] и принимает на его концах значения разных знаков, то на [a;b] содержится, по меньшей мере, один корень;", "Если функция f(x) монотонна на отрезке [a;b], то она интегрируема на этом отрезке;", "Если функция f(x) монотонна на отрезке [a;b], то она дифференцируема на этом отрезке."], "a": 1, "note": "Вариант 2 — теорема Больцано–Коши о промежуточном значении.", "sec": "Численные методы"}, {"n": 17, "q": "Отделение корней можно выполнить двумя способами:", "opts": ["аналитическим и графическим;", "приближением и отделением;", "аналитическим и систематическим;", "систематическим и графическим."], "a": 1, "note": "", "sec": "Численные методы"}, {"n": 18, "q": "Отделить корни уравнения x³ − 2x − 3 = 0.", "opts": ["Единственный корень расположен между √(2/3) и ∞;", "Корней нет;", "Один из корней находится на отрезке [1,2];", "Один из корней находится на отрезке [-1,2]."], "a": 3, "note": "f(1) = 1−2−3 = −4 &lt; 0, f(2) = 8−4−3 = 1 &gt; 0 — перемена знака, корень на [1,2] (действительный корень x ≈ 1,89 единственный).", "sec": "Численные методы"}, {"n": 19, "q": "Укажите рекуррентную формулу метода простой итерации:", "opts": ["<math xmlns='http://www.w3.org/1998/Math/MathML'><msub><mi>x<\/mi><mrow><mi>n<\/mi><mo>+<\/mo><mn>1<\/mn><\/mrow><\/msub><mo>=<\/mo><mi>&#x3C6;<\/mi><mo>(<\/mo><msub><mi>x<\/mi><mi>n<\/mi><\/msub><mo>)<\/mo><\/math>", "<math xmlns='http://www.w3.org/1998/Math/MathML'><mi>x<\/mi><mo>=<\/mo><mi>&#x3C6;<\/mi><\/math>", "<math xmlns='http://www.w3.org/1998/Math/MathML'><mi>x<\/mi><mo>=<\/mo><mi>C<\/mi><\/math>", "<math xmlns='http://www.w3.org/1998/Math/MathML'><msub><mi>x<\/mi><mrow><mi>n<\/mi><mo>+<\/mo><mn>1<\/mn><\/mrow><\/msub><mo>=<\/mo><mi>&#x3C8;<\/mi><mo>(<\/mo><msub><mi>x<\/mi><mi>n<\/mi><\/msub><mo>)<\/mo><mo>+<\/mo><mi>&#x3C6;<\/mi><mo>(<\/mo><msub><mi>x<\/mi><mi>n<\/mi><\/msub><mo>)<\/mo><\/math>"], "a": 1, "note": "Уравнение приводится к виду x=φ(x), затем итерации x<sub>n+1<\/sub>=φ(x<sub>n<\/sub>).", "sec": "Численные методы"}, {"n": 20, "q": "Последовательность, удовлетворяющая условию Коши, называется …", "opts": ["фундаментальной последовательностью;", "рекуррентной последовательностью;", "итеративной последовательностью;", "двусторонней последовательностью."], "a": 1, "note": "Фундаментальная (сходящаяся в себе) последовательность — определение по Коши.", "sec": "Численные методы"}, {"n": 21, "q": "Метод хорд – это …", "opts": ["частный случай метода итераций;", "частный случай метода коллокации;", "частный случай метода прогонки;", "частный случай метода квадратных корней."], "a": 1, "note": "Метод хорд записывается в виде x<sub>n+1<\/sub>=φ(x<sub>n<\/sub>) — частный случай метода итераций.", "sec": "Численные методы"}, {"n": 22, "q": "Как иначе называют метод Ньютона?", "opts": ["Метод касательных;", "Метод коллокации;", "Метод прогонки;", "Метод итераций."], "a": 1, "note": "", "sec": "Численные методы"}, {"n": 23, "q": "Что общего у метода хорд и метода итераций?", "opts": ["Общая скорость сходимости;", "Свойство самоисправляемости;", "Общая трудоемкость;", "Легкость реализации."], "a": 2, "note": "Оба метода самоисправляющиеся: отдельная ошибка в вычислениях не влияет на конечный результат (исправляется последующими итерациями).", "sec": "Численные методы"}, {"n": 24, "q": "Метод Ньютона …", "opts": ["имеет высокую скорость сходимости;", "дает большой выигрыш во времени;", "занимает очень много времени;", "предельно прост."], "a": 1, "note": "Квадратичная сходимость — главное достоинство метода Ньютона.", "sec": "Численные методы"}, {"n": 25, "q": "Все методы вычисления интегралов делятся на …", "opts": ["точные и приближенные;", "прямые и итеративные;", "прямые и косвенные;", "аналитические и графические."], "a": 1, "note": "", "sec": "Численные методы"}, {"n": 26, "q": "Точный метод вычисления интегралов был предложен …", "opts": ["Ньютоном и Лейбницем;", "Ньютоном и Гауссом;", "Гауссом и Стирлингом;", "Вольтерра."], "a": 1, "note": "Формула Ньютона–Лейбница.", "sec": "Численные методы"}, {"n": 27, "q": "Геометрически нижняя сумма Дарбу равна …", "opts": ["площади ступенчатого многоугольника, содержащегося в криволинейной трапеции;", "площади ступенчатого многоугольника, содержащего внутри себя криволинейную трапецию;", "площади прямоугольного параллелепипеда;", "площади ступенчатого шестиугольника."], "a": 1, "note": "Нижняя сумма — вписанный ступенчатый многоугольник.", "sec": "Численные методы"}, {"n": 28, "q": "Геометрически верхняя сумма Дарбу равна …", "opts": ["площади ступенчатого многоугольника, содержащего внутри себя криволинейную трапецию;", "площади ступенчатого многоугольника, содержащегося в криволинейной трапеции;", "площади прямоугольного параллелепипеда;", "площади ступенчатого шестиугольника."], "a": 1, "note": "Верхняя сумма — описанный ступенчатый многоугольник.", "sec": "Численные методы"}, {"n": 29, "q": "Приближенные методы вычисления интегралов можно разделить на 2 группы:", "opts": ["аналитические и численные;", "аналитические и графические;", "систематические и численные;", "систематические и случайные."], "a": 1, "note": "", "sec": "Численные методы"}, {"n": 30, "q": "Латинское слово recurrens означает …", "opts": ["возвращающийся;", "меняющийся;", "повторяющийся;", "заменяющийся."], "a": 1, "note": "Recurrens (recurro — «бегу назад») — «возвращающийся»; отсюда «рекуррентная формула».", "sec": "Численные методы"}, {"n": 31, "q": "Округлить число π=3,1415926535… до пяти значащих цифр.", "opts": ["3,1416;", "3,1425;", "3,142;", "3,14."], "a": 1, "note": "Пять значащих цифр: 3,1415|9… → шестая цифра 9 ≥ 5, округляем вверх: 3,1416.", "sec": "Численные методы"}, {"n": 32, "q": "Найти ln(3) с точностью до 10⁻⁵.", "opts": ["1,09861;", "1,01;", "1,098132;", "1,02."], "a": 1, "note": "ln 3 = 1,0986122886… → с точностью 10⁻⁵: 1,09861.", "sec": "Численные методы"}, {"n": 33, "q": "Погрешность, связанная с самой постановкой математической задачи – это …", "opts": ["погрешность задачи;", "погрешность метода;", "остаточная погрешность;", "погрешность действия."], "a": 1, "note": "", "sec": "Численные методы"}, {"n": 34, "q": "Погрешность, связанная с наличием бесконечных процессов в математическом анализе, – это …", "opts": ["остаточная погрешность;", "абсолютная погрешность;", "относительная погрешность;", "погрешность условия."], "a": 1, "note": "Бесконечный процесс обрывается на конечном шаге — возникает остаточная погрешность.", "sec": "Численные методы"}, {"n": 35, "q": "Погрешность, связанная с наличием в математических формулах числовых параметров, называется …", "opts": ["начальной;", "конечной;", "абсолютной;", "относительной."], "a": 1, "note": "Начальная погрешность — от приближённо заданных исходных параметров.", "sec": "Численные методы"}, {"n": 36, "q": "Погрешность, связанная с системой счисления, - это …", "opts": ["погрешность округления;", "погрешность действий;", "погрешности задач;", "остаточная погрешность."], "a": 1, "note": "Конечная разрядность системы счисления вынуждает округлять числа.", "sec": "Численные методы"}, {"n": 37, "q": "Какой из перечисленных методов служит для решения уравнений с одним неизвестным?", "opts": ["Интерполирование;", "Трапеций;", "Хорд;", "Рунге-Кутта."], "a": 3, "note": "", "sec": "Численные методы"}, {"n": 38, "q": "Какой из перечисленных методов служит для решения задачи Коши?", "opts": ["Касательных;", "Галёркина;", "Гаусса;", "Рунге-Кутта."], "a": 4, "note": "", "sec": "Численные методы"}, {"n": 39, "q": "Какой из перечисленных методов служит для приближенного вычисления определённого интеграла?", "opts": ["Касательных;", "Парабол;", "Гаусса;", "Рунге-Кутта."], "a": 2, "note": "Метод парабол = метод Симпсона.", "sec": "Численные методы"}, {"n": 40, "q": "Процесс построения значения корней системы с заданной точностью в виде предела последовательности некоторых векторов называется …", "opts": ["итерационным;", "сходящимся;", "расходящимся;", "установившимся."], "a": 1, "note": "", "sec": "Численные методы"}, {"n": 41, "q": "Интерполяционным многочленом называется многочлен …", "opts": ["значения которого в узлах интерполяции равны значениям табличной функции в этих узлах;", "n-й степени;", "параболического вида;", "значения которого равны между собой."], "a": 1, "note": "", "sec": "Численные методы"}, {"n": 42, "q": "Конечные табличные разности используются в интерполяционной формуле …", "opts": ["Гаусса для равноотстоящих узлов интерполяции;", "Эйткина для равноотстоящих узлов интерполяции;", "Ньютона для равноотстоящих узлов интерполяции;", "Лагранжа для равноотстоящих узлов интерполяции."], "a": 3, "note": "Формулы Ньютона (для интерполяции вперёд/назад) строятся на конечных разностях при равноотстоящих узлах.", "sec": "Численные методы"}, {"n": 43, "q": "Квадратурная формула Гаусса имеет вид …", "opts": ["<math xmlns='http://www.w3.org/1998/Math/MathML' display='block'><msubsup><mo>&#x222B;<\/mo><mi>a<\/mi><mi>b<\/mi><\/msubsup><mrow><mi>f<\/mi><mo>(<\/mo><mi>x<\/mi><mo>)<\/mo><\/mrow><mrow><mi>d<\/mi><mi>x<\/mi><\/mrow><mo>&#x2248;<\/mo><mrow><mo>(<\/mo><mi>b<\/mi><mo>&#x2212;<\/mo><mi>a<\/mi><mo>)<\/mo><\/mrow><mfrac><mrow><mi>f<\/mi><mo>(<\/mo><mi>a<\/mi><mo>)<\/mo><mo>+<\/mo><mrow><mi>f<\/mi><mo>(<\/mo><mi>b<\/mi><mo>)<\/mo><\/mrow><\/mrow><mn>2<\/mn><\/mfrac><\/math>", "<math xmlns='http://www.w3.org/1998/Math/MathML' display='block'><msubsup><mo>&#x222B;<\/mo><mi>a<\/mi><mi>b<\/mi><\/msubsup><mrow><mi>f<\/mi><mo>(<\/mo><mi>x<\/mi><mo>)<\/mo><\/mrow><mrow><mi>d<\/mi><mi>x<\/mi><\/mrow><mo>&#x2248;<\/mo><mfrac><mrow><mo>(<\/mo><mi>b<\/mi><mo>&#x2212;<\/mo><mi>a<\/mi><mo>)<\/mo><\/mrow><mi>n<\/mi><\/mfrac><munderover><mo>&#x2211;<\/mo><mrow><mi>i<\/mi><mo>=<\/mo><mn>0<\/mn><\/mrow><mrow><mi>n<\/mi><mo>&#x2212;<\/mo><mn>1<\/mn><\/mrow><\/munderover><msub><mi>y<\/mi><mi>i<\/mi><\/msub><\/math>", "<math xmlns='http://www.w3.org/1998/Math/MathML' display='block'><msubsup><mo>&#x222B;<\/mo><mrow><mo>&#x2212;<\/mo><mn>1<\/mn><\/mrow><mn>1<\/mn><\/msubsup><mrow><mi>f<\/mi><mo>(<\/mo><mi>x<\/mi><mo>)<\/mo><\/mrow><mrow><mi>d<\/mi><mi>x<\/mi><\/mrow><mo>&#x2248;<\/mo><munderover><mo>&#x2211;<\/mo><mrow><mi>k<\/mi><mo>=<\/mo><mn>1<\/mn><\/mrow><mi>n<\/mi><\/munderover><msub><mi>A<\/mi><mi>k<\/mi><\/msub><mi>f<\/mi><mo>(<\/mo><msub><mi>x<\/mi><mi>k<\/mi><\/msub><mo>)<\/mo><\/math>", "<math xmlns='http://www.w3.org/1998/Math/MathML' display='block'><msubsup><mo>&#x222B;<\/mo><mi>a<\/mi><mi>b<\/mi><\/msubsup><mrow><mi>f<\/mi><mo>(<\/mo><mi>x<\/mi><mo>)<\/mo><\/mrow><mrow><mi>d<\/mi><mi>x<\/mi><\/mrow><mo>&#x2248;<\/mo><mfrac><mrow><mo>(<\/mo><mi>b<\/mi><mo>&#x2212;<\/mo><mi>a<\/mi><mo>)<\/mo><\/mrow><mrow><mn>6<\/mn><mi>n<\/mi><\/mrow><\/mfrac><mo>[<\/mo><mn>2<\/mn><mrow><mo>(<\/mo><msub><mi>y<\/mi><mn>0<\/mn><\/msub><mo>+<\/mo><msub><mi>y<\/mi><mrow><mn>2<\/mn><mi>n<\/mi><\/mrow><\/msub><mo>)<\/mo><\/mrow><mo>+<\/mo><mn>4<\/mn><mrow><mo>(<\/mo><msub><mi>y<\/mi><mn>1<\/mn><\/msub><mo>+<\/mo><mo>&#x2026;<\/mo><mo>+<\/mo><msub><mi>y<\/mi><mrow><mn>2<\/mn><mi>n<\/mi><mo>&#x2212;<\/mo><mn>1<\/mn><\/mrow><\/msub><mo>)<\/mo><\/mrow><mo>]<\/mo><\/math>"], "a": 3, "note": "Формула Гаусса: интеграл на [−1,1] ≈ взвешенная сумма значений функции в специально выбранных узлах.", "sec": "Численные методы"}, {"n": 44, "q": "По методу Рунге-Кутта 4-го порядка приближенное решение дифференциального уравнения определяется по формуле …", "opts": ["<math xmlns='http://www.w3.org/1998/Math/MathML' display='block'><msub><mi>y<\/mi><mi>n<\/mi><\/msub><mo>(<\/mo><mi>x<\/mi><mo>)<\/mo><mo>=<\/mo><msub><mi>y<\/mi><mn>0<\/mn><\/msub><mo>+<\/mo><msubsup><mo>&#x222B;<\/mo><msub><mi>x<\/mi><mn>0<\/mn><\/msub><mi>x<\/mi><\/msubsup><mi>f<\/mi><mo>(<\/mo><mi>x<\/mi><mo>,<\/mo><msub><mi>y<\/mi><mrow><mi>n<\/mi><mo>&#x2212;<\/mo><mn>1<\/mn><\/mrow><\/msub><mo>)<\/mo><mrow><mi>d<\/mi><mi>x<\/mi><\/mrow><\/math>", "<math xmlns='http://www.w3.org/1998/Math/MathML' display='block'><msub><mi>y<\/mi><mrow><mi>i<\/mi><mo>+<\/mo><mn>1<\/mn><\/mrow><\/msub><mo>=<\/mo><msub><mi>y<\/mi><mi>i<\/mi><\/msub><mo>+<\/mo><mi>h<\/mi><mfrac><mrow><msubsup><mi>y<\/mi><mi>i<\/mi><mo>&#x2032;<\/mo><\/msubsup><mo>+<\/mo><msubsup><mi>&#x1EF9;<\/mi><mrow><mi>i<\/mi><mo>+<\/mo><mn>1<\/mn><\/mrow><mo>&#x2032;<\/mo><\/msubsup><\/mrow><mn>2<\/mn><\/mfrac><mo>,<\/mo><mtext>&nbsp;где&nbsp;<\/mtext><msubsup><mi>&#x1EF9;<\/mi><mrow><mi>i<\/mi><mo>+<\/mo><mn>1<\/mn><\/mrow><mo>&#x2032;<\/mo><\/msubsup><mo>=<\/mo><mi>f<\/mi><mo>(<\/mo><msub><mi>x<\/mi><mrow><mi>i<\/mi><mo>+<\/mo><mn>1<\/mn><\/mrow><\/msub><mo>,<\/mo><msub><mi>&#x1EF9;<\/mi><mrow><mi>i<\/mi><mo>+<\/mo><mn>1<\/mn><\/mrow><\/msub><mo>)<\/mo><\/math>", "<math xmlns='http://www.w3.org/1998/Math/MathML' display='block'><msubsup><mi>y<\/mi><mrow><mi>i<\/mi><mo>+<\/mo><mn>1<\/mn><\/mrow><mrow><mo>(<\/mo><mi>k<\/mi><mo>)<\/mo><\/mrow><\/msubsup><mo>=<\/mo><msub><mi>y<\/mi><mi>i<\/mi><\/msub><mo>+<\/mo><mfrac><mi>h<\/mi><mn>2<\/mn><\/mfrac><mo>[<\/mo><mi>f<\/mi><mo>(<\/mo><msub><mi>x<\/mi><mi>i<\/mi><\/msub><mo>,<\/mo><msub><mi>y<\/mi><mi>i<\/mi><\/msub><mo>)<\/mo><mo>+<\/mo><mi>f<\/mi><mo>(<\/mo><msub><mi>x<\/mi><mrow><mi>i<\/mi><mo>+<\/mo><mn>1<\/mn><\/mrow><\/msub><mo>,<\/mo><msubsup><mi>y<\/mi><mrow><mi>i<\/mi><mo>+<\/mo><mn>1<\/mn><\/mrow><mrow><mo>(<\/mo><mi>k<\/mi><mo>&#x2212;<\/mo><mn>1<\/mn><mo>)<\/mo><\/mrow><\/msubsup><mo>)<\/mo><mo>]<\/mo><\/math>", "<math xmlns='http://www.w3.org/1998/Math/MathML' display='block'><msub><mi>y<\/mi><mrow><mi>i<\/mi><mo>+<\/mo><mn>1<\/mn><\/mrow><\/msub><mo>=<\/mo><msub><mi>y<\/mi><mi>i<\/mi><\/msub><mo>+<\/mo><mo>&#x394;<\/mo><msub><mi>y<\/mi><mi>i<\/mi><\/msub><mo>,<\/mo><mtext>&nbsp;где&nbsp;<\/mtext><mo>&#x394;<\/mo><msub><mi>y<\/mi><mi>i<\/mi><\/msub><mo>=<\/mo><mfrac><mn>1<\/mn><mn>6<\/mn><\/mfrac><mrow><mo>(<\/mo><msubsup><mi>k<\/mi><mn>1<\/mn><mrow><mo>(<\/mo><mi>i<\/mi><mo>)<\/mo><\/mrow><\/msubsup><mo>+<\/mo><mn>2<\/mn><msubsup><mi>k<\/mi><mn>2<\/mn><mrow><mo>(<\/mo><mi>i<\/mi><mo>)<\/mo><\/mrow><\/msubsup><mo>+<\/mo><mn>2<\/mn><msubsup><mi>k<\/mi><mn>3<\/mn><mrow><mo>(<\/mo><mi>i<\/mi><mo>)<\/mo><\/mrow><\/msubsup><mo>+<\/mo><msubsup><mi>k<\/mi><mn>4<\/mn><mrow><mo>(<\/mo><mi>i<\/mi><mo>)<\/mo><\/mrow><\/msubsup><mo>)<\/mo><\/mrow><\/math>"], "a": 4, "note": "Классическая формула Рунге–Кутты с четырьмя коэффициентами k₁…k₄ и весами 1-2-2-1.", "sec": "Численные методы"}, {"n": 45, "q": "Итерационный процесс построения приближений по формуле <math xmlns='http://www.w3.org/1998/Math/MathML'><msup><mi>X<\/mi><mrow><mo>(<\/mo><mi>k<\/mi><mo>+<\/mo><mn>1<\/mn><mo>)<\/mo><\/mrow><\/msup><mo>=<\/mo><mi>&#x3B2;<\/mi><mo>+<\/mo><mi>&#x3B1;<\/mi><msup><mi>X<\/mi><mrow><mo>(<\/mo><mi>k<\/mi><mo>)<\/mo><\/mrow><\/msup><\/math> называется …", "opts": ["методом Зейделя;", "методом Ньютона;", "методом простых итераций;", "методом Холецкого."], "a": 3, "note": "Приведённая форма СЛАУ x = β + αx и повторная подстановка — метод простых итераций.", "sec": "Численные методы"}, {"n": 46, "q": "К способам уточнения корней не относится …", "opts": ["метод хорд, метод касательных, метод итераций;", "метод хорд, метод касательных, метод Зейделя;", "метод хорд, метод касательных, метод секущих;", "метод золотого сечения, метод простых итераций, метод Ньютона."], "a": 4, "note": "Метод золотого сечения — метод оптимизации (поиска экстремума), а не уточнения корней уравнения.", "sec": "Численные методы"}, {"n": 47, "q": "Разность между значениями функции в соседних узлах интерполяции называется …", "opts": ["центральной разностью первого порядка;", "конечной разностью первого порядка;", "разделенной разностью первого порядка;", "разделенной разностью нулевого порядка."], "a": 2, "note": "Δy<sub>i<\/sub> = y<sub>i+1<\/sub> − y<sub>i<\/sub> — конечная разность первого порядка.", "sec": "Численные методы"}, {"n": 48, "q": "Центральные табличные разности используются в интерполяционной формуле …", "opts": ["Ньютона для равноотстоящих узлов интерполяции;", "Гаусса для равноотстоящих узлов интерполяции;", "Эйткина для равноотстоящих узлов интерполяции;", "Лагранжа для равноотстоящих узлов интерполяции."], "a": 2, "note": "Формулы Гаусса (а также Стирлинга, Бесселя) строятся на центральных разностях.", "sec": "Численные методы"}, {"n": 49, "q": "Квадратурными формулами называются …", "opts": ["формулы приближенного интегрирования;", "формула квадратного трехчлена;", "формулы нахождения квадрата суммы;", "формулы Эйлера."], "a": 1, "note": "", "sec": "Численные методы"}, {"n": 50, "q": "По методу Эйлера n-е приближение решения дифференциального уравнения определяется по формуле …", "opts": ["<math xmlns='http://www.w3.org/1998/Math/MathML' display='block'><msub><mi>y<\/mi><mrow><mi>k<\/mi><mo>+<\/mo><mn>1<\/mn><\/mrow><\/msub><mo>=<\/mo><msub><mi>y<\/mi><mi>k<\/mi><\/msub><mo>+<\/mo><mo>&#x394;<\/mo><msub><mi>y<\/mi><mi>k<\/mi><\/msub><mo>,<\/mo><mtext>&nbsp;где&nbsp;<\/mtext><mo>&#x394;<\/mo><msub><mi>y<\/mi><mi>k<\/mi><\/msub><mo>=<\/mo><msubsup><mi>y<\/mi><mi>k<\/mi><mo>&#x2032;<\/mo><\/msubsup><mfrac><mrow><mi>b<\/mi><mo>&#x2212;<\/mo><mi>a<\/mi><\/mrow><mi>n<\/mi><\/mfrac><\/math>", "<math xmlns='http://www.w3.org/1998/Math/MathML' display='block'><msub><mi>y<\/mi><mi>n<\/mi><\/msub><mo>(<\/mo><mi>x<\/mi><mo>)<\/mo><mo>=<\/mo><msub><mi>y<\/mi><mn>0<\/mn><\/msub><mo>+<\/mo><msubsup><mo>&#x222B;<\/mo><msub><mi>x<\/mi><mn>0<\/mn><\/msub><mi>x<\/mi><\/msubsup><mi>f<\/mi><mo>(<\/mo><mi>x<\/mi><mo>,<\/mo><msub><mi>y<\/mi><mrow><mi>n<\/mi><mo>&#x2212;<\/mo><mn>1<\/mn><\/mrow><\/msub><mo>)<\/mo><mrow><mi>d<\/mi><mi>x<\/mi><\/mrow><\/math>", "<math xmlns='http://www.w3.org/1998/Math/MathML' display='block'><msub><mi>y<\/mi><mrow><mi>i<\/mi><mo>+<\/mo><mn>1<\/mn><\/mrow><\/msub><mo>=<\/mo><msub><mi>y<\/mi><mi>i<\/mi><\/msub><mo>+<\/mo><mi>h<\/mi><mfrac><mrow><msubsup><mi>y<\/mi><mi>i<\/mi><mo>&#x2032;<\/mo><\/msubsup><mo>+<\/mo><msubsup><mi>&#x1EF9;<\/mi><mrow><mi>i<\/mi><mo>+<\/mo><mn>1<\/mn><\/mrow><mo>&#x2032;<\/mo><\/msubsup><\/mrow><mn>2<\/mn><\/mfrac><mo>,<\/mo><mtext>&nbsp;где&nbsp;<\/mtext><msubsup><mi>&#x1EF9;<\/mi><mrow><mi>i<\/mi><mo>+<\/mo><mn>1<\/mn><\/mrow><mo>&#x2032;<\/mo><\/msubsup><mo>=<\/mo><mi>f<\/mi><mo>(<\/mo><msub><mi>x<\/mi><mrow><mi>i<\/mi><mo>+<\/mo><mn>1<\/mn><\/mrow><\/msub><mo>,<\/mo><msub><mi>&#x1EF9;<\/mi><mrow><mi>i<\/mi><mo>+<\/mo><mn>1<\/mn><\/mrow><\/msub><mo>)<\/mo><\/math>", "<math xmlns='http://www.w3.org/1998/Math/MathML' display='block'><msubsup><mi>y<\/mi><mrow><mi>i<\/mi><mo>+<\/mo><mn>1<\/mn><\/mrow><mrow><mo>(<\/mo><mi>k<\/mi><mo>)<\/mo><\/mrow><\/msubsup><mo>=<\/mo><msub><mi>y<\/mi><mi>i<\/mi><\/msub><mo>+<\/mo><mfrac><mi>h<\/mi><mn>2<\/mn><\/mfrac><mo>[<\/mo><mi>f<\/mi><mo>(<\/mo><msub><mi>x<\/mi><mi>i<\/mi><\/msub><mo>,<\/mo><msub><mi>y<\/mi><mi>i<\/mi><\/msub><mo>)<\/mo><mo>+<\/mo><mi>f<\/mi><mo>(<\/mo><msub><mi>x<\/mi><mrow><mi>i<\/mi><mo>+<\/mo><mn>1<\/mn><\/mrow><\/msub><mo>,<\/mo><msubsup><mi>y<\/mi><mrow><mi>i<\/mi><mo>+<\/mo><mn>1<\/mn><\/mrow><mrow><mo>(<\/mo><mi>k<\/mi><mo>&#x2212;<\/mo><mn>1<\/mn><mo>)<\/mo><\/mrow><\/msubsup><mo>)<\/mo><mo>]<\/mo><\/math>"], "a": 1, "note": "Метод Эйлера: y<sub>k+1<\/sub> = y<sub>k<\/sub> + h·y′<sub>k<\/sub>, шаг h = (b−a)/n.", "sec": "Численные методы"}, {"n": 51, "q": "Идея метода хорд: на [a,b] дуга кривой y=f(x) заменяется стягивающей её хордой; приближение корня — точка пересечения хорды с осью Ox, её координаты определяются формулой …", "opts": ["<math xmlns='http://www.w3.org/1998/Math/MathML' display='block'><msub><mi>x<\/mi><mrow><mi>n<\/mi><mo>+<\/mo><mn>1<\/mn><\/mrow><\/msub><mo>=<\/mo><msub><mi>x<\/mi><mi>n<\/mi><\/msub><mo>&#x2212;<\/mo><mfrac><mrow><mrow><mi>f<\/mi><mo>(<\/mo><msub><mi>x<\/mi><mi>n<\/mi><\/msub><mo>)<\/mo><\/mrow><mrow><mo>(<\/mo><mi>b<\/mi><mo>&#x2212;<\/mo><msub><mi>x<\/mi><mi>n<\/mi><\/msub><mo>)<\/mo><\/mrow><\/mrow><mrow><mrow><mi>f<\/mi><mo>(<\/mo><mi>b<\/mi><mo>)<\/mo><\/mrow><mo>&#x2212;<\/mo><mrow><mi>f<\/mi><mo>(<\/mo><msub><mi>x<\/mi><mi>n<\/mi><\/msub><mo>)<\/mo><\/mrow><\/mrow><\/mfrac><\/math>", "<math xmlns='http://www.w3.org/1998/Math/MathML' display='block'><msub><mi>x<\/mi><mi>n<\/mi><\/msub><mo>=<\/mo><mi>&#x3C6;<\/mi><mo>(<\/mo><msub><mi>x<\/mi><mrow><mi>n<\/mi><mo>&#x2212;<\/mo><mn>1<\/mn><\/mrow><\/msub><mo>)<\/mo><\/math>", "<math xmlns='http://www.w3.org/1998/Math/MathML' display='block'><msub><mi>x<\/mi><mrow><mi>n<\/mi><mo>+<\/mo><mn>1<\/mn><\/mrow><\/msub><mo>=<\/mo><msub><mi>x<\/mi><mi>n<\/mi><\/msub><mo>&#x2212;<\/mo><mfrac><mrow><mi>f<\/mi><mo>(<\/mo><msub><mi>x<\/mi><mi>n<\/mi><\/msub><mo>)<\/mo><\/mrow><mrow><msup><mi>f<\/mi><mo>&#x2032;<\/mo><\/msup><mo>(<\/mo><msub><mi>x<\/mi><mi>n<\/mi><\/msub><mo>)<\/mo><\/mrow><\/mfrac><\/math>", "<math xmlns='http://www.w3.org/1998/Math/MathML' display='block'><msub><mi>x<\/mi><mrow><mi>n<\/mi><mo>+<\/mo><mn>1<\/mn><\/mrow><\/msub><mo>=<\/mo><msub><mi>x<\/mi><mi>n<\/mi><\/msub><mo>&#x2212;<\/mo><mfrac><mrow><mrow><mi>f<\/mi><mo>(<\/mo><msub><mi>x<\/mi><mi>n<\/mi><\/msub><mo>)<\/mo><\/mrow><mrow><mo>(<\/mo><msub><mi>x<\/mi><mi>n<\/mi><\/msub><mo>&#x2212;<\/mo><msub><mi>x<\/mi><mrow><mi>n<\/mi><mo>&#x2212;<\/mo><mn>1<\/mn><\/mrow><\/msub><mo>)<\/mo><\/mrow><\/mrow><mrow><mrow><mi>f<\/mi><mo>(<\/mo><msub><mi>x<\/mi><mi>n<\/mi><\/msub><mo>)<\/mo><\/mrow><mo>&#x2212;<\/mo><mi>f<\/mi><mo>(<\/mo><msub><mi>x<\/mi><mrow><mi>n<\/mi><mo>&#x2212;<\/mo><mn>1<\/mn><\/mrow><\/msub><mo>)<\/mo><\/mrow><\/mfrac><\/math>"], "a": 1, "note": "Формула метода хорд с закреплённым концом b.", "sec": "Численные методы"}, {"n": 52, "q": "Формула приближенного вычисления интеграла методом прямоугольников имеет вид …", "opts": ["<math xmlns='http://www.w3.org/1998/Math/MathML' display='block'><msubsup><mo>&#x222B;<\/mo><mi>a<\/mi><mi>b<\/mi><\/msubsup><mrow><mi>f<\/mi><mo>(<\/mo><mi>x<\/mi><mo>)<\/mo><\/mrow><mrow><mi>d<\/mi><mi>x<\/mi><\/mrow><mo>&#x2248;<\/mo><mrow><mo>(<\/mo><mi>b<\/mi><mo>&#x2212;<\/mo><mi>a<\/mi><mo>)<\/mo><\/mrow><mfrac><mrow><mi>f<\/mi><mo>(<\/mo><mi>a<\/mi><mo>)<\/mo><mo>+<\/mo><mrow><mi>f<\/mi><mo>(<\/mo><mi>b<\/mi><mo>)<\/mo><\/mrow><\/mrow><mn>2<\/mn><\/mfrac><\/math>", "<math xmlns='http://www.w3.org/1998/Math/MathML' display='block'><msubsup><mo>&#x222B;<\/mo><mi>a<\/mi><mi>b<\/mi><\/msubsup><mrow><mi>f<\/mi><mo>(<\/mo><mi>x<\/mi><mo>)<\/mo><\/mrow><mrow><mi>d<\/mi><mi>x<\/mi><\/mrow><mo>&#x2248;<\/mo><mfrac><mrow><mo>(<\/mo><mi>b<\/mi><mo>&#x2212;<\/mo><mi>a<\/mi><mo>)<\/mo><\/mrow><mi>n<\/mi><\/mfrac><munderover><mo>&#x2211;<\/mo><mrow><mi>i<\/mi><mo>=<\/mo><mn>0<\/mn><\/mrow><mrow><mi>n<\/mi><mo>&#x2212;<\/mo><mn>1<\/mn><\/mrow><\/munderover><msub><mi>y<\/mi><mi>i<\/mi><\/msub><\/math>", "<math xmlns='http://www.w3.org/1998/Math/MathML' display='block'><msubsup><mo>&#x222B;<\/mo><mrow><mo>&#x2212;<\/mo><mn>1<\/mn><\/mrow><mn>1<\/mn><\/msubsup><mrow><mi>f<\/mi><mo>(<\/mo><mi>x<\/mi><mo>)<\/mo><\/mrow><mrow><mi>d<\/mi><mi>x<\/mi><\/mrow><mo>&#x2248;<\/mo><munderover><mo>&#x2211;<\/mo><mrow><mi>k<\/mi><mo>=<\/mo><mn>1<\/mn><\/mrow><mi>n<\/mi><\/munderover><msub><mi>c<\/mi><mi>k<\/mi><\/msub><mi>f<\/mi><mo>(<\/mo><msub><mi>x<\/mi><mi>k<\/mi><\/msub><mo>)<\/mo><\/math>", "<math xmlns='http://www.w3.org/1998/Math/MathML' display='block'><msubsup><mo>&#x222B;<\/mo><mi>a<\/mi><mi>b<\/mi><\/msubsup><mrow><mi>f<\/mi><mo>(<\/mo><mi>x<\/mi><mo>)<\/mo><\/mrow><mrow><mi>d<\/mi><mi>x<\/mi><\/mrow><mo>&#x2248;<\/mo><mfrac><mrow><mo>(<\/mo><mi>b<\/mi><mo>&#x2212;<\/mo><mi>a<\/mi><mo>)<\/mo><\/mrow><mrow><mn>6<\/mn><mi>n<\/mi><\/mrow><\/mfrac><mo>[<\/mo><mn>2<\/mn><mrow><mo>(<\/mo><msub><mi>y<\/mi><mn>0<\/mn><\/msub><mo>+<\/mo><msub><mi>y<\/mi><mrow><mn>2<\/mn><mi>n<\/mi><\/mrow><\/msub><mo>)<\/mo><\/mrow><mo>+<\/mo><mn>4<\/mn><mrow><mo>(<\/mo><msub><mi>y<\/mi><mn>1<\/mn><\/msub><mo>+<\/mo><mo>&#x2026;<\/mo><mo>+<\/mo><msub><mi>y<\/mi><mrow><mn>2<\/mn><mi>n<\/mi><mo>&#x2212;<\/mo><mn>1<\/mn><\/mrow><\/msub><mo>)<\/mo><\/mrow><mo>]<\/mo><\/math>"], "a": 2, "note": "Сумма площадей прямоугольников с основанием h=(b−a)/n и высотами y<sub>i<\/sub>.", "sec": "Численные методы"}, {"n": 53, "q": "По методу Эйлера-Коши приближение решения дифференциального уравнения определяется по формуле …", "opts": ["<math xmlns='http://www.w3.org/1998/Math/MathML' display='block'><msub><mi>y<\/mi><mrow><mi>k<\/mi><mo>+<\/mo><mn>1<\/mn><\/mrow><\/msub><mo>=<\/mo><msub><mi>y<\/mi><mi>k<\/mi><\/msub><mo>+<\/mo><mo>&#x394;<\/mo><msub><mi>y<\/mi><mi>k<\/mi><\/msub><\/math>", "<math xmlns='http://www.w3.org/1998/Math/MathML' display='block'><msub><mi>y<\/mi><mi>n<\/mi><\/msub><mo>(<\/mo><mi>x<\/mi><mo>)<\/mo><mo>=<\/mo><msub><mi>y<\/mi><mn>0<\/mn><\/msub><mo>+<\/mo><msubsup><mo>&#x222B;<\/mo><msub><mi>x<\/mi><mn>0<\/mn><\/msub><mi>x<\/mi><\/msubsup><mi>f<\/mi><mo>(<\/mo><mi>x<\/mi><mo>,<\/mo><msub><mi>y<\/mi><mrow><mi>n<\/mi><mo>&#x2212;<\/mo><mn>1<\/mn><\/mrow><\/msub><mo>)<\/mo><mrow><mi>d<\/mi><mi>x<\/mi><\/mrow><\/math>", "<math xmlns='http://www.w3.org/1998/Math/MathML' display='block'><msub><mi>y<\/mi><mrow><mi>i<\/mi><mo>+<\/mo><mn>1<\/mn><\/mrow><\/msub><mo>=<\/mo><msub><mi>y<\/mi><mi>i<\/mi><\/msub><mo>+<\/mo><mi>h<\/mi><mfrac><mrow><msubsup><mi>y<\/mi><mi>i<\/mi><mo>&#x2032;<\/mo><\/msubsup><mo>+<\/mo><msubsup><mi>&#x1EF9;<\/mi><mrow><mi>i<\/mi><mo>+<\/mo><mn>1<\/mn><\/mrow><mo>&#x2032;<\/mo><\/msubsup><\/mrow><mn>2<\/mn><\/mfrac><mo>,<\/mo><mtext>&nbsp;где&nbsp;<\/mtext><msubsup><mi>&#x1EF9;<\/mi><mrow><mi>i<\/mi><mo>+<\/mo><mn>1<\/mn><\/mrow><mo>&#x2032;<\/mo><\/msubsup><mo>=<\/mo><mi>f<\/mi><mo>(<\/mo><msub><mi>x<\/mi><mrow><mi>i<\/mi><mo>+<\/mo><mn>1<\/mn><\/mrow><\/msub><mo>,<\/mo><msub><mi>&#x1EF9;<\/mi><mrow><mi>i<\/mi><mo>+<\/mo><mn>1<\/mn><\/mrow><\/msub><mo>)<\/mo><\/math>", "<math xmlns='http://www.w3.org/1998/Math/MathML' display='block'><msub><mi>y<\/mi><mrow><mi>i<\/mi><mo>+<\/mo><mn>1<\/mn><\/mrow><\/msub><mo>=<\/mo><msub><mi>y<\/mi><mi>i<\/mi><\/msub><mo>+<\/mo><mo>&#x394;<\/mo><msub><mi>y<\/mi><mi>i<\/mi><\/msub><mo>,<\/mo><mtext>&nbsp;где&nbsp;<\/mtext><mo>&#x394;<\/mo><msub><mi>y<\/mi><mi>i<\/mi><\/msub><mo>=<\/mo><mfrac><mn>1<\/mn><mn>6<\/mn><\/mfrac><mrow><mo>(<\/mo><msubsup><mi>k<\/mi><mn>1<\/mn><mrow><mo>(<\/mo><mi>i<\/mi><mo>)<\/mo><\/mrow><\/msubsup><mo>+<\/mo><mn>2<\/mn><msubsup><mi>k<\/mi><mn>2<\/mn><mrow><mo>(<\/mo><mi>i<\/mi><mo>)<\/mo><\/mrow><\/msubsup><mo>+<\/mo><mn>2<\/mn><msubsup><mi>k<\/mi><mn>3<\/mn><mrow><mo>(<\/mo><mi>i<\/mi><mo>)<\/mo><\/mrow><\/msubsup><mo>+<\/mo><msubsup><mi>k<\/mi><mn>4<\/mn><mrow><mo>(<\/mo><mi>i<\/mi><mo>)<\/mo><\/mrow><\/msubsup><mo>)<\/mo><\/mrow><\/math>"], "a": 3, "note": "Метод Эйлера–Коши (усовершенствованный Эйлер): усреднение наклонов в начале и конце шага.", "sec": "Численные методы"}, {"n": 54, "q": "Если для получения значения функции по данному значению аргумента нужно выполнить арифметические операции и возведение в степень с рациональным показателем, то функция называется …", "opts": ["алгебраической;", "трансцендентной;", "рациональной;", "вычислимой."], "a": 1, "note": "Арифметика + степени с рациональным показателем (корни) = алгебраическая функция; рациональная — только арифметика.", "sec": "Численные методы"}, {"n": 55, "q": "Идея метода касательных: дуга кривой заменяется касательной; приближение корня — точка пересечения касательной с осью Ox, её координаты определяются формулой …", "opts": ["<math xmlns='http://www.w3.org/1998/Math/MathML' display='block'><msub><mi>x<\/mi><mrow><mi>n<\/mi><mo>+<\/mo><mn>1<\/mn><\/mrow><\/msub><mo>=<\/mo><msub><mi>x<\/mi><mi>n<\/mi><\/msub><mo>&#x2212;<\/mo><mfrac><mrow><mrow><mi>f<\/mi><mo>(<\/mo><msub><mi>x<\/mi><mi>n<\/mi><\/msub><mo>)<\/mo><\/mrow><mrow><mo>(<\/mo><mi>b<\/mi><mo>&#x2212;<\/mo><msub><mi>x<\/mi><mi>n<\/mi><\/msub><mo>)<\/mo><\/mrow><\/mrow><mrow><mrow><mi>f<\/mi><mo>(<\/mo><mi>b<\/mi><mo>)<\/mo><\/mrow><mo>&#x2212;<\/mo><mrow><mi>f<\/mi><mo>(<\/mo><msub><mi>x<\/mi><mi>n<\/mi><\/msub><mo>)<\/mo><\/mrow><\/mrow><\/mfrac><\/math>", "<math xmlns='http://www.w3.org/1998/Math/MathML' display='block'><msub><mi>x<\/mi><mi>n<\/mi><\/msub><mo>=<\/mo><mi>&#x3C6;<\/mi><mo>(<\/mo><msub><mi>x<\/mi><mrow><mi>n<\/mi><mo>&#x2212;<\/mo><mn>1<\/mn><\/mrow><\/msub><mo>)<\/mo><\/math>", "<math xmlns='http://www.w3.org/1998/Math/MathML' display='block'><msub><mi>x<\/mi><mrow><mi>n<\/mi><mo>+<\/mo><mn>1<\/mn><\/mrow><\/msub><mo>=<\/mo><msub><mi>x<\/mi><mi>n<\/mi><\/msub><mo>&#x2212;<\/mo><mfrac><mrow><mi>f<\/mi><mo>(<\/mo><msub><mi>x<\/mi><mi>n<\/mi><\/msub><mo>)<\/mo><\/mrow><mrow><msup><mi>f<\/mi><mo>&#x2032;<\/mo><\/msup><mo>(<\/mo><msub><mi>x<\/mi><mi>n<\/mi><\/msub><mo>)<\/mo><\/mrow><\/mfrac><\/math>", "<math xmlns='http://www.w3.org/1998/Math/MathML' display='block'><msub><mi>x<\/mi><mrow><mi>n<\/mi><mo>+<\/mo><mn>1<\/mn><\/mrow><\/msub><mo>=<\/mo><msub><mi>x<\/mi><mi>n<\/mi><\/msub><mo>&#x2212;<\/mo><mfrac><mrow><mrow><mi>f<\/mi><mo>(<\/mo><msub><mi>x<\/mi><mi>n<\/mi><\/msub><mo>)<\/mo><\/mrow><mrow><mo>(<\/mo><msub><mi>x<\/mi><mi>n<\/mi><\/msub><mo>&#x2212;<\/mo><msub><mi>x<\/mi><mrow><mi>n<\/mi><mo>&#x2212;<\/mo><mn>1<\/mn><\/mrow><\/msub><mo>)<\/mo><\/mrow><\/mrow><mrow><mrow><mi>f<\/mi><mo>(<\/mo><msub><mi>x<\/mi><mi>n<\/mi><\/msub><mo>)<\/mo><\/mrow><mo>&#x2212;<\/mo><mi>f<\/mi><mo>(<\/mo><msub><mi>x<\/mi><mrow><mi>n<\/mi><mo>&#x2212;<\/mo><mn>1<\/mn><\/mrow><\/msub><mo>)<\/mo><\/mrow><\/mfrac><\/math>"], "a": 3, "note": "Формула Ньютона (касательных).", "sec": "Численные методы"}, {"n": 56, "q": "Интерполяционный многочлен Лагранжа имеет вид …", "opts": ["<math xmlns='http://www.w3.org/1998/Math/MathML' display='block'><mrow><msub><mi>L<\/mi><mi>n<\/mi><\/msub><mo>(<\/mo><mi>x<\/mi><mo>)<\/mo><\/mrow><mo>=<\/mo><munderover><mo>&#x2211;<\/mo><mrow><mi>i<\/mi><mo>=<\/mo><mn>1<\/mn><\/mrow><mi>n<\/mi><\/munderover><msub><mi>y<\/mi><mi>i<\/mi><\/msub><munderover><mo>&#x220F;<\/mo><mrow><mi>j<\/mi><mo>=<\/mo><mn>1<\/mn><mo>,<\/mo><mi>j<\/mi><mo>&#x2260;<\/mo><mi>i<\/mi><\/mrow><mi>n<\/mi><\/munderover><mfrac><mrow><mo>(<\/mo><mi>x<\/mi><mo>&#x2212;<\/mo><msub><mi>x<\/mi><mi>j<\/mi><\/msub><mo>)<\/mo><\/mrow><mrow><mo>(<\/mo><msub><mi>x<\/mi><mi>i<\/mi><\/msub><mo>&#x2212;<\/mo><msub><mi>x<\/mi><mi>j<\/mi><\/msub><mo>)<\/mo><\/mrow><\/mfrac><\/math>", "<math xmlns='http://www.w3.org/1998/Math/MathML' display='block'><mrow><msub><mi>L<\/mi><mi>n<\/mi><\/msub><mo>(<\/mo><mi>x<\/mi><mo>)<\/mo><\/mrow><mo>=<\/mo><munderover><mo>&#x2211;<\/mo><mrow><mi>i<\/mi><mo>=<\/mo><mn>1<\/mn><\/mrow><mi>n<\/mi><\/munderover><msub><mi>y<\/mi><mi>i<\/mi><\/msub><munderover><mo>&#x220F;<\/mo><mrow><mi>j<\/mi><mo>=<\/mo><mn>1<\/mn><\/mrow><mi>n<\/mi><\/munderover><mfrac><mrow><mo>(<\/mo><mi>x<\/mi><mo>&#x2212;<\/mo><msub><mi>x<\/mi><mi>j<\/mi><\/msub><mo>)<\/mo><\/mrow><mrow><mo>(<\/mo><msub><mi>x<\/mi><mi>i<\/mi><\/msub><mo>&#x2212;<\/mo><msub><mi>x<\/mi><mi>j<\/mi><\/msub><mo>)<\/mo><\/mrow><\/mfrac><\/math>", "<math xmlns='http://www.w3.org/1998/Math/MathML' display='block'><mrow><msub><mi>L<\/mi><mi>n<\/mi><\/msub><mo>(<\/mo><mi>x<\/mi><mo>)<\/mo><\/mrow><mo>=<\/mo><munderover><mo>&#x220F;<\/mo><mrow><mi>j<\/mi><mo>=<\/mo><mn>1<\/mn><\/mrow><mi>n<\/mi><\/munderover><mfrac><mrow><mo>(<\/mo><mi>x<\/mi><mo>&#x2212;<\/mo><msub><mi>x<\/mi><mi>j<\/mi><\/msub><mo>)<\/mo><\/mrow><mrow><mo>(<\/mo><msub><mi>x<\/mi><mi>i<\/mi><\/msub><mo>&#x2212;<\/mo><msub><mi>x<\/mi><mi>j<\/mi><\/msub><mo>)<\/mo><\/mrow><\/mfrac><munderover><mo>&#x2211;<\/mo><mrow><mi>i<\/mi><mo>=<\/mo><mn>1<\/mn><\/mrow><mi>n<\/mi><\/munderover><msub><mi>y<\/mi><mi>i<\/mi><\/msub><\/math>", "<math xmlns='http://www.w3.org/1998/Math/MathML' display='block'><mrow><msub><mi>L<\/mi><mi>n<\/mi><\/msub><mo>(<\/mo><mi>x<\/mi><mo>)<\/mo><\/mrow><mo>=<\/mo><munderover><mo>&#x2211;<\/mo><mrow><mi>i<\/mi><mo>=<\/mo><mn>1<\/mn><\/mrow><mi>n<\/mi><\/munderover><msub><mi>y<\/mi><mi>i<\/mi><\/msub><munderover><mo>&#x220F;<\/mo><mrow><mi>j<\/mi><mo>=<\/mo><mn>1<\/mn><mo>,<\/mo><mi>j<\/mi><mo>&#x2260;<\/mo><mi>i<\/mi><\/mrow><mi>n<\/mi><\/munderover><mfrac><mrow><mo>(<\/mo><msub><mi>x<\/mi><mi>i<\/mi><\/msub><mo>&#x2212;<\/mo><msub><mi>x<\/mi><mi>j<\/mi><\/msub><mo>)<\/mo><\/mrow><mrow><mo>(<\/mo><mi>x<\/mi><mo>&#x2212;<\/mo><msub><mi>x<\/mi><mi>j<\/mi><\/msub><mo>)<\/mo><\/mrow><\/mfrac><\/math>"], "a": 1, "note": "Базисные многочлены Лагранжа: произведение по всем j, кроме j=i.", "sec": "Численные методы"}, {"n": 57, "q": "Идея метода итерации: уравнение f(x)=0 заменяется равносильным x=g(x); приближение корня определяется формулой …", "opts": ["<math xmlns='http://www.w3.org/1998/Math/MathML' display='block'><msub><mi>x<\/mi><mrow><mi>n<\/mi><mo>+<\/mo><mn>1<\/mn><\/mrow><\/msub><mo>=<\/mo><msub><mi>x<\/mi><mi>n<\/mi><\/msub><mo>&#x2212;<\/mo><mfrac><mrow><mrow><mi>f<\/mi><mo>(<\/mo><msub><mi>x<\/mi><mi>n<\/mi><\/msub><mo>)<\/mo><\/mrow><mrow><mo>(<\/mo><mi>b<\/mi><mo>&#x2212;<\/mo><msub><mi>x<\/mi><mi>n<\/mi><\/msub><mo>)<\/mo><\/mrow><\/mrow><mrow><mrow><mi>f<\/mi><mo>(<\/mo><mi>b<\/mi><mo>)<\/mo><\/mrow><mo>&#x2212;<\/mo><mrow><mi>f<\/mi><mo>(<\/mo><msub><mi>x<\/mi><mi>n<\/mi><\/msub><mo>)<\/mo><\/mrow><\/mrow><\/mfrac><\/math>", "<math xmlns='http://www.w3.org/1998/Math/MathML' display='block'><msub><mi>x<\/mi><mi>n<\/mi><\/msub><mo>=<\/mo><mi>g<\/mi><mo>(<\/mo><msub><mi>x<\/mi><mrow><mi>n<\/mi><mo>&#x2212;<\/mo><mn>1<\/mn><\/mrow><\/msub><mo>)<\/mo><\/math>", "<math xmlns='http://www.w3.org/1998/Math/MathML' display='block'><msub><mi>x<\/mi><mrow><mi>n<\/mi><mo>+<\/mo><mn>1<\/mn><\/mrow><\/msub><mo>=<\/mo><msub><mi>x<\/mi><mi>n<\/mi><\/msub><mo>&#x2212;<\/mo><mfrac><mrow><mi>f<\/mi><mo>(<\/mo><msub><mi>x<\/mi><mi>n<\/mi><\/msub><mo>)<\/mo><\/mrow><mrow><msup><mi>f<\/mi><mo>&#x2032;<\/mo><\/msup><mo>(<\/mo><msub><mi>x<\/mi><mi>n<\/mi><\/msub><mo>)<\/mo><\/mrow><\/mfrac><\/math>", "<math xmlns='http://www.w3.org/1998/Math/MathML' display='block'><msub><mi>x<\/mi><mrow><mi>n<\/mi><mo>+<\/mo><mn>1<\/mn><\/mrow><\/msub><mo>=<\/mo><msub><mi>x<\/mi><mi>n<\/mi><\/msub><mo>&#x2212;<\/mo><mfrac><mrow><mrow><mi>f<\/mi><mo>(<\/mo><msub><mi>x<\/mi><mi>n<\/mi><\/msub><mo>)<\/mo><\/mrow><mrow><mo>(<\/mo><msub><mi>x<\/mi><mi>n<\/mi><\/msub><mo>&#x2212;<\/mo><msub><mi>x<\/mi><mrow><mi>n<\/mi><mo>&#x2212;<\/mo><mn>1<\/mn><\/mrow><\/msub><mo>)<\/mo><\/mrow><\/mrow><mrow><mrow><mi>f<\/mi><mo>(<\/mo><msub><mi>x<\/mi><mi>n<\/mi><\/msub><mo>)<\/mo><\/mrow><mo>&#x2212;<\/mo><mi>f<\/mi><mo>(<\/mo><msub><mi>x<\/mi><mrow><mi>n<\/mi><mo>&#x2212;<\/mo><mn>1<\/mn><\/mrow><\/msub><mo>)<\/mo><\/mrow><\/mfrac><\/math>"], "a": 2, "note": "", "sec": "Численные методы"}, {"n": 58, "q": "Квадратурная формула Симпсона имеет вид …", "opts": ["<math xmlns='http://www.w3.org/1998/Math/MathML' display='block'><msubsup><mo>&#x222B;<\/mo><mi>a<\/mi><mi>b<\/mi><\/msubsup><mrow><mi>f<\/mi><mo>(<\/mo><mi>x<\/mi><mo>)<\/mo><\/mrow><mrow><mi>d<\/mi><mi>x<\/mi><\/mrow><mo>&#x2248;<\/mo><mrow><mo>(<\/mo><mi>b<\/mi><mo>&#x2212;<\/mo><mi>a<\/mi><mo>)<\/mo><\/mrow><mfrac><mrow><mi>f<\/mi><mo>(<\/mo><mi>a<\/mi><mo>)<\/mo><mo>+<\/mo><mrow><mi>f<\/mi><mo>(<\/mo><mi>b<\/mi><mo>)<\/mo><\/mrow><\/mrow><mn>2<\/mn><\/mfrac><\/math>", "<math xmlns='http://www.w3.org/1998/Math/MathML' display='block'><msubsup><mo>&#x222B;<\/mo><mi>a<\/mi><mi>b<\/mi><\/msubsup><mrow><mi>f<\/mi><mo>(<\/mo><mi>x<\/mi><mo>)<\/mo><\/mrow><mrow><mi>d<\/mi><mi>x<\/mi><\/mrow><mo>&#x2248;<\/mo><mfrac><mrow><mo>(<\/mo><mi>b<\/mi><mo>&#x2212;<\/mo><mi>a<\/mi><mo>)<\/mo><\/mrow><mi>n<\/mi><\/mfrac><munderover><mo>&#x2211;<\/mo><mrow><mi>i<\/mi><mo>=<\/mo><mn>0<\/mn><\/mrow><mrow><mi>n<\/mi><mo>&#x2212;<\/mo><mn>1<\/mn><\/mrow><\/munderover><msub><mi>y<\/mi><mi>i<\/mi><\/msub><\/math>", "<math xmlns='http://www.w3.org/1998/Math/MathML' display='block'><msubsup><mo>&#x222B;<\/mo><mi>a<\/mi><mi>b<\/mi><\/msubsup><mrow><mi>f<\/mi><mo>(<\/mo><mi>x<\/mi><mo>)<\/mo><\/mrow><mrow><mi>d<\/mi><mi>x<\/mi><\/mrow><mo>&#x2248;<\/mo><mfrac><mrow><mo>(<\/mo><mi>b<\/mi><mo>&#x2212;<\/mo><mi>a<\/mi><mo>)<\/mo><\/mrow><mrow><mn>6<\/mn><mi>n<\/mi><\/mrow><\/mfrac><mo>[<\/mo><msub><mi>y<\/mi><mn>0<\/mn><\/msub><mo>+<\/mo><msub><mi>y<\/mi><mrow><mn>2<\/mn><mi>n<\/mi><\/mrow><\/msub><mo>+<\/mo><mn>4<\/mn><mrow><mo>(<\/mo><msub><mi>y<\/mi><mn>1<\/mn><\/msub><mo>+<\/mo><msub><mi>y<\/mi><mn>3<\/mn><\/msub><mo>+<\/mo><mo>&#x2026;<\/mo><mo>+<\/mo><msub><mi>y<\/mi><mrow><mn>2<\/mn><mi>n<\/mi><mo>&#x2212;<\/mo><mn>1<\/mn><\/mrow><\/msub><mo>)<\/mo><\/mrow><mo>+<\/mo><mn>2<\/mn><mrow><mo>(<\/mo><msub><mi>y<\/mi><mn>2<\/mn><\/msub><mo>+<\/mo><msub><mi>y<\/mi><mn>4<\/mn><\/msub><mo>+<\/mo><mo>&#x2026;<\/mo><mo>+<\/mo><msub><mi>y<\/mi><mrow><mn>2<\/mn><mi>n<\/mi><mo>&#x2212;<\/mo><mn>2<\/mn><\/mrow><\/msub><mo>)<\/mo><\/mrow><mo>]<\/mo><\/math>", "<math xmlns='http://www.w3.org/1998/Math/MathML' display='block'><msubsup><mo>&#x222B;<\/mo><mrow><mo>&#x2212;<\/mo><mn>1<\/mn><\/mrow><mn>1<\/mn><\/msubsup><mrow><mi>f<\/mi><mo>(<\/mo><mi>x<\/mi><mo>)<\/mo><\/mrow><mrow><mi>d<\/mi><mi>x<\/mi><\/mrow><mo>&#x2248;<\/mo><munderover><mo>&#x2211;<\/mo><mrow><mi>k<\/mi><mo>=<\/mo><mn>1<\/mn><\/mrow><mi>n<\/mi><\/munderover><msub><mi>c<\/mi><mi>k<\/mi><\/msub><mi>f<\/mi><mo>(<\/mo><msub><mi>x<\/mi><mi>k<\/mi><\/msub><mo>)<\/mo><\/math>"], "a": 3, "note": "Формула парабол: веса 1-4-2-4-…-4-1 с множителем (b−a)/6n.", "sec": "Численные методы"}, {"n": 59, "q": "Задача отыскания решения дифференциального уравнения, удовлетворяющего начальным условиям, называется задачей …", "opts": ["Эйлера-Коши;", "Коши;", "Липшица;", "Пикара."], "a": 2, "note": "", "sec": "Численные методы"}, {"n": 60, "q": "Используя метод Эйлера, найти значение функции y, определяемой уравнением y′ = x² − y, y(0) = 1; шаг h = 0.1. Найти только y₁.", "opts": ["1,1;", "2,4;", "0,9;", "1,2."], "a": 3, "note": "y₁ = y₀ + h·f(x₀,y₀) = 1 + 0,1·(0² − 1) = 1 − 0,1 = 0,9.", "sec": "Численные методы"}, {"n": 61, "q": "Методы решения дифференциальных уравнений, дающие приближенное решение в виде аналитического выражения, называются …", "opts": ["аналитическими;", "интерполяционными;", "итерационными;", "численными."], "a": 1, "note": "", "sec": "Численные методы"}, {"n": 62, "q": "Дано уравнение 2x³ − 5x² + 4x − 3 = 0. Если корень отделен, то для того, чтобы решить уравнение методом простых итераций, …", "opts": ["строим графики y = 2x³ и y = 5x² − 4x + 3;", "находим вторую производную, определяем её знак;", "находим производную (2x³ − 5x² + 4x − 3)′, находим критические точки;", "записываем уравнение в виде x = φ(x)."], "a": 4, "note": "Первый шаг метода простых итераций — приведение уравнения к виду x = φ(x).", "sec": "Численные методы"}, {"n": 63, "q": "Функция задана таблицей: x = (−1; 0; 1), y = (5; −1; 7). Тогда соответствующий интерполяционный полином имеет вид …", "opts": ["y = 2x² − x − 1;", "y = 7x² − x − 1;", "y = 7x² + x − 1;", "y = 2x² − 5x + 1."], "a": 3, "note": "y(0) = c = −1; y(−1): a−b−1=5; y(1): a+b−1=7 → a=7, b=1: y = 7x² + x − 1. Проверка: 7−1−1=5 ✓, 7+1−1=7 ✓.", "sec": "Численные методы"}, {"n": 64, "q": "Используя метод Эйлера, найти значение функции y, определяемой уравнением y′ = 5x + y + 3, y(0) = 1; шаг h = 0.1. Найти только y₁.", "opts": ["1,1;", "1,4;", "0,9;", "1,2."], "a": 2, "note": "y₁ = 1 + 0,1·(5·0 + 1 + 3) = 1 + 0,4 = 1,4.", "sec": "Численные методы"}, {"n": 65, "q": "Методы решения дифференциальных уравнений, дающие приближенное решение в виде таблицы, называются …", "opts": ["аналитическими;", "интерполяционными;", "итерационными;", "численными."], "a": 4, "note": "", "sec": "Численные методы"}, {"n": 66, "q": "Способ находить по известному приближению решения следующее, более точное приближение называется …", "opts": ["обратный ход;", "прямой ход;", "итерация;", "двойной просчет."], "a": 3, "note": "", "sec": "Численные методы"}, {"n": 67, "q": "Функция задана таблично: x = (0; 1; 2; 3), y = (1; 1,5; 1,3; 0). Найти Δ²y₀.", "opts": ["−0,7;", "−0,5;", "0,7;", "1,8."], "a": 1, "note": "Δy₀ = 1,5−1 = 0,5; Δy₁ = 1,3−1,5 = −0,2; Δ²y₀ = Δy₁ − Δy₀ = −0,2 − 0,5 = −0,7.", "sec": "Численные методы"}, {"n": 68, "q": "Корень уравнения lg(x) = 1 − x² находится на промежутке …", "opts": ["[1,3];", "[0,1];", "[-1,0];", "[3,4]."], "a": 1, "note": "Корень уравнения — ровно x = 1 (lg 1 = 0 и 1 − 1² = 0), он единственный: f(x) = lg x + x² − 1 строго возрастает при x &gt; 0. Корректный отрезок отделения — [1,3]: на нём f непрерывна (на [0,1] lg x не определён в точке 0). На [−1,0] логарифм не существует, на [3,4] корней нет.", "sec": "Численные методы"}, {"n": 69, "q": "Используя метод Эйлера, найти значение функции y, определяемой уравнением y′ = xy + 2, y(0) = 1; шаг h = 0.1. Найти только y₁.", "opts": ["1,1;", "1,4;", "0,9;", "1,2."], "a": 4, "note": "y₁ = 1 + 0,1·(0·1 + 2) = 1 + 0,2 = 1,2.", "sec": "Численные методы"}, {"n": 70, "q": "Методы решения систем конечных уравнений, в которых решение получают после повторения однотипных математических операций, и на каждом шаге используются результаты предыдущих шагов, называются …", "opts": ["аналитическими;", "интерполяционными;", "итерационными;", "численными."], "a": 3, "note": "", "sec": "Численные методы"}, {"n": 71, "q": "Формулы для построения многочлена, принимающего в данных точках x_i (i = 0,1,…,n) данные значения P_n(x_i) = y_i, называются:", "opts": ["аналитическими;", "интерполяционными;", "итерационными;", "численными."], "a": 2, "note": "", "sec": "Численные методы"}, {"n": 72, "q": "В методе Гаусса приведение системы линейных уравнений к треугольному виду называется …", "opts": ["обратный ход;", "прямой ход;", "простая итерация;", "двойной пересчет."], "a": 2, "note": "Прямой ход — исключение неизвестных (треугольный вид); обратный ход — последовательное нахождение неизвестных.", "sec": "Численные методы"}, {"n": 73, "q": "Функция, заданная таблично (x = −1; 0; 1 → y₁, y₂, y₃), описывается полиномом y = 2x² − 5x + 1. Найти узловые значения y₁, y₂, y₃.", "opts": ["8, 1, −2;", "−3, −1, 7;", "7, 1, 5;", "2, −1, 0."], "a": 1, "note": "y(−1) = 2+5+1 = 8; y(0) = 1; y(1) = 2−5+1 = −2.", "sec": "Численные методы"}, {"n": 74, "q": "Какой интерполяционный полином соответствует таблице: x = (−2; −1; 0), y = (9; 1; −1)?", "opts": ["y = 2x² + x − 1;", "y = 3x² + x − 1;", "y = 4x² − x − 1;", "y = 6x² + x − 1."], "a": 2, "note": "Проверка y = 3x²+x−1: y(−2) = 12−2−1 = 9 ✓; y(−1) = 3−1−1 = 1 ✓; y(0) = −1 ✓.", "sec": "Численные методы"}, {"n": 75, "q": "Функция, заданная таблично (x = −1; 0; 1 → y₁, y₂, y₃), описывается интерполяционным полиномом y = 3x² + 5x + 1. Найти узловые значения функции y₁, y₂, y₃.", "opts": ["−1, 1, 8;", "−3, −1, 7;", "7, −1, 5;", "−1, 1, 9."], "a": 4, "note": "y(−1) = 3 − 5 + 1 = −1; y(0) = 1; y(1) = 3 + 5 + 1 = 9.", "sec": "Численные методы"}, {"n": 101, "q": "Целевая функция – это …", "opts": ["любая функция, у которой есть экстремумы;", "функция, экстремумы которой необходимо найти;", "любая функция, у которой нет экстремумов;", "любая функция, у которой есть минимумы."], "a": 2, "note": "", "sec": "Оптимизация"}, {"n": 102, "q": "Выберете правильную фразу", "opts": ["Оптимальный по заданному критерию;", "Наиболее оптимальный по заданному критерию;", "Самый оптимальный по заданному критерию;", "Самый оптимальный."], "a": 1, "note": "«Оптимальный» уже означает «наилучший» — сравнительные степени («самый», «наиболее») к нему неприменимы; обязательно указание критерия.", "sec": "Оптимизация"}, {"n": 103, "q": "Метод Золотого сечения является …", "opts": ["методом отыскания экстремумов многоэкстремальных функций;", "методом отыскания только максимумов многоэкстремальных функций;", "методом отыскания только минимумов унимодальных функций;", "методом отыскания экстремумов унимодальных функций."], "a": 4, "note": "Метод золотого сечения применим к унимодальным функциям и находит экстремум (минимум или максимум).", "sec": "Оптимизация"}, {"n": 104, "q": "Оптимизация системы состоит …", "opts": ["в поиске такой системы, в которой максимум параметров управления;", "в поиске такого набора параметров управления, при котором целевая функция самая оптимальная;", "в поиске минимального набора параметров управления, при которых целевая функция достигает экстремума;", "в поиске такого набора параметров управления, при котором целевая функция достигает экстремума."], "a": 4, "note": "", "sec": "Оптимизация"}, {"n": 105, "q": "Задача:<math xmlns='http://www.w3.org/1998/Math/MathML' display='block'><mrow><mi>M<\/mi><mo>(<\/mo><mi>x<\/mi><mo>)<\/mo><\/mrow><mo>=<\/mo><munderover><mo>&#x2211;<\/mo><mrow><mi>j<\/mi><mo>=<\/mo><mn>1<\/mn><\/mrow><mi>n<\/mi><\/munderover><msub><mi>v<\/mi><mi>j<\/mi><\/msub><mrow><mo>(<\/mo><mn>1<\/mn><mo>&#x2212;<\/mo><msup><mi>e<\/mi><mrow><mo>&#x2212;<\/mo><msub><mi>&#x3B1;<\/mi><mi>j<\/mi><\/msub><msub><mi>x<\/mi><mi>j<\/mi><\/msub><\/mrow><\/msup><mo>)<\/mo><\/mrow><mo>&#x2192;<\/mo><mtext>max<\/mtext><\/math><math xmlns='http://www.w3.org/1998/Math/MathML' display='block'><munderover><mo>&#x2211;<\/mo><mrow><mi>j<\/mi><mo>=<\/mo><mn>1<\/mn><\/mrow><mi>n<\/mi><\/munderover><msub><mi>x<\/mi><mi>j<\/mi><\/msub><mo>=<\/mo><mi>N<\/mi><mo>,<\/mo><mtext>&nbsp;&nbsp;<\/mtext><msub><mi>x<\/mi><mi>j<\/mi><\/msub><mo>&#x2265;<\/mo><mn>0<\/mn><\/math>Выберете функцию Лагранжа для этой задачи", "opts": ["<math xmlns='http://www.w3.org/1998/Math/MathML' display='block'><mrow><mi>&#x3A6;<\/mi><mo>(<\/mo><mi>x<\/mi><mo>,<\/mo><mi>&#x3C8;<\/mi><mo>)<\/mo><\/mrow><mo>=<\/mo><munderover><mo>&#x2211;<\/mo><mrow><mi>j<\/mi><mo>=<\/mo><mn>1<\/mn><\/mrow><mi>n<\/mi><\/munderover><msub><mi>x<\/mi><mi>j<\/mi><\/msub><mo>&#x2212;<\/mo><mi>N<\/mi><mo>+<\/mo><mi>&#x3C8;<\/mi><mrow><mi>M<\/mi><mo>(<\/mo><mi>x<\/mi><mo>)<\/mo><\/mrow><\/math>", "<math xmlns='http://www.w3.org/1998/Math/MathML' display='block'><mrow><mi>&#x3A6;<\/mi><mo>(<\/mo><mi>x<\/mi><mo>,<\/mo><mi>&#x3C8;<\/mi><mo>)<\/mo><\/mrow><mo>=<\/mo><mrow><mi>M<\/mi><mo>(<\/mo><mi>x<\/mi><mo>)<\/mo><\/mrow><mo>+<\/mo><mi>&#x3C8;<\/mi><mrow><mo>(<\/mo><munderover><mo>&#x2211;<\/mo><mrow><mi>j<\/mi><mo>=<\/mo><mn>1<\/mn><\/mrow><mi>n<\/mi><\/munderover><msub><mi>x<\/mi><mi>j<\/mi><\/msub><mo>&#x2212;<\/mo><mi>N<\/mi><mo>)<\/mo><\/mrow><\/math>", "<math xmlns='http://www.w3.org/1998/Math/MathML' display='block'><mrow><mi>&#x3A6;<\/mi><mo>(<\/mo><mi>x<\/mi><mo>,<\/mo><mi>&#x3C8;<\/mi><mo>)<\/mo><\/mrow><mo>=<\/mo><mrow><mi>M<\/mi><mo>(<\/mo><mi>x<\/mi><mo>)<\/mo><\/mrow><mo>+<\/mo><mi>&#x3C8;<\/mi><munderover><mo>&#x2211;<\/mo><mrow><mi>j<\/mi><mo>=<\/mo><mn>1<\/mn><\/mrow><mi>n<\/mi><\/munderover><msub><mi>x<\/mi><mi>j<\/mi><\/msub><\/math>", "<math xmlns='http://www.w3.org/1998/Math/MathML' display='block'><mrow><mi>&#x3A6;<\/mi><mo>(<\/mo><mi>x<\/mi><mo>,<\/mo><mi>&#x3C8;<\/mi><mo>)<\/mo><\/mrow><mo>=<\/mo><mrow><mi>M<\/mi><mo>(<\/mo><mi>x<\/mi><mo>)<\/mo><\/mrow><mo>+<\/mo><mi>&#x3C8;<\/mi><mi>N<\/mi><\/math>"], "a": 2, "note": "Функция Лагранжа = целевая функция + множитель × (ограничение, приведённое к виду «= 0»).", "sec": "Оптимизация"}, {"n": 106, "q": "Задача:<math xmlns='http://www.w3.org/1998/Math/MathML' display='block'><mi>f<\/mi><mo>(<\/mo><mi>x<\/mi><mo>)<\/mo><mo>=<\/mo><mfrac><mn>1<\/mn><mn>2<\/mn><\/mfrac><mi>a<\/mi><msubsup><mi>x<\/mi><mn>1<\/mn><mn>2<\/mn><\/msubsup><mo>+<\/mo><mfrac><mn>1<\/mn><mn>2<\/mn><\/mfrac><mi>b<\/mi><msubsup><mi>x<\/mi><mn>2<\/mn><mn>2<\/mn><\/msubsup><mo>&#x2192;<\/mo><mtext>extr<\/mtext><mtext>&nbsp;(a&gt;0,&nbsp;b&gt;0),<\/mtext><\/math><math xmlns='http://www.w3.org/1998/Math/MathML' display='block'><mi>&#x3C6;<\/mi><mo>(<\/mo><mi>x<\/mi><mo>)<\/mo><mo>=<\/mo><msubsup><mi>x<\/mi><mn>1<\/mn><mn>3<\/mn><\/msubsup><mo>+<\/mo><msubsup><mi>x<\/mi><mn>2<\/mn><mn>3<\/mn><\/msubsup><mo>&#x2212;<\/mo><mn>1<\/mn><mo>=<\/mo><mn>0<\/mn><\/math>Выберете функцию Лагранжа для этой задачи", "opts": ["<math xmlns='http://www.w3.org/1998/Math/MathML' display='block'><mrow><mi>&#x3A6;<\/mi><mo>(<\/mo><mi>x<\/mi><mo>,<\/mo><mi>&#x3C8;<\/mi><mo>)<\/mo><\/mrow><mo>=<\/mo><mfrac><mn>1<\/mn><mn>2<\/mn><\/mfrac><mi>a<\/mi><msubsup><mi>x<\/mi><mn>1<\/mn><mn>2<\/mn><\/msubsup><mo>+<\/mo><mfrac><mn>1<\/mn><mn>2<\/mn><\/mfrac><mi>b<\/mi><msubsup><mi>x<\/mi><mn>2<\/mn><mn>2<\/mn><\/msubsup><mo>+<\/mo><mi>&#x3C8;<\/mi><mrow><mo>(<\/mo><msubsup><mi>x<\/mi><mn>1<\/mn><mn>3<\/mn><\/msubsup><mo>+<\/mo><msubsup><mi>x<\/mi><mn>2<\/mn><mn>3<\/mn><\/msubsup><mo>&#x2212;<\/mo><mn>1<\/mn><mo>)<\/mo><\/mrow><\/math>", "<math xmlns='http://www.w3.org/1998/Math/MathML' display='block'><mrow><mi>&#x3A6;<\/mi><mo>(<\/mo><mi>x<\/mi><mo>,<\/mo><mi>&#x3C8;<\/mi><mo>)<\/mo><\/mrow><mo>=<\/mo><msubsup><mi>x<\/mi><mn>1<\/mn><mn>3<\/mn><\/msubsup><mo>+<\/mo><msubsup><mi>x<\/mi><mn>2<\/mn><mn>3<\/mn><\/msubsup><mo>&#x2212;<\/mo><mn>1<\/mn><mo>+<\/mo><mi>&#x3C8;<\/mi><mrow><mo>(<\/mo><mfrac><mn>1<\/mn><mn>2<\/mn><\/mfrac><mi>a<\/mi><msubsup><mi>x<\/mi><mn>1<\/mn><mn>2<\/mn><\/msubsup><mo>+<\/mo><mfrac><mn>1<\/mn><mn>2<\/mn><\/mfrac><mi>b<\/mi><msubsup><mi>x<\/mi><mn>2<\/mn><mn>2<\/mn><\/msubsup><mo>)<\/mo><\/mrow><\/math>", "<math xmlns='http://www.w3.org/1998/Math/MathML' display='block'><mrow><mi>&#x3A6;<\/mi><mo>(<\/mo><mi>x<\/mi><mo>,<\/mo><mi>&#x3C8;<\/mi><mo>)<\/mo><\/mrow><mo>=<\/mo><msubsup><mi>x<\/mi><mn>1<\/mn><mn>3<\/mn><\/msubsup><mo>+<\/mo><mfrac><mn>1<\/mn><mn>2<\/mn><\/mfrac><mi>b<\/mi><msubsup><mi>x<\/mi><mn>2<\/mn><mn>2<\/mn><\/msubsup><mo>+<\/mo><mi>&#x3C8;<\/mi><mrow><mo>(<\/mo><mfrac><mn>1<\/mn><mn>2<\/mn><\/mfrac><mi>a<\/mi><msubsup><mi>x<\/mi><mn>1<\/mn><mn>2<\/mn><\/msubsup><mo>+<\/mo><msubsup><mi>x<\/mi><mn>2<\/mn><mn>3<\/mn><\/msubsup><mo>&#x2212;<\/mo><mn>1<\/mn><mo>)<\/mo><\/mrow><\/math>", "<math xmlns='http://www.w3.org/1998/Math/MathML' display='block'><mrow><mi>&#x3A6;<\/mi><mo>(<\/mo><mi>x<\/mi><mo>,<\/mo><mi>&#x3C8;<\/mi><mo>)<\/mo><\/mrow><mo>=<\/mo><mfrac><mn>1<\/mn><mn>2<\/mn><\/mfrac><mi>a<\/mi><msubsup><mi>x<\/mi><mn>1<\/mn><mn>2<\/mn><\/msubsup><mo>+<\/mo><msubsup><mi>x<\/mi><mn>2<\/mn><mn>3<\/mn><\/msubsup><mo>+<\/mo><mi>&#x3C8;<\/mi><mrow><mo>(<\/mo><msubsup><mi>x<\/mi><mn>1<\/mn><mn>3<\/mn><\/msubsup><mo>+<\/mo><mfrac><mn>1<\/mn><mn>2<\/mn><\/mfrac><mi>b<\/mi><msubsup><mi>x<\/mi><mn>2<\/mn><mn>2<\/mn><\/msubsup><mo>&#x2212;<\/mo><mn>1<\/mn><mo>)<\/mo><\/mrow><\/math>"], "a": 1, "note": "Φ = f(x) + ψ·φ(x).", "sec": "Оптимизация"}, {"n": 107, "q": "Оптимизационную задачу относят к выпуклому программированию, если …", "opts": ["целевая функция выпуклая и функции ограничений образуют выпуклое множество;", "целевая функция и функции ограничений линейны;", "целевая функция линейна, а функции ограничений образуют выпуклое множество;", "целевая функция вогнута, а функции ограничений линейны."], "a": 1, "note": "", "sec": "Оптимизация"}, {"n": 108, "q": "Необходимым условием локального экстремума скалярной функции одного переменного является …", "opts": ["условие непрерывности;", "условие гладкости и равенства нулю второй производной;", "условие непрерывности и постоянства знака первой производной;", "условие гладкости и равенство нулю первой производной."], "a": 4, "note": "Теорема Ферма: в точке экстремума гладкой функции f′(x*) = 0.", "sec": "Оптимизация"}, {"n": 109, "q": "В точке, подозрительной на экстремум, первая производная скалярной функции одного переменного …", "opts": ["меняет знак;", "равна нулю;", "является непрерывной;", "достигает минимального значения."], "a": 2, "note": "Стационарная точка: f′(x) = 0.", "sec": "Оптимизация"}, {"n": 110, "q": "Градиентом скалярной функции нескольких переменных называется …", "opts": ["вектор, касательный к линии уровня;", "вектор, составленный из частных производных функции по всем переменным;", "её среднее значение;", "её наименьшее значение."], "a": 2, "note": "", "sec": "Оптимизация"}, {"n": 111, "q": "Градиент скалярной функции нескольких переменных - это …", "opts": ["вектор приращений;", "вектор в пространстве переменных, ортогональный линии уровня функции, и направленный в сторону её убывания;", "вектор в пространстве переменных, ортогональный линии уровня функции, и направленный в сторону её возрастания;", "вектор в пространстве переменных, касательный к линии уровня функции."], "a": 3, "note": "Градиент перпендикулярен линии уровня и указывает направление наискорейшего роста.", "sec": "Оптимизация"}, {"n": 112, "q": "В точке, подозрительной на экстремум, градиент скалярной функции …", "opts": ["равен нулевому вектору;", "меняет направление;", "является непрерывным;", "имеет минимальный модуль."], "a": 1, "note": "", "sec": "Оптимизация"}, {"n": 113, "q": "Достаточное условие минимума существенно гладкой скалярной функции одного переменного является …", "opts": ["условие равенства нулю первой производной;", "условие равенства нулю первой производной и положительности второй производной;", "условие перемены знака первой производной;", "условие монотонности."], "a": 2, "note": "f′(x*) = 0 и f″(x*) &gt; 0 ⇒ строгий локальный минимум.", "sec": "Оптимизация"}, {"n": 114, "q": "Точка, подозрительная на экстремум скалярной функции векторного аргумента, является …", "opts": ["решением системы интегральных уравнений;", "решением задачи Коши;", "решением матричного уравнения, являющегося необходимым условием;", "решением системы конечных уравнений, являющейся необходимым условием."], "a": 4, "note": "∇f(x) = 0 — система конечных (алгебраических) уравнений, выражающая необходимое условие экстремума.", "sec": "Оптимизация"}, {"n": 115, "q": "Достаточным условием локального минимума существенно гладкой скалярной функции векторного аргумента является …", "opts": ["равенство нулю всех её первых частных производных;", "равенство её градиента нулевому вектору и положительная определенность её гессиана;", "равенство её градиента нулевому вектору;", "положительная определённость её гессиана."], "a": 2, "note": "∇f = 0 + положительно определённый гессиан ⇒ локальный минимум.", "sec": "Оптимизация"}, {"n": 116, "q": "Достаточное условие экстремума существенно гладкой скалярной функции одного переменного является …", "opts": ["условие равенства нулю первой производной;", "условие непрерывности первой производной;", "условие равенства нулю первой производной и положительности второй производной;", "условие перемены знака первой производной."], "a": 3, "note": "Для дважды дифференцируемой («существенно гладкой») функции: f′ = 0 и f″ ≠ 0 (в тесте — положительность f″, случай минимума) — достаточное условие экстремума.", "sec": "Оптимизация"}, {"n": 117, "q": "Достаточное условие экстремума гладкой скалярной функции одного переменного является …", "opts": ["условие равенства нулю первой производной;", "условие монотонности;", "условие непрерывности первой производной;", "условие перемены знака первой производной."], "a": 4, "note": "Для гладкой функции перемена знака f′ при переходе через точку — достаточное условие экстремума.", "sec": "Оптимизация"}, {"n": 118, "q": "Достаточное условие локального максимума существенно гладкой скалярной функции одного переменного является …", "opts": ["условие равенства нулю первой производной;", "условие перемены знака первой производной;", "условие равенства нулю первой производной и отрицательности второй производной;", "условие монотонности."], "a": 3, "note": "f′(x*) = 0 и f″(x*) &lt; 0 ⇒ локальный максимум.", "sec": "Оптимизация"}, {"n": 119, "q": "Скалярная функция нескольких переменных убывает в направлении …", "opts": ["градиента;", "антиградиента;", "диагонали гессиана;", "седловой точки."], "a": 2, "note": "", "sec": "Оптимизация"}, {"n": 120, "q": "Функция<math xmlns='http://www.w3.org/1998/Math/MathML' display='block'><mi>f<\/mi><mo>=<\/mo><mn>2<\/mn><msubsup><mi>x<\/mi><mn>1<\/mn><mn>2<\/mn><\/msubsup><mo>+<\/mo><mn>3<\/mn><msub><mi>x<\/mi><mn>1<\/mn><\/msub><msub><mi>x<\/mi><mn>2<\/mn><\/msub><mo>+<\/mo><mn>2<\/mn><msubsup><mi>x<\/mi><mn>2<\/mn><mn>2<\/mn><\/msubsup><mo>&#x2212;<\/mo><msub><mi>x<\/mi><mn>1<\/mn><\/msub><mo>+<\/mo><mn>2<\/mn><msub><mi>x<\/mi><mn>2<\/mn><\/msub><mo>+<\/mo><mn>12<\/mn><\/math>в точке A(0,0) возрастает в направлении …", "opts": ["(−1, 2);", "(1, 2);", "(1, −2);", "(−1, 2)."], "a": 1, "note": "∇f = (4x₁+3x₂−1; 3x₁+4x₂+2), в A(0,0): ∇f = (−1; 2) — направление возрастания.", "sec": "Оптимизация"}, {"n": 121, "q": "Функция<math xmlns='http://www.w3.org/1998/Math/MathML' display='block'><mi>f<\/mi><mo>=<\/mo><mn>2<\/mn><msubsup><mi>x<\/mi><mn>1<\/mn><mn>2<\/mn><\/msubsup><mo>+<\/mo><mn>3<\/mn><msub><mi>x<\/mi><mn>1<\/mn><\/msub><msub><mi>x<\/mi><mn>2<\/mn><\/msub><mo>+<\/mo><mn>2<\/mn><msubsup><mi>x<\/mi><mn>2<\/mn><mn>2<\/mn><\/msubsup><mo>&#x2212;<\/mo><msub><mi>x<\/mi><mn>1<\/mn><\/msub><mo>+<\/mo><mn>2<\/mn><msub><mi>x<\/mi><mn>2<\/mn><\/msub><mo>+<\/mo><mn>12<\/mn><\/math>в точке A(1,0) убывает в направлении …", "opts": ["(−3, −5);", "(3, 5);", "(−3, 5);", "(3, −5)."], "a": 1, "note": "∇f(1,0) = (4−1; 3+2) = (3; 5); направление убывания — антиградиент (−3; −5).", "sec": "Оптимизация"}, {"n": 122, "q": "Функция<math xmlns='http://www.w3.org/1998/Math/MathML' display='block'><mi>f<\/mi><mo>=<\/mo><mn>2<\/mn><msubsup><mi>x<\/mi><mn>1<\/mn><mn>2<\/mn><\/msubsup><mo>+<\/mo><mn>3<\/mn><msub><mi>x<\/mi><mn>1<\/mn><\/msub><msub><mi>x<\/mi><mn>2<\/mn><\/msub><mo>+<\/mo><mn>2<\/mn><msubsup><mi>x<\/mi><mn>2<\/mn><mn>2<\/mn><\/msubsup><mo>&#x2212;<\/mo><msub><mi>x<\/mi><mn>1<\/mn><\/msub><mo>+<\/mo><mn>2<\/mn><msub><mi>x<\/mi><mn>2<\/mn><\/msub><mo>+<\/mo><mn>12<\/mn><\/math>в точке A(0,1) возрастает в направлении …", "opts": ["(2, −6);", "(2, 6);", "(−2, 6);", "(2, 3)."], "a": 2, "note": "∇f(0,1) = (3−1; 4+2) = (2; 6).", "sec": "Оптимизация"}, {"n": 123, "q": "Функция<math xmlns='http://www.w3.org/1998/Math/MathML' display='block'><mi>f<\/mi><mo>=<\/mo><mn>2<\/mn><msubsup><mi>x<\/mi><mn>1<\/mn><mn>2<\/mn><\/msubsup><mo>+<\/mo><mn>3<\/mn><msub><mi>x<\/mi><mn>1<\/mn><\/msub><msub><mi>x<\/mi><mn>2<\/mn><\/msub><mo>+<\/mo><mn>2<\/mn><msubsup><mi>x<\/mi><mn>2<\/mn><mn>2<\/mn><\/msubsup><mo>&#x2212;<\/mo><msub><mi>x<\/mi><mn>1<\/mn><\/msub><mo>+<\/mo><mn>2<\/mn><msub><mi>x<\/mi><mn>2<\/mn><\/msub><mo>+<\/mo><mn>12<\/mn><\/math>в точке A(-1,0) возрастает в направлении …", "opts": ["(5, 1);", "(−5, 1);", "(5, −1);", "(−5, −1)."], "a": 4, "note": "∇f(−1,0) = (−4−1; −3+2) = (−5; −1).", "sec": "Оптимизация"}, {"n": 124, "q": "Функция<math xmlns='http://www.w3.org/1998/Math/MathML' display='block'><mi>f<\/mi><mo>=<\/mo><mn>2<\/mn><msubsup><mi>x<\/mi><mn>1<\/mn><mn>2<\/mn><\/msubsup><mo>+<\/mo><mn>3<\/mn><msub><mi>x<\/mi><mn>1<\/mn><\/msub><msub><mi>x<\/mi><mn>2<\/mn><\/msub><mo>+<\/mo><mn>2<\/mn><msubsup><mi>x<\/mi><mn>2<\/mn><mn>2<\/mn><\/msubsup><mo>&#x2212;<\/mo><msub><mi>x<\/mi><mn>1<\/mn><\/msub><mo>+<\/mo><mn>2<\/mn><msub><mi>x<\/mi><mn>2<\/mn><\/msub><mo>+<\/mo><mn>12<\/mn><\/math>в точке A(1,1) убывает в направлении …", "opts": ["(6, 3);", "(−6, −9);", "(6, 9);", "(6, 9)."], "a": 2, "note": "∇f(1,1) = (4+3−1; 3+4+2) = (6; 9); антиградиент (−6; −9).", "sec": "Оптимизация"}, {"n": 125, "q": "Функция<math xmlns='http://www.w3.org/1998/Math/MathML' display='block'><mi>f<\/mi><mo>=<\/mo><mn>2<\/mn><msubsup><mi>x<\/mi><mn>1<\/mn><mn>2<\/mn><\/msubsup><mo>+<\/mo><mn>3<\/mn><msub><mi>x<\/mi><mn>1<\/mn><\/msub><msub><mi>x<\/mi><mn>2<\/mn><\/msub><mo>+<\/mo><mn>2<\/mn><msubsup><mi>x<\/mi><mn>2<\/mn><mn>2<\/mn><\/msubsup><mo>&#x2212;<\/mo><msub><mi>x<\/mi><mn>1<\/mn><\/msub><mo>+<\/mo><mn>2<\/mn><msub><mi>x<\/mi><mn>2<\/mn><\/msub><mo>+<\/mo><mn>12<\/mn><\/math>в точке A(-1,-1) убывает в направлении …", "opts": ["(−8, 5);", "(8, −5);", "(8, 5);", "(−5, −8)."], "a": 3, "note": "∇f(−1,−1) = (−4−3−1; −3−4+2) = (−8; −5); антиградиент (8; 5).", "sec": "Оптимизация"}, {"n": 126, "q": "Задача может быть отнесена к классу задач нелинейного программирования, если в ней …", "opts": ["все ограничения и целевая функция – линейны;", "по меньшей мере, одно из ограничений является нелинейным;", "не задана целевая функция;", "все ограничения линейны, а целевая функция не линейна."], "a": 2, "note": "Нелинейное программирование: хотя бы одна из функций (ограничение или целевая) нелинейна. (Вариант 4 — частный случай; канонический ответ теста — 2.)", "sec": "Оптимизация"}, {"n": 127, "q": "Теорема Куна-Таккера …", "opts": ["формулирует необходимое условие экстремума;", "формулирует достаточное условие экстремума для задач выпуклого программирования с ограничениями;", "формулирует достаточное условие экстремума для произвольной экстремальной задачи;", "позволяет свести произвольную экстремальную задачу к эквивалентной задаче линейного программирования."], "a": 2, "note": "Для задач выпуклого программирования условия Куна–Таккера являются достаточными (и необходимыми) условиями оптимальности.", "sec": "Оптимизация"}, {"n": 128, "q": "Отметьте, какие из приведенных заголовков являются названиями разделов математического программирования.", "opts": ["Линейное программирование;", "Выпуклое программирование;", "Нелинейное программирование;", "Все."], "a": 4, "note": "", "sec": "Оптимизация"}, {"n": 129, "q": "Отметьте, какие из приведенных заголовков являются названиями разделов математического программирования.", "opts": ["Геометрическое программирование;", "Стохастическое программирование;", "Целочисленное программирование;", "Все."], "a": 4, "note": "", "sec": "Оптимизация"}, {"n": 130, "q": "Укажите условие корректной разрешимости задачи условной оптимизации с ограничениями-равенствами.", "opts": ["Все множители Лагранжа отрицательные;", "Все множители Лагранжа положительные;", "Все множители Лагранжа не равны нулю;", "Все приведенные выше."], "a": 3, "note": "Для ограничений-равенств знак множителей Лагранжа не фиксирован (могут быть любого знака), но для корректной разрешимости они не равны нулю.", "sec": "Оптимизация"}];
+
+/* ---------- storage ---------- */
+function loadStore(){
+  try{ var s = JSON.parse(localStorage.getItem('mmf-trainer-v1')||'{}');
+       return { known:new Set(s.known||[]), hard:new Set(s.hard||[]), learn:(s.learn||{}),
+                sound:(s.sound!==false), best:(s.best||0), att:(s.att||{}), wrong:(s.wrong||{}) }; }
+  catch(e){ return { known:new Set(), hard:new Set(), learn:{}, sound:true, best:0, att:{}, wrong:{} }; }
+}
+function saveStore(){
+  try{ localStorage.setItem('mmf-trainer-v1', JSON.stringify({known:[...store.known], hard:[...store.hard], learn:store.learn, sound:store.sound, best:store.best, att:store.att, wrong:store.wrong})); }catch(e){}
+}
+/* учёт ошибок: локально + анонимная сводка на сервер (если доступен) */
+function track(n, good){
+  store.att[n]=(store.att[n]||0)+1;
+  if(!good) store.wrong[n]=(store.wrong[n]||0)+1;
+  saveStore();
+  try{
+    if(/^https?:$/.test(location.protocol)){
+      fetch(GAPI+'/hit/'+GNS+'/q'+n+'a').catch(function(){});
+      if(!good) fetch(GAPI+'/hit/'+GNS+'/q'+n+'w').catch(function(){});
+    }
+  }catch(e){}
+}
+var GNS='sessia-mmf', GAPI='https://abacus.jasoncameron.dev';
+var GSTATS=null, _gload=false;
+function loadGStats(){
+  if(_gload || !/^https?:$/.test(location.protocol)) return; _gload=true;
+  try{
+    var res={}, todo=[];
+    DATA.forEach(function(d){ todo.push(['a',d.n]); todo.push(['w',d.n]); });
+    var i=0, act=0, done=0;
+    function fin(){ GSTATS=res; headerSync(); if(mode==='list') render(); }
+    function one(t){
+      act++;
+      fetch(GAPI+'/get/'+GNS+'/q'+t[1]+t[0]).then(function(r){ return r.ok?r.json():null; })
+        .then(function(j){ var o=res[t[1]]||(res[t[1]]={a:0,w:0}); o[t[0]]=(j&&j.value)||0; })
+        .catch(function(){})
+        .then(function(){ act--; done++; if(done>=todo.length) fin(); else next(); });
+    }
+    function next(){ while(act<24 && i<todo.length) one(todo[i++]); }
+    if(todo.length) next(); else fin();
+  }catch(e){}
+}
+var store = loadStore();
+
+/* ---------- фан: звук, конфетти, стрик, фокус ---------- */
+var RM = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+var streak=0;
+var _ac=null;
+function _audio(){ try{ if(!_ac) _ac=new (window.AudioContext||window.webkitAudioContext)(); return _ac; }catch(e){ return null; } }
+function _tone(freq, t0, dur, type, vol){
+  var ac=_audio(); if(!ac||!store.sound) return;
+  var o=ac.createOscillator(), g=ac.createGain();
+  o.type=type||'sine'; o.frequency.value=freq;
+  g.gain.setValueAtTime(0.0001, ac.currentTime+t0);
+  g.gain.exponentialRampToValueAtTime(vol||0.12, ac.currentTime+t0+0.012);
+  g.gain.exponentialRampToValueAtTime(0.0001, ac.currentTime+t0+dur);
+  o.connect(g); g.connect(ac.destination);
+  o.start(ac.currentTime+t0); o.stop(ac.currentTime+t0+dur+0.05);
+}
+function sndOk(){ _tone(660,0,.09); _tone(880,.08,.14); }
+function sndBad(){ _tone(196,0,.16,'triangle',0.10); }
+function sndRound(){ _tone(523,0,.10); _tone(659,.09,.10); _tone(784,.18,.10); _tone(1047,.27,.22); }
+var _parts=[], _fxOn=false;
+function burst(x,y,n){
+  if(RM) return;
+  var cv=document.getElementById('fx');
+  cv.width=innerWidth; cv.height=innerHeight;
+  var colors=['#ff5e3a','#ff9a3d','#ffd23d','#4cc38a','#5aa2ff','#b07aff'];
+  for(var i=0;i<n;i++){
+    var a=Math.random()*Math.PI*2, v=3+Math.random()*5;
+    _parts.push({x:x,y:y,vx:Math.cos(a)*v,vy:Math.sin(a)*v-3,g:0.22,life:1,
+                 c:colors[i%colors.length],s:3+Math.random()*4,rot:Math.random()*6});
+  }
+  if(!_fxOn){ _fxOn=true; requestAnimationFrame(_fxTick); }
+}
+function _fxTick(){
+  var cv=document.getElementById('fx'), ctx=cv.getContext('2d');
+  ctx.clearRect(0,0,cv.width,cv.height);
+  _parts=_parts.filter(function(p){ return p.life>0; });
+  if(!_parts.length){ _fxOn=false; return; }
+  _parts.forEach(function(p){
+    p.x+=p.vx; p.y+=p.vy; p.vy+=p.g; p.life-=0.02; p.rot+=0.1;
+    ctx.save(); ctx.globalAlpha=Math.max(p.life,0); ctx.translate(p.x,p.y); ctx.rotate(p.rot);
+    ctx.fillStyle=p.c; ctx.fillRect(-p.s/2,-p.s/2,p.s,p.s*0.6); ctx.restore();
+  });
+  requestAnimationFrame(_fxTick);
+}
+function burstAt(el,n){
+  if(!el){ burst(innerWidth/2, 180, n); return; }
+  var r=el.getBoundingClientRect();
+  burst(r.left+r.width/2, r.top+r.height/2, n);
+}
+function toggleSound(){ store.sound=!store.sound; saveStore(); if(store.sound) sndOk(); render(); }
+function toggleFocus(){ document.body.classList.toggle('focusmode'); render(); }
+
+/* ---------- state ---------- */
+var mode='learn', filter='all', onlyHard=false;
+var cards={order:[],pos:0,flip:false,sesKnown:0,sesHard:0};
+var quiz={order:[],pos:0,right:0,wrong:0,answered:false,mistakes:[],perm:[]};
+var searchQ='';
+
+function pool(){
+  var idx=[];
+  for(var i=0;i<DATA.length;i++){
+    var d=DATA[i];
+    if(filter==='num' && d.n>74) continue;
+    if(filter==='opt' && d.n<101) continue;
+    idx.push(i);
+  }
+  return idx;
+}
+function shuffle(a){ a=a.slice(); for(var i=a.length-1;i>0;i--){ var j=Math.floor(Math.random()*(i+1)); var t=a[i];a[i]=a[j];a[j]=t;} return a; }
+function esc(s){ return s; } /* данные доверенные (собраны локально) */
+function norm(s){ return s.replace(/<[^>]*>/g,'').replace(/[\s;.,]+/g,' ').trim().toLowerCase(); }
+
+/* ---------- header ---------- */
+function setMode(m){ mode=m; killAuto(); if(m==='learn') startLearn(); if(m==='cards') startCards(); if(m==='quiz') startQuiz(); if(m==='list') loadGStats(); render(); }
+function setFilter(f){ filter=f; killAuto(); if(mode==='learn') startLearn(); if(mode==='cards') startCards(); if(mode==='quiz') startQuiz(); render(); }
+function toggleHard(){ onlyHard=!onlyHard; if(mode==='cards') startCards(); render(); }
+function resetProgress(){
+  if(confirm('Сбросить весь прогресс — заучивание и отметки карточек?')){ store.known.clear(); store.hard.clear(); store.learn={}; saveStore(); killAuto(); if(mode==='learn') startLearn(); if(mode==='cards') startCards(); render(); }
+}
+function headerSync(){
+  var ids={learn:'tab-learn',cards:'tab-cards',quiz:'tab-quiz',list:'tab-list'};
+  Object.keys(ids).forEach(function(k){ document.getElementById(ids[k]).classList.toggle('on',mode===k); });
+  var fs={all:'f-all',num:'f-num',opt:'f-opt'};
+  Object.keys(fs).forEach(function(k){ document.getElementById(fs[k]).classList.toggle('on',filter===k); });
+  document.getElementById('f-hard').classList.toggle('on',onlyHard);
+  var snd=document.getElementById('f-sound');
+  snd.textContent=store.sound?'🔊 Звук':'🔇 Звук';
+  snd.classList.toggle('on',store.sound);
+  document.getElementById('f-focus').classList.toggle('on',document.body.classList.contains('focusmode'));
+  document.getElementById('statlink').style.display='none';
+  var p=pool();
+  var txt;
+  if(mode==='learn'){
+    var m=p.filter(function(i){return lsc(DATA[i].n)>=3;}).length;
+    txt='усвоено '+m+' / '+p.length;
+  } else {
+    var kn=p.filter(function(i){return store.known.has(DATA[i].n);}).length;
+    txt='выучено '+kn+' / '+p.length;
+  }
+  document.getElementById('stats').textContent=txt;
+}
+
+/* ---------- learn (режим заучивания) ----------
+   Правила: порции по 10 вопросов; верный ответ +1 к усвоению, ошибка −1 и
+   вопрос возвращается в текущую порцию через 2–3 позиции; вопрос считается
+   усвоенным после 3 верных ответов и больше не показывается. */
+var NEED=3, PORTION=10;
+var learn={queue:[],pos:0,roundNum:0,answered:false,chosen:-1,good:false,perm:[],autoT:null,autoTok:0,justWrong:false,sessAns:0,sessOk:0,celebrated:false};
+function lsc(n){ return store.learn[n]||0; }
+function killAuto(){ if(learn.autoT){ clearTimeout(learn.autoT); learn.autoT=null; } learn.autoTok++; }
+function startLearn(){ learn.roundNum=0; learn.sessAns=0; learn.sessOk=0; learn.celebrated=false; buildRound(); }
+function buildRound(){
+  killAuto();
+  var groups={0:[],1:[],2:[]};
+  pool().forEach(function(i){ var s=lsc(DATA[i].n); if(s<NEED) groups[Math.min(s,2)].push(i); });
+  var ordered=shuffle(groups[0]).concat(shuffle(groups[1])).concat(shuffle(groups[2]));
+  learn.queue=shuffle(ordered.slice(0,PORTION));
+  learn.pos=0; learn.answered=false; learn.good=false;
+  if(learn.queue.length) learn.roundNum++;
+  makeLearnPerm();
+}
+function makeLearnPerm(){ learn.perm=shuffle([0,1,2,3]); }
+function answerLearn(slot, el){
+  if(learn.answered || learn.pos>=learn.queue.length) return;
+  var d=DATA[learn.queue[learn.pos]];
+  var chosen=learn.perm[slot];
+  var okText=norm(d.opts[d.a-1]);
+  var good=(chosen===d.a-1)||(norm(d.opts[chosen])===okText);
+  learn.answered=true; learn.chosen=chosen; learn.good=good;
+  learn.sessAns++;
+  track(d.n, good);
+  var s=lsc(d.n);
+  store.learn[d.n]=good?Math.min(NEED,s+1):Math.max(0,s-1);
+  if(good){
+    learn.sessOk++; streak++;
+    if(streak>store.best) store.best=streak;
+    sndOk(); burstAt(el, Math.min(14+streak*2, 44));
+    var tok=++learn.autoTok;
+    learn.autoT=setTimeout(function(){ if(tok===learn.autoTok) nextLearn(); },900);
+  } else {
+    streak=0; learn.justWrong=true; sndBad();
+  }
+  saveStore();
+  render();
+}
+function nextLearn(){
+  if(!learn.answered) return;
+  killAuto();
+  if(learn.good){ learn.pos++; }
+  else{
+    var item=learn.queue.splice(learn.pos,1)[0];
+    var at=Math.min(learn.pos+2+Math.floor(Math.random()*2), learn.queue.length);
+    learn.queue.splice(at,0,item);
+  }
+  learn.answered=false; learn.good=false; makeLearnPerm();
+  if(learn.pos>=learn.queue.length && learn.queue.length){
+    sndRound();
+    burst(innerWidth/2, 170, 70);
+    setTimeout(function(){ burst(innerWidth*0.25, 220, 35); burst(innerWidth*0.75, 220, 35); }, 220);
+  }
+  render();
+}
+function learnCounts(){
+  var p=pool(), m=0, prog=0, fresh=0, sum=0;
+  p.forEach(function(i){ var s=lsc(DATA[i].n); sum+=Math.min(s,NEED);
+    if(s>=NEED) m++; else if(s>0) prog++; else fresh++; });
+  return {total:p.length, mastered:m, inprog:prog, fresh:fresh, pct:p.length?Math.round(100*sum/(NEED*p.length)):0};
+}
+function pips(s){
+  var h='<span class="pips" title="верных ответов: '+Math.min(s,NEED)+' из '+NEED+'">';
+  for(var i=0;i<NEED;i++) h+='<span class="pip'+(i<s?' f':'')+'"></span>';
+  return h+'</span>';
+}
+function renderLearn(el){
+  var c=learnCounts();
+  if(!c.total){ el.innerHTML='<div class="empty">В этой подборке нет вопросов.</div>'; return; }
+  if(!learn.queue.length && c.mastered<c.total) buildRound();
+  if(c.mastered>=c.total){
+    if(!learn.celebrated){ learn.celebrated=true; sndRound();
+      burst(innerWidth/2, 160, 90);
+      setTimeout(function(){ burst(innerWidth*0.3, 240, 45); burst(innerWidth*0.7, 240, 45); }, 300); }
+    el.innerHTML='<div class="result"><div class="big good">🎉 100%</div>'+
+      '<p>Все '+c.total+' вопросов усвоены — на каждый дано по '+NEED+' верных ответа. Готов к экзамену!</p>'+
+      '<div class="rowbtns" style="max-width:420px;margin:0 auto">'+
+      '<button class="btn primary" onclick="if(confirm(\'Начать заучивание заново?\')){pool().forEach(function(i){delete store.learn[DATA[i].n];});saveStore();startLearn();render();}">Пройти заново</button>'+
+      '</div></div>';
+    return;
+  }
+  if(learn.pos>=learn.queue.length){
+    var acc=learn.sessAns?Math.round(100*learn.sessOk/learn.sessAns):0;
+    el.innerHTML='<div class="progress"><i style="width:'+c.pct+'%"></i></div>'+
+      '<div class="result"><div class="big mid">Порция '+learn.roundNum+' пройдена</div>'+
+      '<div class="lstat">'+
+      '<div class="b g"><div class="v">'+c.mastered+'</div><div class="l">усвоено</div></div>'+
+      '<div class="b a"><div class="v">'+c.inprog+'</div><div class="l">в процессе</div></div>'+
+      '<div class="b"><div class="v">'+c.fresh+'</div><div class="l">не начато</div></div>'+
+      '<div class="b"><div class="v">'+acc+'%</div><div class="l">точность</div></div>'+
+      '</div>'+
+      '<p>общий прогресс — '+c.pct+'% · рекорд серии 🔥 '+store.best+'</p>'+
+      '<div class="rowbtns" style="max-width:420px;margin:0 auto">'+
+      '<button class="btn primary" onclick="buildRound();render()">Следующая порция →</button>'+
+      '</div></div>';
+    return;
+  }
+  var d=DATA[learn.queue[learn.pos]];
+  var okIdx=d.a-1, okText=norm(d.opts[okIdx]);
+  var btns=learn.perm.map(function(oi,slot){
+    var cls='opt', dis=learn.answered?' disabled':'';
+    if(learn.answered){
+      var isOk=(oi===okIdx)||(norm(d.opts[oi])===okText);
+      if(isOk) cls+=' correct';
+      else if(oi===learn.chosen) cls+=' wrong';
+    }
+    return '<button class="'+cls+'"'+dis+' onclick="answerLearn('+slot+',this)"><span class="k">'+(slot+1)+'</span><span>'+d.opts[oi]+'</span></button>';
+  }).join('');
+  var shake=learn.justWrong?' shake':''; learn.justWrong=false;
+  el.innerHTML=
+    '<div class="progress"><i style="width:'+c.pct+'%"></i></div>'+
+    '<div class="meta"><span>порция '+learn.roundNum+' · вопрос '+(learn.pos+1)+' / '+learn.queue.length+'</span>'+
+    '<span>'+(streak>=2?'<span class="streak">🔥 '+streak+'</span> ':'')+'усвоено '+c.mastered+' из '+c.total+' · '+c.pct+'%</span></div>'+
+    '<div class="qcard'+shake+'"><span><span class="badge">№'+d.n+'</span><span class="tag">'+d.sec+'</span>'+pips(lsc(d.n))+'</span>'+
+    '<div class="q">'+d.q+'</div><div class="opts">'+btns+'</div>'+
+    (learn.answered?('<div class="verdict '+(learn.good?'good':'badv')+'">'+
+      (learn.good?'Верно! +1 к усвоению':'Неверно — этот вопрос ещё вернётся в этой порции')+'</div>'+
+      (d.note&&!learn.good?'<div class="note"><b>Пояснение:</b> '+d.note+'</div>':'')):'')+
+    '</div>'+
+    (learn.answered&&!learn.good?'<div class="rowbtns"><button class="btn primary" onclick="nextLearn()">Дальше →</button></div>':'');
+}
+
+/* ---------- flashcards ---------- */
+function cardPool(){
+  var p=pool();
+  if(onlyHard) p=p.filter(function(i){ return !store.known.has(DATA[i].n); });
+  return p;
+}
+function startCards(){ cards.order=shuffle(cardPool()); cards.pos=0; cards.flip=false; cards.sesKnown=0; cards.sesHard=0; }
+function markCard(know){
+  var d=DATA[cards.order[cards.pos]];
+  if(know){ store.known.add(d.n); store.hard.delete(d.n); cards.sesKnown++; }
+  else{ store.hard.add(d.n); store.known.delete(d.n); cards.sesHard++; }
+  saveStore();
+  cards.pos++; cards.flip=false; render();
+}
+function flipCard(){ cards.flip=!cards.flip; render(); }
+function renderCards(el){
+  var ord=cards.order;
+  if(!ord.length){ el.innerHTML='<div class="empty">В этой подборке нет карточек — сними фильтр «Только невыученные» или выбери другой раздел.</div>'; return; }
+  if(cards.pos>=ord.length){
+    el.innerHTML='<div class="result">'+
+      '<div class="big '+(cards.sesHard===0?'good':'mid')+'">'+cards.sesKnown+' / '+ord.length+'</div>'+
+      '<p>отмечено «знал» за этот круг · «ещё учить» — '+cards.sesHard+'</p>'+
+      '<div class="rowbtns" style="max-width:420px;margin:0 auto">'+
+      '<button class="btn primary" onclick="startCards();render()">Ещё круг</button>'+
+      (cards.sesHard>0?'<button class="btn" onclick="onlyHard=true;startCards();render()">Учить сложные</button>':'')+
+      '</div></div>';
+    return;
+  }
+  var d=DATA[ord[cards.pos]];
+  var opts=d.opts.map(function(o){return '<li>'+o+'</li>';}).join('');
+  var pct=Math.round(100*cards.pos/ord.length);
+  el.innerHTML=
+    '<div class="progress"><i style="width:'+pct+'%"></i></div>'+
+    '<div class="meta"><span>карточка '+(cards.pos+1)+' / '+ord.length+'</span><span>знал '+cards.sesKnown+' · учить '+cards.sesHard+'</span></div>'+
+    '<div class="scene"><button class="card3d'+(cards.flip?' flip':'')+'" onclick="flipCard()" aria-label="Перевернуть карточку">'+
+      '<span class="face front"><span><span class="badge">№'+d.n+'</span><span class="tag">'+d.sec+'</span></span>'+
+        '<span class="q">'+d.q+'</span><ol>'+opts+'</ol>'+
+        '<span class="hint">нажми, чтобы увидеть ответ</span></span>'+
+      '<span class="face back"><span><span class="badge">№'+d.n+'</span><span class="tag">'+d.sec+'</span></span>'+
+        '<span class="ansbox"><span class="lbl">Правильный ответ — вариант '+d.a+'</span><span class="txt" style="display:block">'+d.opts[d.a-1]+'</span></span>'+
+        (d.note?'<span class="note"><b>Пояснение:</b> '+d.note+'</span>':'')+
+        '<span class="hint">оцени себя кнопками ниже</span></span>'+
+    '</button></div>'+
+    '<div class="rowbtns">'+
+      '<button class="btn badb" onclick="markCard(false)">Ещё учить</button>'+
+      '<button class="btn okb" onclick="markCard(true)">Знал</button>'+
+    '</div>';
+}
+
+/* ---------- quiz ---------- */
+function startQuiz(){
+  quiz.order=shuffle(pool()); quiz.pos=0; quiz.right=0; quiz.wrong=0; quiz.answered=false; quiz.mistakes=[]; quiz.perm=[];
+  makePerm();
+}
+function startQuizFrom(list){
+  quiz.order=shuffle(list.slice()); quiz.pos=0; quiz.right=0; quiz.wrong=0; quiz.answered=false; quiz.mistakes=[]; quiz.perm=[];
+  makePerm(); render();
+}
+function makePerm(){ quiz.perm=shuffle([0,1,2,3]); }
+function answer(slot, el){
+  if(quiz.answered || quiz.pos>=quiz.order.length) return;
+  var d=DATA[quiz.order[quiz.pos]];
+  var chosen=quiz.perm[slot];
+  var okText=norm(d.opts[d.a-1]);
+  var good=(chosen===d.a-1)||(norm(d.opts[chosen])===okText);
+  quiz.answered=true; quiz.chosen=chosen;
+  track(d.n, good);
+  if(good){ quiz.right++; streak++; if(streak>store.best){store.best=streak; saveStore();} sndOk(); burstAt(el,16); }
+  else { quiz.wrong++; quiz.mistakes.push(quiz.order[quiz.pos]); streak=0; sndBad(); }
+  quiz.good=good;
+  render();
+}
+function nextQ(){
+  if(!quiz.answered) return;
+  quiz.pos++; quiz.answered=false; makePerm(); render();
+}
+function renderQuiz(el){
+  var ord=quiz.order;
+  if(!ord.length){ el.innerHTML='<div class="empty">Нет вопросов в этой подборке.</div>'; return; }
+  if(quiz.pos>=ord.length){
+    var pct=Math.round(100*quiz.right/ord.length);
+    var cls=pct>=85?'good':(pct>=60?'mid':'badv');
+    el.innerHTML='<div class="result">'+
+      '<div class="big '+cls+'">'+pct+'%</div>'+
+      '<p>верно '+quiz.right+' из '+ord.length+(quiz.mistakes.length?' · ошибки: '+quiz.mistakes.map(function(i){return '№'+DATA[i].n;}).join(', '):'')+'</p>'+
+      '<div class="rowbtns" style="max-width:460px;margin:0 auto">'+
+      (quiz.mistakes.length?'<button class="btn badb" onclick="startQuizFrom(quiz.mistakes)">Повторить ошибки ('+quiz.mistakes.length+')</button>':'')+
+      '<button class="btn primary" onclick="startQuiz();render()">Пройти ещё раз</button>'+
+      '</div></div>';
+    return;
+  }
+  var d=DATA[ord[quiz.pos]];
+  var pct2=Math.round(100*quiz.pos/ord.length);
+  var okIdx=d.a-1, okText=norm(d.opts[okIdx]);
+  var btns=quiz.perm.map(function(oi,slot){
+    var cls='opt', dis=quiz.answered?' disabled':'';
+    if(quiz.answered){
+      var isOk=(oi===okIdx)||(norm(d.opts[oi])===okText);
+      if(isOk) cls+=' correct';
+      else if(oi===quiz.chosen) cls+=' wrong';
+    }
+    return '<button class="'+cls+'"'+dis+' onclick="answer('+slot+',this)"><span class="k">'+(slot+1)+'</span><span>'+d.opts[oi]+'</span></button>';
+  }).join('');
+  el.innerHTML=
+    '<div class="progress"><i style="width:'+pct2+'%"></i></div>'+
+    '<div class="meta"><span>вопрос '+(quiz.pos+1)+' / '+ord.length+'</span><span>верно '+quiz.right+' · ошибки '+quiz.wrong+'</span></div>'+
+    '<div class="qcard"><span><span class="badge">№'+d.n+'</span><span class="tag">'+d.sec+'</span></span>'+
+    '<div class="q">'+d.q+'</div><div class="opts">'+btns+'</div>'+
+    (quiz.answered?('<div class="verdict '+(quiz.good?'good':'badv')+'">'+(quiz.good?'Верно!':'Неверно — правильный ответ подсвечен')+'</div>'+
+      (d.note?'<div class="note"><b>Пояснение:</b> '+d.note+'</div>':'')):'')+
+    '</div>'+
+    '<div class="rowbtns"><button class="btn primary" '+(quiz.answered?'':'disabled')+' onclick="nextQ()">Дальше →</button></div>';
+}
+
+/* ---------- list ---------- */
+var listSort='num';
+function _gs(n){ var g=GSTATS&&(GSTATS[n]||GSTATS[String(n)]); return (g&&g.a)?g:null; }
+function renderList(el){
+  var p=pool();
+  var q=norm(searchQ||'');
+  var items=p.filter(function(i){
+    if(!q) return true;
+    var d=DATA[i];
+    return (norm(d.q).indexOf(q)>=0)||('№'+d.n).indexOf(searchQ.trim())>=0||String(d.n).indexOf(searchQ.trim())>=0||d.opts.some(function(o){return norm(o).indexOf(q)>=0;});
+  });
+  if(listSort==='mine'){
+    items.sort(function(a,b){ return (store.wrong[DATA[b].n]||0)-(store.wrong[DATA[a].n]||0) || DATA[a].n-DATA[b].n; });
+  } else if(listSort==='group'&&GSTATS){
+    items.sort(function(a,b){
+      var ga=_gs(DATA[a].n), gb=_gs(DATA[b].n);
+      var ra=ga?ga.w/ga.a:-1, rb=gb?gb.w/gb.a:-1;
+      return rb-ra || DATA[a].n-DATA[b].n;
+    });
+  }
+  var html='<div class="listbar"><input class="search" id="searchbox" placeholder="Поиск по тексту вопроса или номеру…" value="'+searchQ.replace(/"/g,'&quot;')+'">'+
+    '<select class="sel" id="lsort" onchange="listSort=this.value;render()">'+
+    '<option value="num"'+(listSort==='num'?' selected':'')+'>по номеру</option>'+
+    '<option value="mine"'+(listSort==='mine'?' selected':'')+'>сначала мои ошибки</option>'+
+    (GSTATS?'<option value="group"'+(listSort==='group'?' selected':'')+'>сначала ошибки группы</option>':'')+
+    '</select></div>';
+  if(!items.length) html+='<div class="empty">Ничего не найдено.</div>';
+  items.forEach(function(i){
+    var d=DATA[i];
+    var st = store.known.has(d.n)?'<span class="st known">знаю</span>':(store.hard.has(d.n)?'<span class="st hard">учить</span>':'');
+    var a=store.att[d.n]||0, w=store.wrong[d.n]||0, g=_gs(d.n);
+    var es='';
+    if(a||g){
+      es='<div class="errstat">';
+      if(a) es+='мои ошибки: <b class="'+(w?'bad':'okc')+'">'+w+'</b> из '+a+' ответов';
+      if(g) es+=(a?' · ':'')+'группа: <b class="'+(g.w/g.a>=0.3?'bad':'okc')+'">'+Math.round(100*g.w/g.a)+'% ошибок</b> ('+g.a+' отв.)';
+      es+='</div>';
+    }
+    html+='<div class="litem">'+st+'<div><span class="badge">№'+d.n+'</span><span class="tag">'+d.sec+'</span></div>'+
+      '<p class="q">'+d.q+'</p>'+es+'<ol>'+
+      d.opts.map(function(o,j){return '<li'+(j===d.a-1?' class="ok"':'')+'>'+o+'</li>';}).join('')+
+      '</ol>'+(d.note?'<div class="note"><b>Пояснение:</b> '+d.note+'</div>':'')+'</div>';
+  });
+  el.innerHTML=html;
+  var sb=document.getElementById('searchbox');
+  sb.addEventListener('input',function(){ searchQ=sb.value; var pos=sb.selectionStart; renderList(el); var nb=document.getElementById('searchbox'); nb.focus(); nb.setSelectionRange(pos,pos); });
+}
+
+/* ---------- render root ---------- */
+function render(){
+  headerSync();
+  var el=document.getElementById('main');
+  if(mode==='learn') renderLearn(el);
+  else if(mode==='cards') renderCards(el);
+  else if(mode==='quiz') renderQuiz(el);
+  else renderList(el);
+}
+
+/* ---------- keyboard ---------- */
+document.addEventListener('keydown',function(e){
+  if(e.target && (e.target.tagName==='INPUT'||e.target.tagName==='TEXTAREA')) return;
+  if(mode==='learn'){
+    if(['1','2','3','4'].indexOf(e.key)>=0 && !learn.answered){ var s=parseInt(e.key,10)-1; answerLearn(s, document.querySelectorAll('.opt')[s]); }
+    if((e.code==='ArrowRight'||e.code==='Enter')&&learn.answered){ e.preventDefault(); nextLearn(); }
+    if((e.code==='ArrowRight'||e.code==='Enter')&&!learn.answered&&learn.pos>=learn.queue.length&&learn.queue.length){ e.preventDefault(); buildRound(); render(); }
+  } else if(mode==='cards'){
+    if(e.code==='Space'||e.code==='Enter'){ e.preventDefault(); if(cards.pos<cards.order.length) flipCard(); }
+    if(e.key==='1'&&cards.flip) markCard(false);
+    if(e.key==='2'&&cards.flip) markCard(true);
+    if(e.code==='ArrowRight'&&cards.flip) markCard(true);
+  } else if(mode==='quiz'){
+    if(['1','2','3','4'].indexOf(e.key)>=0 && !quiz.answered) answer(parseInt(e.key,10)-1);
+    if((e.code==='ArrowRight'||e.code==='Enter')&&quiz.answered){ e.preventDefault(); nextQ(); }
+  }
+});
+
+startLearn();
+loadGStats();
+render();
+</script>
+</body></html>

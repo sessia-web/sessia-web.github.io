@@ -1,0 +1,93 @@
+<!doctype html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Подготовка к сессии</title>
+<meta name="description" content="Тренажёры для подготовки к экзаменам: реальные вопросы, проверенные ответы, схемы и формулы">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E⚡%3C/text%3E%3C/svg%3E">
+<style>
+:root{
+  --bg:#F6F7F4; --surface:#FFFFFF; --ink:#20262B; --muted:#66707A; --line:#DDE2E0;
+  --accent:#2B4BB5; --accent-ink:#FFFFFF; --accent-soft:#E9EDFA;
+  --ok:#177A4C; --chip:#ECEFF3; --grid:rgba(43,75,181,.045);
+  --shadow:0 1px 2px rgba(24,32,44,.06),0 6px 18px rgba(24,32,44,.07);
+}
+@media (prefers-color-scheme: dark){
+  :root{
+    --bg:#14181D; --surface:#1D232A; --ink:#E8ECEF; --muted:#98A2AB; --line:#2C343C;
+    --accent:#7C93E8; --accent-ink:#101625; --accent-soft:#232C42;
+    --ok:#4CC38A; --chip:#252C34; --grid:rgba(124,147,232,.05);
+    --shadow:0 1px 2px rgba(0,0,0,.4),0 8px 22px rgba(0,0,0,.35);
+  }
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  background:var(--bg);
+  background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);
+  background-size:24px 24px;
+  color:var(--ink);
+  font:16px/1.5 "Segoe UI",-apple-system,"Helvetica Neue",Arial,sans-serif;
+  min-height:100vh;
+}
+.wrap{max-width:820px;margin:0 auto;padding:48px 16px 64px}
+h1{font-family:Georgia,"Times New Roman",serif;font-size:38px;margin:0 0 6px;letter-spacing:.2px}
+h1 .zap{color:var(--accent)}
+.sub{color:var(--muted);font-size:15px;margin:0 0 34px}
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(340px,100%),1fr));gap:16px}
+a.card,div.card{
+  display:block;background:var(--surface);border:1px solid var(--line);border-radius:16px;
+  box-shadow:var(--shadow);padding:22px;text-decoration:none;color:var(--ink);
+  transition:transform .12s ease,border-color .12s ease;
+}
+a.card:hover{transform:translateY(-2px);border-color:var(--accent)}
+.card .emo{font-size:30px;line-height:1;margin-bottom:10px;display:block}
+.card .t{font-weight:700;font-size:18px;margin:0 0 6px;text-wrap:balance}
+.card .d{color:var(--muted);font-size:13.5px;margin:0 0 12px}
+.badge{display:inline-block;border-radius:999px;padding:3px 12px;font:700 12px/1.5 "Segoe UI",sans-serif}
+.badge.go{background:var(--accent);color:var(--accent-ink)}
+.badge.soon{background:var(--chip);color:var(--muted);border:1px dashed var(--line)}
+div.card.soon{opacity:.68}
+footer{margin-top:38px;color:var(--muted);font-size:12.5px}
+</style></head><body>
+<div class="wrap">
+  <h1><span class="zap">⚡</span> Подготовка к сессии</h1>
+  <p class="sub">Тренажёры по предметам: вопросы с проверенными ответами и пояснениями. Прогресс сохраняется в браузере.</p>
+  <div class="cards">
+    <a class="card" href="eltech/">
+      <span class="emo">🔌</span>
+      <p class="t">Основы электротехники и электроники</p>
+      <p class="d">171 проверенный вопрос · схемы · формулы · 4 режима тренировки</p>
+      <span class="badge go">Готовиться →</span> <span class="badge prog" data-store="eltech-trainer-v1" style="display:none"></span>
+    </a>
+    <a class="card" href="mmf/">
+      <span class="emo">∫</span>
+      <p class="t">Математические методы физики</p>
+      <p class="d">105 вопросов теста · заучивание порциями · карточки · разбор</p>
+      <span class="badge go">Готовиться →</span> <span class="badge prog" data-store="mmf-trainer-v1" style="display:none"></span>
+    </a>
+    <div class="card soon">
+      <span class="emo">📈</span>
+      <p class="t">Методы математической оптимизации</p>
+      <p class="d">Тренажёр в разработке</p>
+      <span class="badge soon">Скоро</span>
+    </div>
+    <div class="card soon">
+      <span class="emo">🏗️</span>
+      <p class="t">Сопротивление материалов</p>
+      <p class="d">Тренажёр в разработке</p>
+      <span class="badge soon">Скоро</span>
+    </div>
+  </div>
+  <footer>Сделано для подготовки к сессии</footer>
+</div>
+<script>
+/* бейдж «усвоено N» на карточке, если в этом браузере уже начата тренировка */
+document.querySelectorAll('.badge.prog').forEach(function(el){
+  try{
+    var s = JSON.parse(localStorage.getItem(el.dataset.store)||'{}');
+    var l = s.learn||{}, m = 0;
+    for (var k in l) if (l[k] >= 3) m++;
+    if (m > 0){ el.textContent = '✓ усвоено ' + m; el.style.display = 'inline-block';
+      el.style.background = 'var(--accent-soft)'; el.style.color = 'var(--accent)'; }
+  }catch(e){}
+});
+</script>
+</body></html>
