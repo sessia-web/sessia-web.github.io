@@ -624,7 +624,7 @@ function renderQuiz(el){
 }
 
 /* ---------- экзамен: билет 75 вопросов (80% вероятные + 20% полная база), оценки 50/75/90 ---------- */
-var EX_N=75, EX_FROM_ALL=15;
+var EX_N=75, EX_FROM_ALL=15, EX_LIMIT=60*60*1000; /* лимит времени: 1 час */
 function examGrade(right, total){
   var p = 100*right/Math.max(1,total);
   return p>=90 ? 5 : p>=75 ? 4 : p>=50 ? 3 : 2;
@@ -640,16 +640,36 @@ function buildTicket(){
 }
 function startExam(){ killExamTick(); exam={stage:'intro',order:[],pos:0,chosen:[],right:0,t0:0,dur:0,perm:[],saved:false,tick:null}; }
 function beginExam(){
-  exam.order=buildTicket(); exam.pos=0; exam.chosen=[]; exam.right=0; exam.saved=false;
+  exam.order=buildTicket(); exam.pos=0; exam.chosen=[]; exam.right=0; exam.saved=false; exam.timedOut=false;
   exam.stage='run'; exam.t0=Date.now(); makeExamPerm();
-  exam.tick=setInterval(function(){ var el=document.getElementById('extime'); if(el) el.textContent=examTime(); },1000);
+  exam.tick=setInterval(function(){
+    if(exam.stage==='run' && Date.now()-exam.t0>=EX_LIMIT){ finishExam(true); return; }
+    var el=document.getElementById('extime');
+    if(el){ el.textContent=examTime(); el.style.color = (EX_LIMIT-(Date.now()-exam.t0) < 5*60*1000) ? 'var(--bad)' : ''; }
+  },1000);
   render();
 }
 function killExamTick(){ if(exam.tick){ clearInterval(exam.tick); exam.tick=null; } }
 function examTime(){
-  var s=Math.floor(((exam.stage==='run'?Date.now():exam.dur)-exam.t0)/1000);
-  if(exam.stage!=='run') s=Math.floor(exam.dur/1000);
-  var m=Math.floor(s/60); return m+':'+('0'+(s%60)).slice(-2);
+  /* обратный отсчёт при run, затраченное время после */
+  if(exam.stage==='run'){
+    var left=Math.max(0, Math.floor((EX_LIMIT-(Date.now()-exam.t0))/1000));
+    return Math.floor(left/60)+':'+('0'+(left%60)).slice(-2);
+  }
+  var s=Math.floor(exam.dur/1000);
+  return Math.floor(s/60)+':'+('0'+(s%60)).slice(-2);
+}
+function finishExam(timedOut){
+  exam.stage='done'; exam.dur=Math.min(Date.now()-exam.t0, EX_LIMIT); exam.timedOut=!!timedOut; killExamTick();
+  while(exam.chosen.length<exam.order.length) exam.chosen.push(-1); /* без ответа = ошибка */
+  if(!exam.saved){ exam.saved=true;
+    store.exams.push({d:new Date().toISOString().slice(0,16).replace('T',' '), r:exam.right, t:exam.order.length, g:examGrade(exam.right,exam.order.length), sec:Math.floor(exam.dur/1000)});
+    if(store.exams.length>20) store.exams=store.exams.slice(-20);
+    saveStore();
+  }
+  var g=examGrade(exam.right,exam.order.length);
+  if(g>=4){ sndRound(); burst(innerWidth/2,170,g===5?90:50); }
+  render();
 }
 function makeExamPerm(){ var d=DATA[exam.order[exam.pos]]; exam.perm=d?permFor(d):[]; }
 function answerExam(slot){
@@ -660,16 +680,8 @@ function answerExam(slot){
   if(isOkOpt(d,chosen)) exam.right++;
   track(d.n, isOkOpt(d,chosen));
   exam.pos++;
-  if(exam.pos>=exam.order.length){
-    exam.stage='done'; exam.dur=Date.now()-exam.t0; killExamTick();
-    if(!exam.saved){ exam.saved=true;
-      store.exams.push({d:new Date().toISOString().slice(0,16).replace('T',' '), r:exam.right, t:exam.order.length, g:examGrade(exam.right,exam.order.length), sec:Math.floor(exam.dur/1000)});
-      if(store.exams.length>20) store.exams=store.exams.slice(-20);
-      saveStore();
-    }
-    var g=examGrade(exam.right,exam.order.length);
-    if(g>=4){ sndRound(); burst(innerWidth/2,170,g===5?90:50); }
-  } else { makeExamPerm(); }
+  if(exam.pos>=exam.order.length){ finishExam(false); return; }
+  makeExamPerm();
   render();
 }
 function renderExam(el){
@@ -685,6 +697,7 @@ function renderExam(el){
     }
     el.innerHTML='<div class="qcard"><div class="q">🎓 Экзаменационный билет</div>'+
       '<p>'+EX_N+' случайных вопросов'+(t2n?' (80% — ⭐ вероятные, 20% — из полной базы)':' из ⭐ вероятных')+', без повторов внутри билета. Ответ выбирается один раз, правильный НЕ показывается до конца — как на настоящем экзамене.</p>'+
+      '<p><b>⏱ Время: 60 минут.</b> По истечении билет завершится сам, вопросы без ответа засчитаются как ошибки.</p>'+
       '<p><b>Оценка:</b> ≥90% — <b>5</b> · ≥75% — <b>4</b> · ≥50% — <b>3</b> · меньше — 2</p>'+
       '<div class="rowbtns" style="max-width:420px"><button class="btn primary" onclick="beginExam()">Начать билет →</button></div>'+hist+'</div>';
     return;
@@ -696,7 +709,7 @@ function renderExam(el){
       return '<button class="opt" onclick="answerExam('+slot+')"><span class="k">'+(slot+1)+'</span><span>'+d.opts[oi]+'</span></button>';
     }).join('');
     el.innerHTML='<div class="progress"><i style="width:'+pct+'%"></i></div>'+
-      '<div class="meta"><span>вопрос '+(exam.pos+1)+' / '+exam.order.length+'</span><span>⏱ <span id="extime">'+examTime()+'</span></span></div>'+
+      '<div class="meta"><span>вопрос '+(exam.pos+1)+' / '+exam.order.length+'</span><span>⏱ осталось <span id="extime">'+examTime()+'</span></span></div>'+
       '<div class="qcard"><span><span class="badge">№'+d.n+'</span><span class="tag">'+d.sec+'</span>'+tierBadge(d)+'</span>'+
       '<div class="q">'+d.q+'</div>'+qimgHtml(d)+'<div class="opts">'+btns+'</div></div>';
     return;
@@ -705,6 +718,7 @@ function renderExam(el){
   var cls=g===5?'good':(g>=3?'mid':'badv');
   if(exam.stage==='done'){
     el.innerHTML='<div class="result"><div class="big '+cls+'">'+g+'</div>'+
+      (exam.timedOut?'<p style="color:var(--bad);font-weight:700">⏰ Время вышло — билет завершён автоматически</p>':'')+
       '<p>«'+(g===5?'отлично':g===4?'хорошо':g===3?'удовлетворительно':'неудовлетворительно')+'» · верно '+exam.right+' из '+total+' ('+pctr+'%) · время '+examTime()+'</p>'+
       '<div class="rowbtns" style="max-width:560px;margin:0 auto">'+
       (exam.right<total?'<button class="btn badb" onclick="exam.stage=\'review\';render()">Разбор ошибок ('+(total-exam.right)+')</button>':'')+
@@ -719,7 +733,7 @@ function renderExam(el){
     if(isOkOpt(d2,ch)) continue;
     h+='<div class="litem exwrong"><div><span class="badge">№'+d2.n+'</span><span class="tag">'+d2.sec+'</span></div>'+
       '<p class="q">'+d2.q+'</p>'+qimgHtml(d2)+
-      '<div class="errstat">мой ответ: <b class="bad">'+d2.opts[ch]+'</b></div>'+
+      '<div class="errstat">мой ответ: <b class="bad">'+(ch>=0?d2.opts[ch]:'— нет ответа (время вышло)')+'</b></div>'+
       '<div class="errstat">правильный: <b class="okc">'+d2.opts[d2.a-1]+'</b></div>'+
       (d2.note?'<div class="note"><b>Пояснение:</b> '+d2.note+'</div>':'')+'</div>';
   }
