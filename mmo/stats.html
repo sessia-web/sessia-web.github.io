@@ -1,0 +1,95 @@
+<!doctype html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Статистика — Математические методы оптимизации</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E📊%3C/text%3E%3C/svg%3E">
+<style>
+:root{--bg:#F6F7F4;--surface:#FFF;--ink:#20262B;--muted:#66707A;--line:#DDE2E0;--accent:#2B4BB5;--ok:#177A4C;--bad:#B3362E;--chip:#ECEFF3;--shadow:0 1px 2px rgba(24,32,44,.06),0 6px 18px rgba(24,32,44,.07)}
+@media (prefers-color-scheme: dark){:root{--bg:#14181D;--surface:#1D232A;--ink:#E8ECEF;--muted:#98A2AB;--line:#2C343C;--accent:#7C93E8;--ok:#4CC38A;--bad:#E5766C;--chip:#252C34;--shadow:0 1px 2px rgba(0,0,0,.4)}}
+*{box-sizing:border-box}html,body{margin:0;padding:0}
+body{background:var(--bg);color:var(--ink);font:15px/1.5 "Segoe UI",-apple-system,Arial,sans-serif}
+.wrap{max-width:900px;margin:0 auto;padding:24px 14px 60px}
+h1{font-family:Georgia,serif;font-size:26px;margin:0 0 4px}
+.sub{color:var(--muted);font-size:13px;margin:0 0 18px}
+a.back{color:var(--muted);font-size:12.5px;text-decoration:none}
+.cards{display:flex;gap:12px;flex-wrap:wrap;margin:14px 0 20px}
+.c{background:var(--surface);border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow);padding:12px 18px;text-align:center;min-width:120px}
+.c .v{font-family:Georgia,serif;font-size:26px}.c .l{color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.4px}
+.c.g .v{color:var(--ok)}.c.b .v{color:var(--bad)}.c.a .v{color:var(--accent)}
+table{width:100%;border-collapse:collapse;background:var(--surface);border:1px solid var(--line);border-radius:12px;overflow:hidden;box-shadow:var(--shadow)}
+th,td{padding:8px 10px;text-align:left;border-bottom:1px solid var(--line);font-size:13.5px;vertical-align:top}
+th{background:var(--chip);font-size:11.5px;text-transform:uppercase;letter-spacing:.4px;color:var(--muted);cursor:pointer;user-select:none;white-space:nowrap}
+tr:last-child td{border-bottom:0}
+.q{max-width:420px}
+.bar{position:relative;background:var(--chip);border-radius:6px;height:16px;min-width:110px;overflow:hidden}
+.bar i{position:absolute;left:0;top:0;bottom:0;background:var(--bad);opacity:.75;border-radius:6px}
+.bar span{position:relative;font-size:11px;padding-left:6px;line-height:16px;font-variant-numeric:tabular-nums}
+.num{font-variant-numeric:tabular-nums;white-space:nowrap}
+.load{color:var(--muted);padding:30px;text-align:center}
+.mineB{color:var(--bad);font-weight:700}.mineG{color:var(--ok);font-weight:700}
+</style></head><body><div class="wrap">
+<a class="back" href="./">← к тренажёру</a>
+<h1>📊 Статистика</h1>
+<p class="sub">Математические методы оптимизации · группа — анонимные ответы всех, кто занимается на сайте · мои — этот браузер</p>
+<div class="cards" id="cards"></div>
+<div id="tbl" class="load">Загружаю статистику группы…</div>
+<script>
+"use strict";
+var QS = [{"n": 1, "id": "q001", "oldn": 1, "q": "Предприятие выпускает два вида продукции: P1 и P2. Прибыль от реализации одного изделия P1 составляет 20 руб., P2 — 30 руб. Требуется максим"}, {"n": 2, "id": "q002", "oldn": 2, "q": "Цех производит стулья (x1) и столы (x2). Трудоемкость стула — 2 чел.-ч, стола — 6 чел.-ч. Общий фонд времени — 120 чел.-ч. Прибыль: стул — 5"}, {"n": 3, "id": "q003", "oldn": 3, "q": "Как выглядят оценки (Δi) в индексной строке для базисных переменных?"}, {"n": 4, "id": "q004", "oldn": 4, "q": "Какой признак оптимальности опорного плана в задаче минимизации?"}, {"n": 5, "id": "q005", "oldn": 5, "q": "При графическом решении задачи ЛП на максимум линию уровня целевой функции перемещают в направлении:"}, {"n": 6, "id": "q006", "oldn": 6, "q": "Какую форму задачи линейного программирования требует стандартный симплекс-метод?"}, {"n": 7, "id": "q007", "oldn": 7, "q": "Какова теоретическая сложность симплекс-метода в худшем случае?"}, {"n": 8, "id": "q008", "oldn": 8, "q": "Сколько занятых клеток должно быть в невырожденном опорном плане транспортной задачи размером m × n?"}, {"n": 9, "id": "q009", "oldn": 9, "q": "Что является признаком оптимальности опорного плана в транспортной задачи?"}, {"n": 10, "id": "q010", "oldn": 10, "q": "Какой метод служит для проверки оптимальности плана транспортной задачи?"}, {"n": 11, "id": "q011", "oldn": 11, "q": "Чему равно количество базисных переменных в невырожденном плане транспортной задачи с m поставщиками и n потребителями?"}, {"n": 12, "id": "q012", "oldn": 12, "q": "Как проверить оптимальность плана транспортной задачи?"}, {"n": 13, "id": "q013", "oldn": 13, "q": "Что такое вырожденность в транспортной задаче?"}, {"n": 14, "id": "q014", "oldn": 14, "q": "Какая форма задачи линейного программирования называется канонической?"}, {"n": 15, "id": "q015", "oldn": 15, "q": "Где находится оптимальное решение задачи ЛП с двумя переменными, если оно единственно?"}, {"n": 16, "id": "q016", "oldn": 16, "q": "Если в задаче на максимум есть положительная оценка, то текущий план:"}, {"n": 17, "id": "q017", "oldn": 17, "q": "По какому столбцу выбирается переменная, вводимая в базис в задаче максимизации?"}, {"n": 18, "id": "q018", "oldn": 18, "q": "Рекламная кампания использует два канала: ТВ (x1 минут) и интернет (x2 показов). Охват на минуту ТВ — 5000 чел., на 1000 показов в интернете"}, {"n": 19, "id": "q019", "oldn": 19, "q": "Имеется два поставщика (i=1,2) с запасами a1=10, a2=20 и два потребителя (j=1,2) с потребностями b1=15, b2=15. Стоимость перевозки единицы г"}, {"n": 20, "id": "q020", "oldn": 20, "q": "Как называется функция, которую необходимо минимизировать или максимизировать в задаче оптимизации?"}, {"n": 21, "id": "q021", "oldn": 21, "q": "Что такое линейное программирование?"}, {"n": 22, "id": "q022", "oldn": 22, "q": "Как называется область, задаваемая всеми ограничениями задачи оптимизации?"}, {"n": 23, "id": "q023", "oldn": 23, "q": "Какая задача является классическим примером линейного программирования?"}, {"n": 24, "id": "q024", "oldn": 24, "q": "Что такое транспортная задача?"}, {"n": 25, "id": "q025", "oldn": 25, "q": "Что такое метод северо-западного угла в транспортной задаче?"}, {"n": 26, "id": "q026", "oldn": 26, "q": "Что такое потенциалы в транспортной задаче?"}, {"n": 27, "id": "q027", "oldn": 27, "q": "Какое равенство должно выполняться для занятых клеток в методе потенциалов?"}, {"n": 28, "id": "q028", "oldn": 28, "q": "К какому классу сложности относится задача коммивояжера?"}, {"n": 29, "id": "q029", "oldn": 29, "q": "Сколько различных замкнутых маршрутов существует в задаче коммивояжера с n городами?"}, {"n": 30, "id": "q030", "oldn": 30, "q": "Какой метод часто используется для точного решения задачи коммивояжера небольшой размерности?"}, {"n": 31, "id": "q031", "oldn": 31, "q": "Что такое ограничения в задаче оптимизации?"}, {"n": 32, "id": "q032", "oldn": 32, "q": "Какой метод используется для проверки оптимальности плана в транспортной задаче?"}, {"n": 33, "id": "q033", "oldn": 33, "q": "Что такое открытая транспортная задача?"}, {"n": 34, "id": "q034", "oldn": 34, "q": "Как привести открытую транспортную задачу к закрытой?"}, {"n": 35, "id": "q035", "oldn": 35, "q": "Какой алгоритм даёт точное решение задачи коммивояжера?"}, {"n": 36, "id": "q036", "oldn": 36, "q": "Что такое теория принятия решений?"}, {"n": 37, "id": "q037", "oldn": 37, "q": "Что такое критерий в задаче принятия решений?"}, {"n": 38, "id": "q038", "oldn": 38, "q": "Как называется ситуация, когда последствия выбора имеют вероятностный характер?"}, {"n": 39, "id": "q039", "oldn": 39, "q": "Что такое проблемная ситуация в теории принятия решений?"}, {"n": 40, "id": "q040", "oldn": 40, "q": "Какое требование предъявляется к совокупности критериев в задаче принятия решений?"}, {"n": 41, "id": "q041", "oldn": 41, "q": "Что такое скорость обучения в градиентном спуске?"}, {"n": 42, "id": "q042", "oldn": 42, "q": "Что произойдёт при градиентном спуске, если скорость обучения слишком велика?"}, {"n": 43, "id": "q043", "oldn": 43, "q": "Что такое выпуклая функция?"}, {"n": 44, "id": "q044", "oldn": 44, "q": "Какое важное свойство имеет выпуклая функция в задачах оптимизации?"}, {"n": 45, "id": "q045", "oldn": 45, "q": "Что такое многокритериальная оптимизация?"}];
+var GNS = 'sessia-mmo', GAPI = 'https://abacus.jasoncameron.dev', STORE = 'mmo-trainer-v1';
+var mine = {}, mineIdKeys = false;
+try { var s = JSON.parse(localStorage.getItem(STORE)||'{}'); mine = {att: s.att||{}, wrong: s.wrong||{}, learn: s.learn||{}}; mineIdKeys=(s.idkeys===true); } catch(e){ mine = {att:{},wrong:{},learn:{}}; }
+function mkey(q){ return mineIdKeys ? (q.id||String(q.n)) : String(q.oldn||q.n); }
+var G = {};
+function esc(t){ var d = document.createElement('i'); d.textContent = t; return d.innerHTML; }
+function load(){
+  var todo = [];
+  QS.forEach(function(q){ todo.push(['a', q.n, q.oldn||q.n]); todo.push(['w', q.n, q.oldn||q.n]); });
+  var i = 0, act = 0, done = 0;
+  function fin(){ render(); }
+  function one(t){
+    act++;
+    fetch(GAPI + '/get/' + GNS + '/q' + t[2] + t[0]).then(function(r){ return r.ok ? r.json() : null; })
+      .then(function(j){ var o = G[t[1]] || (G[t[1]] = {a:0, w:0}); o[t[0]] = (j && j.value) || 0; })
+      .catch(function(){})
+      .then(function(){ act--; done++; if(done >= todo.length) fin(); else next(); });
+  }
+  function next(){ while(act < 24 && i < todo.length) one(todo[i++]); }
+  if(todo.length) next(); else fin();
+}
+var sortBy = 'grate';
+function render(){
+  var ga = 0, gw = 0, hard = 0;
+  QS.forEach(function(q){ var g = G[q.n]; if(g && g.a){ ga += g.a; gw += g.w; if(g.w/g.a >= 0.4) hard++; } });
+  var myAtt = 0, myW = 0, myM = 0;
+  QS.forEach(function(q){ var k=mkey(q); myAtt += mine.att[k]||0; myW += mine.wrong[k]||0; if((mine.learn[k]||0) >= 3) myM++; });
+  document.getElementById('cards').innerHTML =
+    '<div class="c a"><div class="v">' + ga + '</div><div class="l">ответов группы</div></div>' +
+    '<div class="c b"><div class="v">' + (ga ? Math.round(100*gw/ga) : 0) + '%</div><div class="l">ошибок группы</div></div>' +
+    '<div class="c b"><div class="v">' + hard + '</div><div class="l">сложных (&ge;40%)</div></div>' +
+    '<div class="c"><div class="v">' + myAtt + '</div><div class="l">моих ответов</div></div>' +
+    '<div class="c b"><div class="v">' + myW + '</div><div class="l">моих ошибок</div></div>' +
+    '<div class="c g"><div class="v">' + myM + '</div><div class="l">усвоено мной</div></div>';
+  var rows = QS.slice();
+  function grate(q){ var g = G[q.n]; return (g && g.a) ? g.w/g.a : -1; }
+  function mrate(q){ var k=mkey(q), a = mine.att[k]||0; return a ? (mine.wrong[k]||0)/a : -1; }
+  if(sortBy === 'num') rows.sort(function(x,y){ return x.n - y.n; });
+  else if(sortBy === 'mine') rows.sort(function(x,y){ return mrate(y) - mrate(x) || x.n - y.n; });
+  else rows.sort(function(x,y){ return grate(y) - grate(x) || x.n - y.n; });
+  var h = '<table><thead><tr>' +
+    '<th onclick="sortBy=\'num\';render()">№</th><th>Вопрос</th>' +
+    '<th onclick="sortBy=\'grate\';render()">Группа: ошибки ▾</th>' +
+    '<th onclick="sortBy=\'mine\';render()">Мои</th></tr></thead><tbody>';
+  rows.forEach(function(q){
+    var k=mkey(q), g = G[q.n], a = mine.att[k]||0, w = mine.wrong[k]||0;
+    var gp = (g && g.a) ? Math.round(100*g.w/g.a) : null;
+    h += '<tr><td class="num">' + q.n + '</td><td class="q">' + esc(q.q) + '</td><td>' +
+      (gp === null ? '<span style="color:var(--muted);font-size:12px">нет данных</span>'
+        : '<div class="bar"><i style="width:' + gp + '%"></i><span>' + gp + '% из ' + g.a + '</span></div>') +
+      '</td><td class="num">' + (a ? ('<span class="' + (w ? 'mineB' : 'mineG') + '">' + w + '</span>/' + a) : '—') + '</td></tr>';
+  });
+  h += '</tbody></table>';
+  document.getElementById('tbl').innerHTML = h;
+  document.getElementById('tbl').classList.remove('load');
+}
+render(); load();
+</script>
+</div></body></html>

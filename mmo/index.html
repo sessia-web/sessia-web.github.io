@@ -1,0 +1,854 @@
+<!doctype html><html lang='ru'><head><meta charset='utf-8'><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Тренажёр — математические методы оптимизации</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E📈%3C/text%3E%3C/svg%3E">
+<link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#14181D">
+<style>
+:root{
+  --bg:#F6F7F4; --surface:#FFFFFF; --ink:#20262B; --muted:#66707A; --line:#DDE2E0;
+  --accent:#2B4BB5; --accent-ink:#FFFFFF; --accent-soft:#E9EDFA;
+  --ok:#177A4C; --ok-bg:#E7F4EC; --bad:#B3362E; --bad-bg:#F9EAE8;
+  --chip:#ECEFF3; --grid:rgba(43,75,181,.045); --shadow:0 1px 2px rgba(24,32,44,.06),0 6px 18px rgba(24,32,44,.07);
+}
+@media (prefers-color-scheme: dark){
+  :root{
+    --bg:#14181D; --surface:#1D232A; --ink:#E8ECEF; --muted:#98A2AB; --line:#2C343C;
+    --accent:#7C93E8; --accent-ink:#101625; --accent-soft:#232C42;
+    --ok:#4CC38A; --ok-bg:rgba(76,195,138,.13); --bad:#E5766C; --bad-bg:rgba(229,118,108,.13);
+    --chip:#252C34; --grid:rgba(124,147,232,.05); --shadow:0 1px 2px rgba(0,0,0,.4),0 8px 22px rgba(0,0,0,.35);
+  }
+}
+:root[data-theme="light"]{
+  --bg:#F6F7F4; --surface:#FFFFFF; --ink:#20262B; --muted:#66707A; --line:#DDE2E0;
+  --accent:#2B4BB5; --accent-ink:#FFFFFF; --accent-soft:#E9EDFA;
+  --ok:#177A4C; --ok-bg:#E7F4EC; --bad:#B3362E; --bad-bg:#F9EAE8;
+  --chip:#ECEFF3; --grid:rgba(43,75,181,.045); --shadow:0 1px 2px rgba(24,32,44,.06),0 6px 18px rgba(24,32,44,.07);
+}
+:root[data-theme="dark"]{
+  --bg:#14181D; --surface:#1D232A; --ink:#E8ECEF; --muted:#98A2AB; --line:#2C343C;
+  --accent:#7C93E8; --accent-ink:#101625; --accent-soft:#232C42;
+  --ok:#4CC38A; --ok-bg:rgba(76,195,138,.13); --bad:#E5766C; --bad-bg:rgba(229,118,108,.13);
+  --chip:#252C34; --grid:rgba(124,147,232,.05); --shadow:0 1px 2px rgba(0,0,0,.4),0 8px 22px rgba(0,0,0,.35);
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  background:var(--bg);
+  background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);
+  background-size:24px 24px;
+  color:var(--ink);
+  font:16px/1.5 "Segoe UI",-apple-system,"Helvetica Neue",Arial,sans-serif;
+  min-height:100vh;
+}
+.wrap{max-width:760px;margin:0 auto;padding:20px 16px 64px}
+header.app h1{font-family:Georgia,"Times New Roman",serif;font-size:26px;margin:0 0 2px;letter-spacing:.2px;text-wrap:balance}
+header.app .sub{color:var(--muted);font-size:13.5px;margin:0 0 16px}
+.tabs{display:flex;gap:0;border:1px solid var(--line);border-radius:10px;overflow:hidden;background:var(--surface);width:fit-content;box-shadow:var(--shadow)}
+.tabs button{appearance:none;border:0;background:transparent;color:var(--muted);font:600 14.5px/1 "Segoe UI",sans-serif;padding:11px 18px;cursor:pointer;border-right:1px solid var(--line)}
+.tabs button:last-child{border-right:0}
+.tabs button.on{background:var(--accent);color:var(--accent-ink)}
+.tabs button:focus-visible,.chip:focus-visible,.btn:focus-visible,.opt:focus-visible,.card3d:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.filters{display:flex;flex-wrap:wrap;gap:8px;margin:14px 0 6px;align-items:center}
+.chip{appearance:none;border:1px solid var(--line);background:var(--chip);color:var(--ink);border-radius:999px;padding:7px 14px;font:500 13px/1 "Segoe UI",sans-serif;cursor:pointer}
+.chip.on{background:var(--accent-soft);border-color:var(--accent);color:var(--accent);font-weight:700}
+.stats{margin-left:auto;color:var(--muted);font:500 12.5px/1.2 Consolas,ui-monospace,monospace;font-variant-numeric:tabular-nums}
+main{margin-top:14px}
+.progress{height:5px;background:var(--chip);border-radius:99px;overflow:hidden;margin:0 0 14px}
+.progress i{display:block;height:100%;background:var(--accent);border-radius:99px;transition:width .25s ease}
+.meta{display:flex;justify-content:space-between;align-items:baseline;color:var(--muted);font:500 13px/1.3 Consolas,ui-monospace,monospace;font-variant-numeric:tabular-nums;margin-bottom:10px;gap:12px;flex-wrap:wrap}
+.badge{display:inline-block;background:var(--accent);color:var(--accent-ink);border-radius:6px;padding:1px 8px;font:700 12.5px/1.5 Consolas,monospace;margin-right:8px;vertical-align:1px}
+.tag{color:var(--muted);font-size:12px;letter-spacing:.4px;text-transform:uppercase}
+/* flashcard */
+.scene{perspective:1400px}
+.card3d{position:relative;display:grid;transform-style:preserve-3d;transition:transform .45s cubic-bezier(.2,.7,.3,1);cursor:pointer;border:0;background:transparent;padding:0;text-align:left;width:100%;font:inherit;color:inherit}
+.card3d.flip{transform:rotateY(180deg)}
+@media (prefers-reduced-motion: reduce){.card3d{transition:none}.progress i{transition:none}}
+.face{grid-area:1/1;background:var(--surface);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow);padding:22px 22px 18px;backface-visibility:hidden;-webkit-backface-visibility:hidden;min-height:340px;display:flex;flex-direction:column}
+.face.back{transform:rotateY(180deg)}
+.face .q{font-size:17.5px;font-weight:650;margin:10px 0 12px;text-wrap:balance}
+.face ol{margin:0 0 8px;padding-left:24px;color:var(--muted)}
+.face ol li{margin:5px 0;font-size:14.5px}
+.hint{margin-top:auto;color:var(--muted);font-size:12.5px;text-align:center;padding-top:14px}
+.ansbox{background:var(--ok-bg);border-left:3px solid var(--ok);border-radius:8px;padding:12px 14px;margin:8px 0 10px}
+.ansbox .lbl{color:var(--ok);font-weight:700;font-size:12px;letter-spacing:.6px;text-transform:uppercase}
+.ansbox .txt{font-size:16.5px;font-weight:650;margin-top:4px}
+.note{color:var(--muted);font-size:14px;border-top:1px dashed var(--line);padding-top:10px;margin-top:2px}
+.rowbtns{display:flex;gap:10px;margin-top:14px}
+.btn{appearance:none;border:1px solid var(--line);border-radius:10px;background:var(--surface);color:var(--ink);font:600 15px/1 "Segoe UI",sans-serif;padding:13px 18px;cursor:pointer;flex:1;box-shadow:var(--shadow)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.btn.okb{background:var(--ok-bg);border-color:var(--ok);color:var(--ok)}
+.btn.badb{background:var(--bad-bg);border-color:var(--bad);color:var(--bad)}
+.btn.ghost{background:transparent;box-shadow:none}
+.btn:disabled{opacity:.45;cursor:default}
+kbd{border:1px solid var(--line);border-bottom-width:2px;border-radius:5px;background:var(--chip);padding:0 5px;font:600 11px/1.6 Consolas,monospace;color:var(--muted)}
+math{font-size:1.08em}
+math[display='block']{display:block math;text-align:left;margin:3px 0}
+.opt math[display='block']{margin:1px 0}
+/* fx: конфетти, стрик, фокус */
+#fx{position:fixed;inset:0;pointer-events:none;z-index:99}
+.streak{display:inline-block;background:linear-gradient(135deg,#ff9a3d,#ff5e3a);color:#fff;border-radius:999px;padding:2px 10px;font:700 12.5px/1.5 Consolas,monospace;animation:spop .25s ease}
+@keyframes spop{0%{transform:scale(.6)}70%{transform:scale(1.15)}100%{transform:scale(1)}}
+@keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-7px)}40%{transform:translateX(6px)}60%{transform:translateX(-4px)}80%{transform:translateX(3px)}}
+.qcard.shake{animation:shake .35s ease}
+@media (prefers-reduced-motion: reduce){.qcard.shake{animation:none}.streak{animation:none}}
+#unfocus{display:none;position:fixed;top:10px;right:12px;z-index:100;appearance:none;border:1px solid var(--line);border-radius:999px;background:var(--surface);color:var(--muted);font:600 13px/1 "Segoe UI",sans-serif;padding:8px 14px;cursor:pointer;box-shadow:var(--shadow)}
+body.focusmode header.app h1,body.focusmode header.app .sub,body.focusmode .filters,body.focusmode footer.app{display:none}
+body.focusmode #unfocus{display:block}
+body.focusmode .tabs{margin-bottom:2px}
+/* learn */
+.pips{display:inline-flex;gap:4px;margin-left:10px;vertical-align:1px}
+.pip{width:9px;height:9px;border-radius:50%;border:1.5px solid var(--accent);display:inline-block}
+.pip.f{background:var(--accent)}
+.lstat{display:flex;gap:14px;justify-content:center;margin:14px 0 20px;flex-wrap:wrap}
+.lstat .b{background:var(--chip);border:1px solid var(--line);border-radius:10px;padding:10px 16px;text-align:center;min-width:104px}
+.lstat .b .v{font-family:Georgia,"Times New Roman",serif;font-size:26px;font-variant-numeric:tabular-nums}
+.lstat .b .l{color:var(--muted);font-size:11.5px;letter-spacing:.4px;text-transform:uppercase}
+.lstat .b.g .v{color:var(--ok)} .lstat .b.a .v{color:var(--accent)}
+/* quiz */
+.qcard{background:var(--surface);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow);padding:22px}
+.qcard .q{font-size:17.5px;font-weight:650;margin:10px 0 16px;text-wrap:balance}
+.opts{display:flex;flex-direction:column;gap:9px}
+.opt{appearance:none;text-align:left;border:1.5px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink);font:500 15px/1.45 "Segoe UI",sans-serif;padding:12px 14px;cursor:pointer;display:flex;gap:10px;align-items:flex-start}
+.opt .k{font:700 12.5px/1.7 Consolas,monospace;color:var(--muted);border:1px solid var(--line);border-radius:6px;padding:0 6px;flex:none;margin-top:1px}
+.opt:not(:disabled):hover{border-color:var(--accent)}
+.opt.correct{background:var(--ok-bg);border-color:var(--ok)}
+.opt.correct .k{color:var(--ok);border-color:var(--ok)}
+.opt.wrong{background:var(--bad-bg);border-color:var(--bad)}
+.opt.wrong .k{color:var(--bad);border-color:var(--bad)}
+.opt:disabled{cursor:default;color:var(--ink)}
+.verdict{font-weight:700;margin:14px 0 4px}
+.verdict.good{color:var(--ok)} .verdict.badv{color:var(--bad)}
+/* result */
+.result{background:var(--surface);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow);padding:34px 24px;text-align:center}
+.result .big{font-family:Georgia,"Times New Roman",serif;font-size:56px;line-height:1;font-variant-numeric:tabular-nums}
+.result .big.good{color:var(--ok)} .result .big.mid{color:var(--accent)} .result .big.badv{color:var(--bad)}
+.result p{color:var(--muted);margin:10px 0 20px}
+/* list */
+.listbar{display:flex;gap:8px;margin-bottom:14px}
+.listbar .search{flex:1;margin-bottom:0}
+select.sel{border:1px solid var(--line);border-radius:10px;background:var(--surface);color:var(--ink);font:500 14px/1 "Segoe UI",sans-serif;padding:0 10px;cursor:pointer}
+.errstat{font-size:12.5px;color:var(--muted);margin:2px 0 8px}
+.errstat b.bad{color:var(--bad)} .errstat b.okc{color:var(--ok)}
+.search{width:100%;border:1px solid var(--line);border-radius:10px;background:var(--surface);color:var(--ink);font:500 15px/1 "Segoe UI",sans-serif;padding:12px 14px;margin-bottom:14px}
+.search::placeholder{color:var(--muted)}
+.litem{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px 16px;margin-bottom:10px}
+.litem .q{font-weight:650;margin:0 0 8px}
+.litem ol{margin:0;padding-left:24px}
+.litem ol li{margin:3px 0;font-size:14px;color:var(--muted)}
+.litem ol li.ok{color:var(--ok);font-weight:700}
+.litem .note{margin-top:8px}
+.litem .st{float:right;font-size:11.5px;letter-spacing:.4px;text-transform:uppercase;font-weight:700}
+.litem .st.known{color:var(--ok)} .litem .st.hard{color:var(--bad)}
+footer.app{margin-top:26px;color:var(--muted);font-size:12.5px;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;align-items:center}
+footer.app button{appearance:none;border:0;background:none;color:var(--muted);text-decoration:underline;cursor:pointer;font:inherit;padding:0}
+.empty{text-align:center;color:var(--muted);padding:40px 10px}
+@media (max-width:520px){
+  .wrap{padding:14px 10px 48px}
+  .tabs{width:100%} .tabs button{flex:1;padding:11px 6px}
+  .face{padding:16px 14px 14px;min-height:300px}
+  .qcard{padding:16px 14px}
+  .stats{margin-left:0;width:100%}
+}
+
+.qimg{display:block;max-width:100%;border:1px solid var(--line);border-radius:10px;margin:4px 0 10px;background:#fff}
+.face .qimg{max-height:230px;width:auto;max-width:100%}
+.srcs{color:var(--muted);font-size:11.5px;margin-top:6px}
+.tierb{display:inline-block;border-radius:6px;padding:1px 7px;font:700 11px/1.6 "Segoe UI",sans-serif;background:linear-gradient(135deg,#ff9a3d,#ff5e3a);color:#fff;margin-left:6px;vertical-align:2px}
+.tierb.bank{background:var(--chip);color:var(--muted)}
+.filters .chip:disabled{opacity:.55;cursor:not-allowed}
+.conf-med{color:var(--muted);font-size:11px;margin-left:8px}
+/* формулы «как в тесте» */
+sub{font-size:.72em;line-height:0;vertical-align:-.28em}
+sup{font-size:.72em;line-height:0;vertical-align:.5em}
+.rad{border-top:1.5px solid currentColor;padding:0 .14em 0 .04em;margin-left:-.05em}
+.q,.opt span:last-child,.note,.litem .q,.face .q{font-variant-numeric:tabular-nums}
+.q i,.opt i,.note i,.litem i,.face i,.ansbox i{font-style:italic}
+math{font-size:1.08em;white-space:nowrap}
+.frac{display:inline-flex;flex-direction:column;vertical-align:-0.55em;text-align:center;line-height:1.08;margin:0 .12em;font-size:.94em}
+.frac>span:first-child{border-bottom:1px solid currentColor;padding:0 .22em .05em}
+.frac>span:last-child{padding:.05em .22em 0}
+/* экзамен и повторы */
+.revtag{display:inline-block;background:var(--accent-soft);color:var(--accent);border-radius:6px;padding:1px 8px;font:700 11px/1.6 "Segoe UI",sans-serif;margin-left:8px;vertical-align:2px}
+.exwrong{border-left:3px solid var(--bad)}
+.qcard table,.result table{width:100%;border-collapse:collapse;margin-top:6px}
+.qcard th,.qcard td,.result th,.result td{padding:5px 10px;border-bottom:1px solid var(--line);font-size:13px;text-align:left}
+.qcard th,.result th{color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.4px}
+footer.app span button{white-space:nowrap}
+</style></head><body>
+<div class="wrap">
+  <header class="app">
+    <a id="tohub" href="../" style="display:none;color:var(--muted);font-size:12.5px;text-decoration:none">← все предметы</a>
+    <h1>Тренажёр: математические методы оптимизации</h1>
+    <p class="sub">45 вопросов с реальных экзаменационных материалов · ответы решены независимо дважды и сверены · пояснения к каждому · прогресс сохраняется в браузере</p>
+    <div class="tabs" role="tablist">
+      <button id="tab-learn" class="on" onclick="setMode('learn')">Заучивание</button>
+      <button id="tab-cards" onclick="setMode('cards')">Карточки</button>
+      <button id="tab-quiz" onclick="setMode('quiz')">Тест</button>
+      <button id="tab-exam" onclick="setMode('exam')">🎓 Экзамен</button>
+      <button id="tab-list" onclick="setMode('list')">Разбор</button>
+    </div>
+    <div class="filters">
+      <button class="chip on" id="f-sec-all" onclick="setSec(-1)">Все темы</button>
+<button class="chip" id="f-sec-0" onclick="setSec(0)">Градиентные методы и выпуклость</button><button class="chip" id="f-sec-1" onclick="setSec(1)">Коммивояжёр и сложность</button><button class="chip" id="f-sec-2" onclick="setSec(2)">Линейное программирование</button><button class="chip" id="f-sec-3" onclick="setSec(3)">Основы оптимизации</button><button class="chip" id="f-sec-4" onclick="setSec(4)">Симплекс-метод</button><button class="chip" id="f-sec-5" onclick="setSec(5)">Теория принятия решений</button><button class="chip" id="f-sec-6" onclick="setSec(6)">Транспортная задача</button>
+      <span style="flex-basis:100%;height:0"></span>
+      <button class="chip" id="f-hard" onclick="toggleHard()" title="Только карточки, отмеченные как сложные или ещё не выученные">Только невыученные</button>
+      <button class="chip" id="f-sound" onclick="toggleSound()">🔊 Звук</button>
+      <button class="chip" id="f-focus" onclick="toggleFocus()" title="Скрыть всё лишнее">🎯 Фокус</button>
+      <a class="chip" id="statlink" href="stats.html" style="display:none;text-decoration:none" title="Таблица ошибок — твои и всей группы">📊 Статистика</a>
+      <button class="chip" id="f-theme" onclick="cycleTheme()" title="Тема: авто / светлая / тёмная">🌓 Тема</button>
+      <span class="stats" id="stats"></span>
+    </div>
+  </header>
+  <main id="main"></main>
+  <canvas id="fx"></canvas>
+  <button id="unfocus" onclick="toggleFocus()">✕ выйти из фокуса</button>
+  <footer class="app">
+    <span>Подсказки: <kbd>Пробел</kbd> — перевернуть, <kbd>1</kbd>–<kbd>9</kbd> — ответ, <kbd>→</kbd> — дальше</span>
+    <span>
+      <button onclick="exportProgress()" title="Скопировать код прогресса для переноса на другое устройство">Экспорт прогресса</button> ·
+      <button onclick="importProgress()" title="Вставить код прогресса с другого устройства">Импорт</button> ·
+      <button onclick="resetProgress()">Сбросить прогресс</button>
+    </span>
+  </footer>
+</div>
+<script>
+"use strict";
+var DATA = [{"n": 1, "id": "q001", "q": "Предприятие выпускает два вида продукции: <i>P</i><sub>1</sub> и <i>P</i><sub>2</sub>. Прибыль от реализации одного изделия <i>P</i><sub>1</sub> составляет 20 руб., <i>P</i><sub>2</sub> — 30 руб. Требуется максимизировать общую прибыль. Какая целевая функция соответствует задаче?", "opts": ["<i>Z</i> = 20x<sub>1</sub> + 30x<sub>2</sub> → max", "<i>Z</i> = 30x<sub>1</sub> + 20x<sub>2</sub> → max", "<i>Z</i> = 20x<sub>1</sub> - 30x<sub>2</sub> → max", "<i>Z</i> = <i>x</i><sub>1</sub> + <i>x</i><sub>2</sub> → max"], "a": 1, "sec": "Линейное программирование", "exam": true, "note": "Общая прибыль равна сумме прибылей по видам продукции: 20 руб. за каждое изделие <i>P</i><sub>1</sub> (<i>x</i><sub>1</sub> штук) и 30 руб. за каждое <i>P</i><sub>2</sub> (<i>x</i><sub>2</sub> штук), поэтому <i>Z</i> = 20x<sub>1</sub> + 30x<sub>2</sub> → max. Коэффициенты целевой функции — именно прибыли на единицу, а не трудоемкости."}, {"n": 2, "id": "q002", "q": "Цех производит стулья (<i>x</i><sub>1</sub>) и столы (<i>x</i><sub>2</sub>). Трудоемкость стула — 2 чел.-ч, стола — 6 чел.-ч. Общий фонд времени — 120 чел.-ч. Прибыль: стул — 500 руб., стол — 1500 руб. Как выглядит целевая функция максимизации прибыли?", "opts": ["<i>Z</i> = 500x<sub>1</sub> + 1500x<sub>2</sub> → max", "<i>Z</i> = 1500x<sub>1</sub> + 500x<sub>2</sub> → max", "<i>Z</i> = 2x<sub>1</sub> + 6x<sub>2</sub> → max", "<i>Z</i> = 120x<sub>1</sub> + 120x<sub>2</sub> → max"], "a": 1, "sec": "Линейное программирование", "exam": true, "note": "Целевая функция строится из прибылей на единицу: 500 руб. за стул и 1500 руб. за стол, то есть <i>Z</i> = 500x<sub>1</sub> + 1500x<sub>2</sub> → max. Трудоёмкости (2 и 6 чел.-ч) входят в ограничение 2x<sub>1</sub> + 6x<sub>2</sub> ≤ 120, а не в целевую функцию."}, {"n": 3, "id": "q003", "q": "Как выглядят оценки (Δ<sub>i</sub>) в индексной строке для базисных переменных?", "opts": ["Всегда положительные", "Всегда равны нулю", "Всегда отрицательные", "Могут быть любыми"], "a": 2, "sec": "Симплекс-метод", "exam": true, "note": "Для базисных переменных оценка Δ<sub>j</sub> = <i>z</i><sub>j</sub> − <i>c</i><sub>j</sub> всегда равна нулю: столбец базисной переменной единичный, и при вычислении <i>z</i><sub>j</sub> коэффициент <i>c</i><sub>j</sub> вычитается сам из себя. Это стандартное свойство индексной строки симплекс-таблицы."}, {"n": 4, "id": "q004", "q": "Какой признак оптимальности опорного плана в задаче минимизации?", "opts": ["Все оценки неположительны", "Все оценки неотрицательны", "Все оценки равны нулю", "Хотя бы одна оценка отрицательна"], "a": 1, "sec": "Симплекс-метод", "exam": true, "note": "При оценках Δ<sub>j</sub> = <i>z</i><sub>j</sub> − <i>c</i><sub>j</sub> опорный план задачи минимизации оптимален, когда все оценки неположительны (Δ<sub>j</sub> ≤ 0); положительная оценка означает возможность уменьшить целевую функцию. Это согласуется с конвенцией курса: в транспортной задаче (минимизация) план оптимален при <i>w</i><sub>ij</sub> = <i>u</i><sub>i</sub> + <i>v</i><sub>j</sub> − <i>c</i><sub>ij</sub> ≤ 0.", "conf": "medium"}, {"n": 5, "id": "q005", "q": "При графическом решении задачи ЛП на максимум линию уровня целевой функции перемещают в направлении:", "opts": ["Антиградиента", "Градиента", "Произвольном", "Параллельном оси <i>x</i><sub>1</sub>"], "a": 2, "sec": "Линейное программирование", "exam": true, "note": "Градиент целевой функции указывает направление её наискорейшего возрастания, поэтому при поиске максимума линию уровня сдвигают по градиенту до последней точки касания с областью допустимых решений. Антиградиент используется при минимизации."}, {"n": 6, "id": "q006", "q": "Какую форму задачи линейного программирования требует стандартный симплекс-метод?", "opts": ["Любую", "Каноническую форму (ограничения-равенства, переменные неотрицательны)", "Общую форму с неравенствами любого знака", "Только задачи с двумя переменными"], "a": 2, "sec": "Симплекс-метод", "exam": true, "note": "Стандартный симплекс-метод применяется к задаче в канонической форме: все ограничения — равенства (неравенства приводятся добавлением дополнительных переменных), все переменные неотрицательны."}, {"n": 7, "id": "q007", "q": "Какова теоретическая сложность симплекс-метода в худшем случае?", "opts": ["Полиномиальная", "Экспоненциальная", "Линейная", "Квадратичная"], "a": 2, "sec": "Симплекс-метод", "exam": true, "note": "В худшем случае симплекс-метод требует экспоненциального числа итераций (классический пример Кли–Минти). Полиномиальную разрешимость ЛП обеспечивают метод эллипсоидов и метод внутренней точки, а не симплекс."}, {"n": 8, "id": "q008", "q": "Сколько занятых клеток должно быть в невырожденном опорном плане транспортной задачи размером <i>m</i> × <i>n</i>?", "opts": ["<i>m</i> × <i>n</i>", "<i>m</i> + <i>n</i> + 1", "<i>m</i> + <i>n</i> - 1", "<i>m</i> + <i>n</i>"], "a": 3, "sec": "Транспортная задача", "exam": true, "note": "Система ограничений транспортной задачи содержит <i>m</i> + <i>n</i> уравнений, из которых независимы <i>m</i> + <i>n</i> − 1, поэтому невырожденный опорный план имеет ровно <i>m</i> + <i>n</i> − 1 занятых (базисных) клеток."}, {"n": 9, "id": "q009", "q": "Что является признаком оптимальности опорного плана в транспортной задачи?", "opts": ["Все оценки (Δ<sub>j</sub>) неположительны", "Все оценки (Δ<sub>j</sub>) неотрицательны", "Все оценки равны нулю", "Хотя бы одна оценка отрицательна"], "a": 1, "sec": "Транспортная задача", "exam": true, "note": "По принятой в курсе конвенции оценка свободной клетки равна Δ<sub>ij</sub> = <i>u</i><sub>i</sub> + <i>v</i><sub>j</sub> − <i>c</i><sub>ij</sub>; план оптимален, когда все такие оценки неположительны (Δ<sub>ij</sub> ≤ 0). Если хотя бы одна оценка положительна, план улучшается переносом по циклу.", "conf": "medium"}, {"n": 10, "id": "q010", "q": "Какой метод служит для проверки оптимальности плана транспортной задачи?", "opts": ["Метод северо-западного угла", "Метод минимальной стоимости", "Метод потенциалов", "Метод ветвей и границ"], "a": 3, "sec": "Транспортная задача", "exam": true, "note": "Оптимальность опорного плана транспортной задачи проверяется методом потенциалов: по базисным клеткам находят <i>u</i><sub>i</sub> и <i>v</i><sub>j</sub>, затем оценивают свободные клетки. Северо-западный угол и минимальная стоимость служат лишь для построения начального плана."}, {"n": 11, "id": "q011", "q": "Чему равно количество базисных переменных в невырожденном плане транспортной задачи с <i>m</i> поставщиками и <i>n</i> потребителями?", "opts": ["<i>m</i> + <i>n</i>", "<i>m</i> + <i>n</i> - 1", "<i>m</i> × <i>n</i>", "<i>m</i> + <i>n</i> + 1"], "a": 2, "sec": "Транспортная задача", "exam": true, "note": "Опорный (базисный) невырожденный план транспортной задачи содержит ровно <i>m</i> + <i>n</i> - 1 занятых клеток: система ограничений имеет <i>m</i> + <i>n</i> уравнений, но одно из них линейно зависимо из-за условия баланса."}, {"n": 12, "id": "q012", "q": "Как проверить оптимальность плана транспортной задачи?", "opts": ["Убедиться, что все клетки заполнены", "Вычислить потенциалы и проверить оценки свободных клеток", "Сравнить стоимость с предыдущим планом", "Проверить сумму всех перевозок"], "a": 2, "sec": "Транспортная задача", "exam": true, "note": "Оптимальность проверяется методом потенциалов: для занятых клеток находят потенциалы u_i, v_j из условия u_i + v_j = c_ij, затем вычисляют оценки свободных клеток; если все оценки неотрицательны (нет нарушений), план оптимален."}, {"n": 13, "id": "q013", "q": "Что такое вырожденность в транспортной задаче?", "opts": ["Отсутствие допустимого плана", "Число занятых клеток меньше <i>m</i> + <i>n</i> - 1", "Все стоимости равны нулю", "Запасы равны потребностям"], "a": 2, "sec": "Транспортная задача", "exam": true, "note": "План называется вырожденным, когда число занятых (базисных) клеток меньше <i>m</i> + <i>n</i> - 1; тогда для применения метода потенциалов вводят нулевые поставки в недостающие клетки."}, {"n": 14, "id": "q014", "q": "Какая форма задачи линейного программирования называется канонической?", "opts": ["Все ограничения — неравенства, переменные любого знака", "Все ограничения — равенства, все переменные неотрицательны", "Только ограничения-неравенства и свободные переменные", "Отсутствуют ограничения"], "a": 2, "sec": "Симплекс-метод", "exam": true, "note": "Каноническая форма ЗЛП: все ограничения записаны как равенства (неравенства переводятся добавочными переменными), а все переменные неотрицательны. Именно к такой форме приводят задачу перед симплекс-методом."}, {"n": 15, "id": "q015", "q": "Где находится оптимальное решение задачи ЛП с двумя переменными, если оно единственно?", "opts": ["Внутри допустимого многогранника", "На отрезке между двумя вершинами", "В вершине допустимого многогранника", "В центре многогранника"], "a": 3, "sec": "Линейное программирование", "exam": true, "note": "По основной теореме ЛП экстремум линейной функции на выпуклом многограннике достигается в вершине; если решение единственно, оно находится ровно в одной вершине допустимой области (отрезок между вершинами соответствует бесконечному множеству решений)."}, {"n": 16, "id": "q016", "q": "Если в задаче на максимум есть положительная оценка, то текущий план:", "opts": ["Оптимален", "Не оптимален, можно улучшить", "Вырожден", "Единственен"], "a": 2, "sec": "Симплекс-метод", "exam": true, "note": "Критерий оптимальности в задаче на максимум: все оценки свободных переменных должны быть неположительными. Наличие положительной оценки означает, что целевую функцию ещё можно увеличить, т.е. план не оптимален и его можно улучшить."}, {"n": 17, "id": "q017", "q": "По какому столбцу выбирается переменная, вводимая в базис в задаче максимизации?", "opts": ["По столбцу с наибольшей по модулю отрицательной оценкой", "По столбцу с наибольшей положительной оценкой", "По первому столбцу", "По столбцу с минимальной оценкой"], "a": 2, "sec": "Симплекс-метод", "exam": true, "note": "В задаче максимизации в базис вводят переменную из столбца с наибольшей положительной оценкой — именно она даёт наибольший прирост целевой функции на единицу. Это согласуется с критерием: положительные оценки сигнализируют о возможности улучшения."}, {"n": 18, "id": "q018", "q": "Рекламная кампания использует два канала: ТВ (<i>x</i><sub>1</sub> минут) и интернет (<i>x</i><sub>2</sub> показов). Охват на минуту ТВ — 5000 чел., на 1000 показов в интернете — 2000 чел. Требуется максимизировать суммарный охват. Какая функция правильная?", "opts": ["<i>Z</i> = 5000x<sub>1</sub> + 2000x<sub>2</sub> → max", "<i>Z</i> = 2000x<sub>1</sub> + 5000x<sub>2</sub> → max", "<i>Z</i> = 5000x<sub>1</sub> + 2x<sub>2</sub> → max", "<i>Z</i> = (5000+2000)(<i>x</i><sub>1</sub> + <i>x</i><sub>2</sub>) → max"], "a": 3, "sec": "Линейное программирование", "exam": true, "note": "<i>x</i><sub>2</sub> задан как число показов, а охват равен 2000 чел. на 1000 показов, то есть 2 человека на один показ. Поэтому корректная целевая функция <i>Z</i> = 5000x<sub>1</sub> + 2x<sub>2</sub> → max; коэффициент 2000 при <i>x</i><sub>2</sub> завышал бы охват в 1000 раз.", "conf": "medium"}, {"n": 19, "id": "q019", "q": "Имеется два поставщика (i=1,2) с запасами <i>a</i><sub>1</sub>=10, <i>a</i><sub>2</sub>=20 и два потребителя (j=1,2) с потребностями <i>b</i><sub>1</sub>=15, <i>b</i><sub>2</sub>=15. Стоимость перевозки единицы груза <i>c</i><sub>ij</sub> задана. Какая целевая функция соответствует минимизации затрат?", "opts": ["<i>Z</i> = c11x<sub>11</sub> + c12x<sub>12</sub> + c21x<sub>21</sub> + c22x<sub>22</sub> → min", "<i>Z</i> = c11x<sub>11</sub> + c12x<sub>21</sub> + c21x<sub>12</sub> + c22x<sub>22</sub> → min", "<i>Z</i> = (<i>c</i><sub>11</sub>+<i>c</i><sub>12</sub>)<i>x</i><sub>11</sub> + (<i>c</i><sub>21</sub>+<i>c</i><sub>22</sub>)<i>x</i><sub>22</sub> → min", "<i>Z</i> = (<i>x</i><sub>11</sub>+<i>x</i><sub>12</sub>)(<i>c</i><sub>11</sub>+<i>c</i><sub>12</sub>) + (<i>x</i><sub>21</sub>+<i>x</i><sub>22</sub>)(<i>c</i><sub>21</sub>+<i>c</i><sub>22</sub>) → min"], "a": 1, "sec": "Транспортная задача", "exam": true, "note": "Суммарные затраты равны сумме произведений тарифа <i>c</i><sub>ij</sub> на объём перевозки <i>x</i><sub>ij</sub> по всем парам (<i>i</i>,<i>j</i>): <i>Z</i> = c11x<sub>11</sub> + c12x<sub>12</sub> + c21x<sub>21</sub> + c22x<sub>22</sub> → min. Только в этом варианте индексы тарифов и перевозок согласованы; остальные варианты перемешивают или перемножают их некорректно."}, {"n": 20, "id": "q020", "q": "Как называется функция, которую необходимо минимизировать или максимизировать в задаче оптимизации?", "opts": ["Функция ограничений", "Целевая функция", "Функция распределения", "Производная функция"], "a": 2, "sec": "Основы оптимизации", "exam": true, "note": "Функция, экстремум которой ищется в задаче оптимизации, по определению называется целевой функцией. Ограничения задают лишь допустимое множество, а «функция распределения» и «производная функция» — термины из других областей."}, {"n": 21, "id": "q021", "q": "Что такое линейное программирование?", "opts": ["Раздел математики, изучающий линейные дифференциальные уравнения", "Метод решения задач, в которых целевая функция и ограничения линейны", "Программирование на линейных языках", "Метод решения нелинейных уравнений"], "a": 2, "sec": "Линейное программирование", "exam": true, "note": "Линейное программирование — раздел математической оптимизации, где целевая функция и все ограничения линейны относительно переменных. Именно линейность модели и даёт название методу."}, {"n": 22, "id": "q022", "q": "Как называется область, задаваемая всеми ограничениями задачи оптимизации?", "opts": ["Область определения функции", "Допустимое множество решений", "Область значений функции", "Критическая область"], "a": 2, "sec": "Основы оптимизации", "exam": true, "note": "Совокупность всех точек, удовлетворяющих ограничениям задачи, называется допустимым множеством (допустимой областью) решений. Область определения функции — понятие из анализа, с ограничениями задачи не связанное."}, {"n": 23, "id": "q023", "q": "Какая задача является классическим примером линейного программирования?", "opts": ["Задача коммивояжера", "Транспортная задача", "Задача о рюкзаке", "Задача раскраски графа"], "a": 2, "sec": "Линейное программирование", "exam": true, "note": "Транспортная задача — классический пример задачи линейного программирования: линейная целевая функция (стоимость перевозок) и линейные ограничения по запасам и потребностям. Коммивояжёр, рюкзак и раскраска графа — задачи дискретной (целочисленной) оптимизации, NP-трудные."}, {"n": 24, "id": "q024", "q": "Что такое транспортная задача?", "opts": ["Задача о нахождении кратчайшего пути между городами", "Задача об оптимальной перевозке грузов от поставщиков к потребителям", "Задача о планировании маршрутов общественного транспорта", "Задача о загрузке транспортного средства"], "a": 2, "sec": "Транспортная задача", "exam": true, "note": "Транспортная задача — это задача о составлении оптимального (минимального по стоимости) плана перевозки однородного груза от поставщиков к потребителям с учётом запасов и потребностей."}, {"n": 25, "id": "q025", "q": "Что такое метод северо-западного угла в транспортной задаче?", "opts": ["Метод нахождения оптимального плана перевозок", "Метод построения начального опорного плана путём заполнения таблицы с левого верхнего угла", "Метод проверки оптимальности плана", "Метод решения задачи коммивояжера"], "a": 2, "sec": "Транспортная задача", "exam": true, "note": "Метод северо-западного угла — способ построения начального опорного плана: таблица заполняется, начиная с левой верхней (северо-западной) клетки, без учёта стоимостей. Оптимальность он не гарантирует — план затем улучшают, например методом потенциалов."}, {"n": 26, "id": "q026", "q": "Что такое потенциалы в транспортной задаче?", "opts": ["Объёмы перевозимых грузов", "Числа, сопоставляемые поставщикам и потребителям для проверки оптимальности плана", "Стоимости перевозки единицы груза", "Запасы на складах"], "a": 2, "sec": "Транспортная задача", "exam": true, "note": "Потенциалы <i>U</i><sub>i</sub> и <i>V</i><sub>j</sub> — вспомогательные числа, приписываемые каждому поставщику и потребителю; по ним считают оценки свободных клеток и проверяют оптимальность опорного плана. Объёмы перевозок, тарифы и запасы — это другие элементы задачи."}, {"n": 27, "id": "q027", "q": "Какое равенство должно выполняться для занятых клеток в методе потенциалов?", "opts": ["<i>U</i><sub>i</sub> - <i>V</i><sub>j</sub> = <i>C</i><sub>i<sub>j</sub></sub>", "<i>U</i><sub>i</sub> + <i>V</i><sub>j</sub> = <i>C</i><sub>i<sub>j</sub></sub>", "<i>U</i><sub>i</sub> <i>V</i><sub>j</sub> = <i>C</i><sub>i<sub>j</sub></sub>", "<i>U</i><sub>i</sub> / <i>V</i><sub>j</sub> = <i>C</i><sub>i<sub>j</sub></sub>"], "a": 2, "sec": "Транспортная задача", "exam": true, "note": "В методе потенциалов для каждой занятой (базисной) клетки требуют <i>U</i><sub>i</sub> + <i>V</i><sub>j</sub> = <i>C</i><sub>i<sub>j</sub></sub>; из этой системы и находят сами потенциалы. Оптимальность затем проверяется по свободным клеткам через оценки <i>C</i><sub>i<sub>j</sub></sub> − (<i>U</i><sub>i</sub> + <i>V</i><sub>j</sub>)."}, {"n": 28, "id": "q028", "q": "К какому классу сложности относится задача коммивояжера?", "opts": ["P", "NP-трудная", "co-NP", "Полиномиальная"], "a": 2, "sec": "Коммивояжёр и сложность", "exam": true, "note": "Задача коммивояжера (в оптимизационной постановке) NP-трудная: полиномиального алгоритма не найдено, все точные методы экспоненциальны. Классы P и «полиномиальная» означали бы наличие быстрого алгоритма, что не так."}, {"n": 29, "id": "q029", "q": "Сколько различных замкнутых маршрутов существует в задаче коммивояжера с <i>n</i> городами?", "opts": ["<i>n</i>!", "(<i>n</i>-1)! / 2", "<i>n</i><sup>2</sup>", "2<sup>n</sup>"], "a": 2, "sec": "Коммивояжёр и сложность", "exam": true, "note": "Замкнутый маршрут по <i>n</i> городам можно начать с любого города и пройти в двух направлениях, поэтому различных туров (<i>n</i>−1)!/2 — именно эта формула даётся в лекции как обоснование NP-трудности. <i>n</i>! пересчитывает каждый тур многократно."}, {"n": 30, "id": "q030", "q": "Какой метод часто используется для точного решения задачи коммивояжера небольшой размерности?", "opts": ["Градиентный спуск", "Метод ветвей и границ", "Метод наименьших квадратов", "Симплекс-метод"], "a": 2, "sec": "Коммивояжёр и сложность", "exam": true, "note": "Для точного решения задачи коммивояжера небольшой размерности применяют метод ветвей и границ: он отсекает бесперспективные ветви перебора и гарантирует оптимум. Градиентный спуск и МНК — методы непрерывной оптимизации, симплекс-метод решает задачи ЛП."}, {"n": 31, "id": "q031", "q": "Что такое ограничения в задаче оптимизации?", "opts": ["Условия, которым должно удовлетворять решение", "Переменные, которые можно менять", "Константы модели", "Начальные значения переменных"], "a": 1, "sec": "Основы оптимизации", "exam": true, "note": "Ограничения — это условия (равенства и неравенства), которым обязано удовлетворять допустимое решение задачи. Переменные — то, что мы варьируем, а ограничения задают область допустимых решений."}, {"n": 32, "id": "q032", "q": "Какой метод используется для проверки оптимальности плана в транспортной задаче?", "opts": ["Метод северо-западного угла", "Метод потенциалов", "Метод минимальной стоимости", "Графический метод"], "a": 2, "sec": "Транспортная задача", "exam": true, "note": "Оптимальность опорного плана транспортной задачи проверяется методом потенциалов: для каждой строки и столбца вычисляются потенциалы u_i и v_j, и план оптимален, если оценки всех свободных клеток неотрицательны. Метод северо-западного угла и метод минимальной стоимости служат лишь для построения начального плана."}, {"n": 33, "id": "q033", "q": "Что такое открытая транспортная задача?", "opts": ["Задача, в которой не все маршруты доступны", "Задача, в которой суммарные запасы не равны суммарным потребностям", "Задача с нелинейной целевой функцией", "Задача без ограничений"], "a": 2, "sec": "Транспортная задача", "exam": true, "note": "Открытой (несбалансированной) называется транспортная задача, в которой суммарные запасы поставщиков не равны суммарным потребностям потребителей. При равенстве задача называется закрытой (сбалансированной)."}, {"n": 34, "id": "q034", "q": "Как привести открытую транспортную задачу к закрытой?", "opts": ["Уменьшить количество поставщиков", "Добавить фиктивного поставщика или потребителя", "Изменить стоимости перевозок", "Увеличить все запасы и потребности"], "a": 2, "sec": "Транспортная задача", "exam": true, "note": "Открытую задачу балансируют введением фиктивного поставщика (если запасов не хватает) или фиктивного потребителя (если запасы избыточны) с нулевыми тарифами перевозок, после чего суммарные запасы и потребности совпадают."}, {"n": 35, "id": "q035", "q": "Какой алгоритм даёт точное решение задачи коммивояжера?", "opts": ["Жадный алгоритм", "Алгоритм ближайшего соседа", "Полный перебор всех возможных маршрутов", "Градиентный спуск"], "a": 3, "sec": "Коммивояжёр и сложность", "exam": true, "note": "Гарантированно точное (оптимальное) решение задачи коммивояжера даёт только полный перебор всех маршрутов (или другие точные методы вроде ветвей и границ). Жадный алгоритм и метод ближайшего соседа — эвристики, дающие лишь приближённое решение."}, {"n": 36, "id": "q036", "q": "Что такое теория принятия решений?", "opts": ["Наука о программировании компьютеров", "Дисциплина, разрабатывающая методы обоснованного выбора наилучшего варианта", "Раздел математической статистики", "Теория управления производством"], "a": 2, "sec": "Теория принятия решений", "exam": true, "note": "Теория принятия решений — дисциплина, разрабатывающая методы и модели обоснованного выбора наилучшего (рационального) варианта из множества альтернатив. Программирование, статистика и управление производством — лишь смежные или инструментальные области."}, {"n": 37, "id": "q037", "q": "Что такое критерий в задаче принятия решений?", "opts": ["Ограничение на переменные", "Признак, на основании которого производится оценка вариантов", "Множество допустимых решений", "Метод решения задачи"], "a": 2, "sec": "Теория принятия решений", "exam": true, "note": "Критерий — признак, на основании которого производится оценка, сравнение и выбор вариантов решения (мерило оценки). Ограничения и допустимое множество задают лишь область поиска, а не способ оценки."}, {"n": 38, "id": "q038", "q": "Как называется ситуация, когда последствия выбора имеют вероятностный характер?", "opts": ["Принятие решений в условиях риска", "Принятие решений в условиях определённости", "Принятие решений в условиях полной неопределённости", "Принятие решений в условиях противодействия"], "a": 1, "sec": "Теория принятия решений", "exam": true, "note": "Если последствия выбора имеют вероятностный характер (известны исходы и их вероятности), это принятие решений в условиях риска. При определённости исход известен точно, при неопределённости вероятности неизвестны."}, {"n": 39, "id": "q039", "q": "Что такое проблемная ситуация в теории принятия решений?", "opts": ["Отсутствие математической модели", "Несоответствие между существующим и требуемым состоянием системы", "Наличие нескольких критериев", "Отсутствие вычислительной техники"], "a": 2, "sec": "Теория принятия решений", "exam": true, "note": "Проблемная ситуация — это несоответствие (разрыв) между существующим и требуемым (целевым) состоянием системы, препятствующее достижению цели. Отсутствие модели или техники и многокритериальность сами по себе проблему не определяют."}, {"n": 40, "id": "q040", "q": "Какое требование предъявляется к совокупности критериев в задаче принятия решений?", "opts": ["Субъективность", "Полнота", "Противоречивость", "Неопределённость"], "a": 2, "sec": "Теория принятия решений", "exam": true, "note": "Совокупность критериев должна удовлетворять требованиям полноты, разложимости, неизбыточности и прозрачности. Полнота означает, что набор критериев отражает все существенные аспекты проблемы; противоречивость и субъективность — недостатки, а не требования."}, {"n": 41, "id": "q041", "q": "Что такое скорость обучения в градиентном спуске?", "opts": ["Количество итераций алгоритма", "Величина шага в направлении антиградиента", "Скорость вычисления градиента", "Количество переменных в задаче"], "a": 2, "sec": "Градиентные методы и выпуклость", "exam": true, "note": "Скорость обучения (learning rate) — это коэффициент, задающий величину шага, на который смещается точка в направлении антиградиента на каждой итерации градиентного спуска. Число итераций и скорость вычислений к этому параметру отношения не имеют."}, {"n": 42, "id": "q042", "q": "Что произойдёт при градиентном спуске, если скорость обучения слишком велика?", "opts": ["Алгоритм будет сходиться быстрее", "Алгоритм может расходиться или колебаться", "Алгоритм остановится на первом шаге", "Алгоритм найдёт точное решение"], "a": 2, "sec": "Градиентные методы и выпуклость", "exam": true, "note": "При слишком большом шаге алгоритм «перепрыгивает» минимум: значения начинают колебаться вокруг него или вовсе расходиться. Быстрая сходимость при чрезмерном шаге не гарантируется, а точного решения метод и так не даёт."}, {"n": 43, "id": "q043", "q": "Что такое выпуклая функция?", "opts": ["Функция, график которой лежит ниже любой хорды", "Функция, график которой лежит не выше хорды, соединяющей любые две точки", "Функция, имеющая только один максимум", "Функция, вторая производная которой отрицательна"], "a": 2, "sec": "Градиентные методы и выпуклость", "exam": true, "note": "По определению функция выпукла, если её график лежит не выше хорды, соединяющей любые две точки графика (<i>f</i>(λx+(1−λ)<i>y</i>) ≤ λf(<i>x</i>)+(1−λ)<i>f</i>(<i>y</i>)); эквивалентно, надграфик — выпуклое множество. Вариант «строго ниже любой хорды» некорректен: концы хорды лежат на графике, а линейная функция совпадает с хордой; отрицательная вторая производная — признак вогнутости."}, {"n": 44, "id": "q044", "q": "Какое важное свойство имеет выпуклая функция в задачах оптимизации?", "opts": ["Имеет множество локальных минимумов", "Любой локальный минимум является глобальным", "Всегда линейна", "Не имеет производной"], "a": 2, "sec": "Градиентные методы и выпуклость", "exam": true, "note": "Ключевое свойство выпуклой функции: любой её локальный минимум является глобальным, поэтому градиентные методы не «застревают» в ложных минимумах. Выпуклая функция не обязана быть линейной и может быть недифференцируемой лишь в отдельных точках."}, {"n": 45, "id": "q045", "q": "Что такое многокритериальная оптимизация?", "opts": ["Оптимизация с большим количеством переменных", "Оптимизация, в которой учитывается несколько целевых функций", "Оптимизация с большим количеством ограничений", "Оптимизация на многопроцессорных системах"], "a": 2, "sec": "Теория принятия решений", "exam": true, "note": "Многокритериальная оптимизация — это задача с несколькими целевыми функциями (критериями), которые нужно учитывать одновременно, обычно через поиск Парето-оптимальных решений. Число переменных или ограничений здесь ни при чём."}];
+var IMGS = [];
+var SECS = ["Градиентные методы и выпуклость", "Коммивояжёр и сложность", "Линейное программирование", "Основы оптимизации", "Симплекс-метод", "Теория принятия решений", "Транспортная задача"];
+
+/* формулы отформатированы на этапе сборки (build_trainer.py) */
+
+/* ---------- storage ---------- */
+function loadStore(){
+  try{ var s = JSON.parse(localStorage.getItem('mmo-trainer-v1')||'{}');
+       return { known:new Set(s.known||[]), hard:new Set(s.hard||[]), learn:(s.learn||{}),
+                sound:(s.sound!==false), best:(s.best||0), att:(s.att||{}), wrong:(s.wrong||{}),
+                exams:(s.exams||[]), mastAt:(s.mastAt||{}), theme:(s.theme||'auto'), idkeys:(s.idkeys===true) }; }
+  catch(e){ return { known:new Set(), hard:new Set(), learn:{}, sound:true, best:0, att:{}, wrong:{}, exams:[], mastAt:{}, theme:'auto', idkeys:false }; }
+}
+function saveStore(){
+  try{ localStorage.setItem('mmo-trainer-v1', JSON.stringify({known:[...store.known], hard:[...store.hard], learn:store.learn, sound:store.sound, best:store.best, att:store.att, wrong:store.wrong, exams:store.exams, mastAt:store.mastAt, theme:store.theme, idkeys:store.idkeys})); }catch(e){}
+}
+var QKEY={}, STATKEY={}, LEGACYKEY={};
+DATA.forEach(function(d){ QKEY[d.n]=d.id||String(d.n); STATKEY[d.n]=d.oldn||d.n; LEGACYKEY[String(d.oldn||d.n)]=d.id||String(d.n); });
+function qkey(n){ return QKEY[n]||String(n); }
+function statkey(n){ return STATKEY[n]||n; }
+function migrateStoreIds(){
+  if(store.idkeys) return;
+  function mapSet(source){ var out=new Set(); source.forEach(function(k){ out.add(LEGACYKEY[String(k)]||String(k)); }); return out; }
+  function mapObj(source,mode){
+    var out={}; Object.keys(source||{}).forEach(function(k){
+      var nk=LEGACYKEY[String(k)]||String(k), v=Number(source[k])||0;
+      out[nk]=mode==='sum'?(out[nk]||0)+v:Math.max(out[nk]||0,v);
+    }); return out;
+  }
+  store.known=mapSet(store.known); store.hard=mapSet(store.hard);
+  store.learn=mapObj(store.learn,'max'); store.mastAt=mapObj(store.mastAt,'max');
+  store.att=mapObj(store.att,'sum'); store.wrong=mapObj(store.wrong,'sum');
+  store.hard.forEach(function(k){ store.known.delete(k); });
+  store.idkeys=true; saveStore();
+}
+/* ---------- перенос прогресса между устройствами ---------- */
+function exportProgress(){
+  try{
+    var raw = localStorage.getItem('mmo-trainer-v1')||'{}';
+    var code = 'MMO1.' + btoa(unescape(encodeURIComponent(raw)));
+    var done = function(){ alert('Код прогресса скопирован в буфер.\nНа другом устройстве нажми «Импорт» и вставь его.'); };
+    if(navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(code).then(done, function(){ prompt('Скопируй код вручную:', code); });
+    else prompt('Скопируй код вручную:', code);
+  }catch(e){ alert('Не удалось выполнить экспорт'); }
+}
+function importProgress(){
+  var code = prompt('Вставь код прогресса (начинается с MMO1.):');
+  if(!code) return;
+  try{
+    code = code.trim();
+    if(code.indexOf('MMO1.')===0) code = code.slice(5);
+    var raw = decodeURIComponent(escape(atob(code)));
+    JSON.parse(raw);
+    localStorage.setItem('mmo-trainer-v1', raw);
+    location.reload();
+  }catch(e){ alert('Код не распознан — проверь, что скопирован целиком.'); }
+}
+/* ---------- тема ---------- */
+function applyTheme(){
+  if(store.theme==='auto') document.documentElement.removeAttribute('data-theme');
+  else document.documentElement.setAttribute('data-theme', store.theme);
+  var b=document.getElementById('f-theme');
+  if(b) b.textContent = store.theme==='auto' ? '🌓 Тема' : (store.theme==='light' ? '☀️ Светлая' : '🌙 Тёмная');
+}
+function cycleTheme(){
+  store.theme = store.theme==='auto' ? 'light' : (store.theme==='light' ? 'dark' : 'auto');
+  saveStore(); applyTheme();
+}
+/* ---------- статистика группы (анонимные счётчики) ---------- */
+var GNS='sessia-mmo', GAPI='https://abacus.jasoncameron.dev';
+function track(n, good){
+  var k=qkey(n), sn=statkey(n);
+  store.att[k]=(store.att[k]||0)+1;
+  if(!good) store.wrong[k]=(store.wrong[k]||0)+1;
+  saveStore();
+  try{
+    if(/^https?:$/.test(location.protocol)){
+      fetch(GAPI+'/hit/'+GNS+'/q'+sn+'a').catch(function(){});
+      if(!good) fetch(GAPI+'/hit/'+GNS+'/q'+sn+'w').catch(function(){});
+    }
+  }catch(e){}
+}
+var GSTATS=null, _gload=false;
+function loadGStats(){
+  if(_gload) return; _gload=true;
+  try{ var c=JSON.parse(localStorage.getItem('gstats-cache-'+GNS)||'null');
+       if(c && c.d && Date.now()-c.t < 600000){ GSTATS=c.d; if(mode==='list') render(); return; } }catch(e){}
+  try{
+    var res={}, todo=[];
+    DATA.forEach(function(d){ todo.push(['a',d.n,statkey(d.n)]); todo.push(['w',d.n,statkey(d.n)]); });
+    var i=0, act=0, done=0;
+    function fin(){ GSTATS=res; try{ localStorage.setItem('gstats-cache-'+GNS, JSON.stringify({t:Date.now(), d:res})); }catch(e){} if(mode==='list') render(); }
+    function one(t){
+      act++;
+      fetch(GAPI+'/get/'+GNS+'/q'+t[2]+t[0]).then(function(r){ return r.ok?r.json():null; })
+        .then(function(j){ var o=res[t[1]]||(res[t[1]]={a:0,w:0}); o[t[0]]=(j&&j.value)||0; })
+        .catch(function(){})
+        .then(function(){ act--; done++; if(done>=todo.length) fin(); else next(); });
+    }
+    function next(){ while(act<24 && i<todo.length) one(todo[i++]); }
+    if(todo.length) next(); else fin();
+  }catch(e){}
+}
+function _gs(n){ var g=GSTATS&&GSTATS[n]; return (g&&g.a)?g:null; }
+var store = loadStore();
+migrateStoreIds();
+
+/* ---------- звук/конфетти ---------- */
+var RM = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+var streak=0; var _ac=null;
+function _audio(){ try{ if(!_ac) _ac=new (window.AudioContext||window.webkitAudioContext)(); return _ac; }catch(e){ return null; } }
+function _tone(freq,t0,dur,type,vol){ var ac=_audio(); if(!ac||!store.sound) return; var o=ac.createOscillator(),g=ac.createGain();
+  o.type=type||'sine'; o.frequency.value=freq; g.gain.setValueAtTime(0.0001,ac.currentTime+t0);
+  g.gain.exponentialRampToValueAtTime(vol||0.12,ac.currentTime+t0+0.012); g.gain.exponentialRampToValueAtTime(0.0001,ac.currentTime+t0+dur);
+  o.connect(g); g.connect(ac.destination); o.start(ac.currentTime+t0); o.stop(ac.currentTime+t0+dur+0.05); }
+function sndOk(){ _tone(660,0,.09); _tone(880,.08,.14); }
+function sndBad(){ _tone(196,0,.16,'triangle',0.10); }
+function sndRound(){ _tone(523,0,.10); _tone(659,.09,.10); _tone(784,.18,.10); _tone(1047,.27,.22); }
+var _parts=[], _fxOn=false;
+function burst(x,y,n){ if(RM) return; var cv=document.getElementById('fx'); cv.width=innerWidth; cv.height=innerHeight;
+  var colors=['#ff5e3a','#ff9a3d','#ffd23d','#4cc38a','#5aa2ff','#b07aff'];
+  for(var i=0;i<n;i++){ var a=Math.random()*Math.PI*2,v=3+Math.random()*5;
+    _parts.push({x:x,y:y,vx:Math.cos(a)*v,vy:Math.sin(a)*v-3,g:0.22,life:1,c:colors[i%colors.length],s:3+Math.random()*4,rot:Math.random()*6}); }
+  if(!_fxOn){ _fxOn=true; requestAnimationFrame(_fxTick); } }
+function _fxTick(){ var cv=document.getElementById('fx'),ctx=cv.getContext('2d'); ctx.clearRect(0,0,cv.width,cv.height);
+  _parts=_parts.filter(function(p){return p.life>0;}); if(!_parts.length){ _fxOn=false; return; }
+  _parts.forEach(function(p){ p.x+=p.vx; p.y+=p.vy; p.vy+=p.g; p.life-=0.02; p.rot+=0.1;
+    ctx.save(); ctx.globalAlpha=Math.max(p.life,0); ctx.translate(p.x,p.y); ctx.rotate(p.rot); ctx.fillStyle=p.c; ctx.fillRect(-p.s/2,-p.s/2,p.s,p.s*0.6); ctx.restore(); });
+  requestAnimationFrame(_fxTick); }
+function burstAt(el,n){ if(!el){ burst(innerWidth/2,180,n); return; } var r=el.getBoundingClientRect(); burst(r.left+r.width/2,r.top+r.height/2,n); }
+function toggleSound(){ store.sound=!store.sound; saveStore(); if(store.sound) sndOk(); render(); }
+function toggleFocus(){ document.body.classList.toggle('focusmode'); render(); }
+
+/* ---------- state ---------- */
+var mode='learn', tier=0, secIdx=-1, onlyHard=false;
+var cards={order:[],pos:0,flip:false,sesKnown:0,sesHard:0};
+var quiz={order:[],pos:0,right:0,wrong:0,answered:false,mistakes:[],perm:[]};
+var exam={stage:'intro',order:[],pos:0,chosen:[],right:0,t0:0,dur:0,perm:[],saved:false,tick:null};
+var searchQ='';
+
+function pool(){
+  var idx=[];
+  for(var i=0;i<DATA.length;i++){
+    var d=DATA[i];
+    if(tier===1 && !d.exam) continue;
+    if(secIdx>=0 && d.sec!==SECS[secIdx]) continue;
+    idx.push(i);
+  }
+  return idx;
+}
+function shuffle(a){ a=a.slice(); for(var i=a.length-1;i>0;i--){ var j=Math.floor(Math.random()*(i+1)); var t=a[i];a[i]=a[j];a[j]=t;} return a; }
+function norm(s){ return String(s).replace(/<[^>]*>/g,'').replace(/[\s;.,]+/g,' ').trim().toLowerCase(); }
+function normCS(s){ return String(s).replace(/<[^>]*>/g,'').replace(/[\s;.,]+/g,' ').trim(); } /* с учётом регистра: Úab и ÚAB — разные! */
+function isOkOpt(d,oi){
+  if(d.aa&&d.aa.indexOf(oi+1)>=0) return true;   /* явные дополнительные корректные ответы */
+  if(d.noshuf) return oi===d.a-1;               /* варианты-картинки: только по номеру */
+  if(oi===d.a-1) return true;
+  var a=normCS(d.opts[oi]), b=normCS(d.opts[d.a-1]);
+  return a.length>2 && a===b;                    /* точные текстовые дубли; пустышки не совпадают */
+}
+function okNums(d){ var out=[]; for(var i=0;i<d.opts.length;i++) if(isOkOpt(d,i)) out.push(i+1); return out; }
+function qimgHtml(d,cls){ return d.qi==null?'':'<img class="qimg'+(cls||'')+'" src="'+IMGS[d.qi]+'" alt="схема к вопросу">'; }
+function srcHtml(d){ return d.conf==='medium'?'<div class="srcs"><span class="conf-med">ответ: средняя уверенность</span></div>':''; }
+
+/* ---------- header ---------- */
+function setMode(m){ mode=m; killAuto(); killExamTick(); if(m==='learn') startLearn(); if(m==='cards') startCards(); if(m==='quiz') startQuiz(); if(m==='exam') startExam(); if(m==='list'&&/^https?:$/.test(location.protocol)) loadGStats(); render(); }
+function examFilterLocked(){ return mode==='exam' && exam.stage==='run'; }
+function setTier(t){ if(examFilterLocked()) return; tier=t; killAuto(); if(mode==='learn') startLearn(); if(mode==='cards') startCards(); if(mode==='quiz') startQuiz(); render(); }
+function setSec(s){ if(examFilterLocked()) return; secIdx=s; killAuto(); if(mode==='learn') startLearn(); if(mode==='cards') startCards(); if(mode==='quiz') startQuiz(); render(); }
+function toggleHard(){ onlyHard=!onlyHard; if(mode==='cards') startCards(); render(); }
+function resetProgress(){
+  if(confirm('Сбросить весь прогресс — заучивание, карточки и статистику ответов?')){
+    store.known.clear(); store.hard.clear(); store.learn={}; store.best=0; store.att={}; store.wrong={}; streak=0;
+    saveStore(); killAuto(); if(mode==='learn') startLearn(); if(mode==='cards') startCards(); render();
+  }
+}
+function headerSync(){
+  var ids={learn:'tab-learn',cards:'tab-cards',quiz:'tab-quiz',exam:'tab-exam',list:'tab-list'};
+  Object.keys(ids).forEach(function(k){ document.getElementById(ids[k]).classList.toggle('on',mode===k); });
+  document.getElementById('f-sec-all').classList.toggle('on',secIdx===-1);
+  for(var i=0;i<SECS.length;i++){ var el=document.getElementById('f-sec-'+i); if(el) el.classList.toggle('on',secIdx===i); }
+  var locked=examFilterLocked(), selectors=document.querySelectorAll('[id^="f-tier"],[id^="f-sec"]');
+  for(var si=0;si<selectors.length;si++) selectors[si].disabled=locked;
+  document.getElementById('f-hard').classList.toggle('on',onlyHard);
+  var snd=document.getElementById('f-sound');
+  snd.textContent=store.sound?'🔊 Звук':'🔇 Звук'; snd.classList.toggle('on',store.sound);
+  document.getElementById('f-focus').classList.toggle('on',document.body.classList.contains('focusmode'));
+  var p=pool(), txt;
+  if(mode==='learn'){ var m=p.filter(function(i){return lsc(DATA[i].n)>=NEED;}).length; txt='усвоено '+m+' / '+p.length; }
+  else { var kn=p.filter(function(i){return store.known.has(qkey(DATA[i].n));}).length; txt='выучено '+kn+' / '+p.length; }
+  document.getElementById('stats').textContent=txt;
+}
+
+/* ---------- learn ---------- */
+var NEED=3, PORTION=10;
+var learn={queue:[],pos:0,roundNum:0,answered:false,chosen:-1,good:false,perm:[],autoT:null,autoTok:0,justWrong:false,sessAns:0,sessOk:0,celebrated:false};
+function lsc(n){ return store.learn[qkey(n)]||0; }
+function killAuto(){ if(learn.autoT){ clearTimeout(learn.autoT); learn.autoT=null; } learn.autoTok++; }
+function startLearn(){ learn.roundNum=0; learn.sessAns=0; learn.sessOk=0; learn.celebrated=false; buildRound(); }
+var REVIEW_AFTER=2*86400000; /* усвоенное возвращается на повтор через 2 дня */
+function dueReviews(){
+  var due=[], now=Date.now();
+  pool().forEach(function(i){ var n=DATA[i].n;
+    if(lsc(n)>=NEED && now-(store.mastAt[qkey(n)]||0)>REVIEW_AFTER) due.push(i); });
+  return due;
+}
+function buildRound(){
+  killAuto();
+  var groups={0:[],1:[],2:[]};
+  pool().forEach(function(i){ var s=lsc(DATA[i].n); if(s<NEED) groups[Math.min(s,2)].push(i); });
+  var ordered=shuffle(groups[0]).concat(shuffle(groups[1])).concat(shuffle(groups[2]));
+  /* интервальные повторения: до 2 давно усвоенных вопросов подмешиваются в порцию */
+  var rev=shuffle(dueReviews()).slice(0, ordered.length?2:0);
+  learn.reviewSet={}; rev.forEach(function(i){ learn.reviewSet[i]=1; });
+  learn.queue=shuffle(ordered.slice(0,Math.max(0,PORTION-rev.length)).concat(rev));
+  learn.pos=0; learn.answered=false; learn.good=false;
+  if(learn.queue.length) learn.roundNum++;
+  makeLearnPerm();
+}
+function buildReviewRound(){
+  killAuto();
+  var rev=shuffle(dueReviews()).slice(0,PORTION);
+  learn.reviewSet={}; rev.forEach(function(i){ learn.reviewSet[i]=1; });
+  learn.queue=rev; learn.pos=0; learn.answered=false; learn.good=false;
+  if(learn.queue.length) learn.roundNum++;
+  makeLearnPerm(); render();
+}
+function permFor(d){ var idx=d.opts.map(function(_,i){return i;}); return d.noshuf?idx:shuffle(idx); }
+function makeLearnPerm(){ var d=DATA[learn.queue[learn.pos]]; learn.perm=d?permFor(d):[]; }
+function answerLearn(slot, el){
+  if(learn.answered || learn.pos>=learn.queue.length) return;
+  var d=DATA[learn.queue[learn.pos]];
+  if(slot>=learn.perm.length) return;
+  var chosen=learn.perm[slot];
+  var good=isOkOpt(d,chosen);
+  learn.answered=true; learn.chosen=chosen; learn.good=good;
+  learn.sessAns++; track(d.n, good);
+  var s=lsc(d.n);
+  store.learn[qkey(d.n)]=good?Math.min(NEED,s+1):Math.max(0,s-1);
+  if(good && store.learn[qkey(d.n)]>=NEED) store.mastAt[qkey(d.n)]=Date.now(); /* SRS: отметка усвоения/повтора */
+  if(good){ learn.sessOk++; streak++; if(streak>store.best) store.best=streak;
+    sndOk(); burstAt(el, Math.min(14+streak*2, 44));
+    var tok=++learn.autoTok;
+    learn.autoT=setTimeout(function(){ if(tok===learn.autoTok) nextLearn(); },900);
+  } else { streak=0; learn.justWrong=true; sndBad(); }
+  saveStore(); render();
+}
+function nextLearn(){
+  if(!learn.answered) return;
+  killAuto();
+  if(learn.good){ learn.pos++; }
+  else{ var item=learn.queue.splice(learn.pos,1)[0];
+    var at=Math.min(learn.pos+2+Math.floor(Math.random()*2), learn.queue.length);
+    learn.queue.splice(at,0,item); }
+  learn.answered=false; learn.good=false; makeLearnPerm();
+  if(learn.pos>=learn.queue.length && learn.queue.length){ sndRound(); burst(innerWidth/2,170,70);
+    setTimeout(function(){ burst(innerWidth*0.25,220,35); burst(innerWidth*0.75,220,35); },220); }
+  render();
+}
+function learnCounts(){
+  var p=pool(), m=0, prog=0, fresh=0, sum=0;
+  p.forEach(function(i){ var s=lsc(DATA[i].n); sum+=Math.min(s,NEED);
+    if(s>=NEED) m++; else if(s>0) prog++; else fresh++; });
+  return {total:p.length, mastered:m, inprog:prog, fresh:fresh, pct:p.length?Math.round(100*sum/(NEED*p.length)):0};
+}
+function pips(s){
+  var h='<span class="pips" title="верных ответов: '+Math.min(s,NEED)+' из '+NEED+'">';
+  for(var i=0;i<NEED;i++) h+='<span class="pip'+(i<s?' f':'')+'"></span>';
+  return h+'</span>';
+}
+function tierBadge(d){ return ''; }
+function renderLearn(el){
+  var c=learnCounts();
+  if(!c.total){ el.innerHTML='<div class="empty">В этой подборке нет вопросов.</div>'; return; }
+  if(!learn.queue.length && c.mastered<c.total) buildRound();
+  if(c.mastered>=c.total){
+    if(!learn.celebrated){ learn.celebrated=true; sndRound(); burst(innerWidth/2,160,90);
+      setTimeout(function(){ burst(innerWidth*0.3,240,45); burst(innerWidth*0.7,240,45); },300); }
+    var due=dueReviews();
+    el.innerHTML='<div class="result"><div class="big good">🎉 100%</div>'+
+      '<p>Все '+c.total+' вопросов усвоены — на каждый дано по '+NEED+' верных ответа. Готов к экзамену!</p>'+
+      '<div class="rowbtns" style="max-width:460px;margin:0 auto">'+
+      (due.length?'<button class="btn primary" onclick="buildReviewRound()">🔁 Повторить давно усвоенные ('+due.length+')</button>':'')+
+      '<button class="btn" onclick="if(confirm(\'Начать заучивание заново?\')){pool().forEach(function(i){delete store.learn[qkey(DATA[i].n)];});saveStore();startLearn();render();}">Пройти заново</button>'+
+      '</div></div>';
+    return;
+  }
+  if(learn.pos>=learn.queue.length){
+    var acc=learn.sessAns?Math.round(100*learn.sessOk/learn.sessAns):0;
+    el.innerHTML='<div class="progress"><i style="width:'+c.pct+'%"></i></div>'+
+      '<div class="result"><div class="big mid">Порция '+learn.roundNum+' пройдена</div>'+
+      '<div class="lstat">'+
+      '<div class="b g"><div class="v">'+c.mastered+'</div><div class="l">усвоено</div></div>'+
+      '<div class="b a"><div class="v">'+c.inprog+'</div><div class="l">в процессе</div></div>'+
+      '<div class="b"><div class="v">'+c.fresh+'</div><div class="l">не начато</div></div>'+
+      '<div class="b"><div class="v">'+acc+'%</div><div class="l">точность</div></div>'+
+      '</div>'+
+      '<p>общий прогресс — '+c.pct+'% · рекорд серии 🔥 '+store.best+'</p>'+
+      '<div class="rowbtns" style="max-width:420px;margin:0 auto">'+
+      '<button class="btn primary" onclick="buildRound();render()">Следующая порция →</button>'+
+      '</div></div>';
+    return;
+  }
+  var d=DATA[learn.queue[learn.pos]];
+  var btns=learn.perm.map(function(oi,slot){
+    var cls='opt', dis=learn.answered?' disabled':'';
+    if(learn.answered){ if(isOkOpt(d,oi)) cls+=' correct'; else if(oi===learn.chosen) cls+=' wrong'; }
+    return '<button class="'+cls+'"'+dis+' onclick="answerLearn('+slot+',this)"><span class="k">'+(slot+1)+'</span><span>'+d.opts[oi]+'</span></button>';
+  }).join('');
+  var shake=learn.justWrong?' shake':''; learn.justWrong=false;
+  el.innerHTML=
+    '<div class="progress"><i style="width:'+c.pct+'%"></i></div>'+
+    '<div class="meta"><span>порция '+learn.roundNum+' · вопрос '+(learn.pos+1)+' / '+learn.queue.length+'</span>'+
+    '<span>'+(streak>=2?'<span class="streak">🔥 '+streak+'</span> ':'')+'усвоено '+c.mastered+' из '+c.total+' · '+c.pct+'%</span></div>'+
+    '<div class="qcard'+shake+'"><span><span class="badge">№'+d.n+'</span><span class="tag">'+d.sec+'</span>'+tierBadge(d)+pips(lsc(d.n))+((learn.reviewSet&&learn.reviewSet[learn.queue[learn.pos]])?'<span class="revtag">🔁 повтор</span>':'')+'</span>'+
+    '<div class="q">'+d.q+'</div>'+qimgHtml(d)+'<div class="opts">'+btns+'</div>'+
+    (learn.answered?('<div class="verdict '+(learn.good?'good':'badv')+'">'+
+      (learn.good?'Верно! +1 к усвоению':'Неверно — этот вопрос ещё вернётся в этой порции')+'</div>'+
+      (d.note&&!learn.good?'<div class="note"><b>Пояснение:</b> '+d.note+'</div>':'')):'')+
+    '</div>'+
+    (learn.answered&&!learn.good?'<div class="rowbtns"><button class="btn primary" onclick="nextLearn()">Дальше →</button></div>':'');
+}
+
+/* ---------- flashcards ---------- */
+function cardPool(){
+  var p=pool();
+  if(onlyHard) p=p.filter(function(i){ return !store.known.has(qkey(DATA[i].n)); });
+  return p;
+}
+function startCards(){ cards.order=shuffle(cardPool()); cards.pos=0; cards.flip=false; cards.sesKnown=0; cards.sesHard=0; }
+function markCard(know){
+  var d=DATA[cards.order[cards.pos]];
+  if(know){ store.known.add(qkey(d.n)); store.hard.delete(qkey(d.n)); cards.sesKnown++; }
+  else{ store.hard.add(qkey(d.n)); store.known.delete(qkey(d.n)); cards.sesHard++; }
+  saveStore(); cards.pos++; cards.flip=false; render();
+}
+function flipCard(){ cards.flip=!cards.flip; render(); }
+function renderCards(el){
+  var ord=cards.order;
+  if(!ord.length){ el.innerHTML='<div class="empty">В этой подборке нет карточек — сними фильтр «Только невыученные» или выбери другую тему.</div>'; return; }
+  if(cards.pos>=ord.length){
+    el.innerHTML='<div class="result">'+
+      '<div class="big '+(cards.sesHard===0?'good':'mid')+'">'+cards.sesKnown+' / '+ord.length+'</div>'+
+      '<p>отмечено «знал» за этот круг · «ещё учить» — '+cards.sesHard+'</p>'+
+      '<div class="rowbtns" style="max-width:420px;margin:0 auto">'+
+      '<button class="btn primary" onclick="startCards();render()">Ещё круг</button>'+
+      (cards.sesHard>0?'<button class="btn" onclick="onlyHard=true;startCards();render()">Учить сложные</button>':'')+
+      '</div></div>';
+    return;
+  }
+  var d=DATA[ord[cards.pos]];
+  var opts=d.opts.map(function(o){return '<li>'+o+'</li>';}).join('');
+  var oks=okNums(d), answerLabel=(oks.length>1?'Правильные ответы — варианты ':'Правильный ответ — вариант ')+oks.join(' и ');
+  var pct=Math.round(100*cards.pos/ord.length);
+  el.innerHTML=
+    '<div class="progress"><i style="width:'+pct+'%"></i></div>'+
+    '<div class="meta"><span>карточка '+(cards.pos+1)+' / '+ord.length+'</span><span>знал '+cards.sesKnown+' · учить '+cards.sesHard+'</span></div>'+
+    '<div class="scene"><button class="card3d'+(cards.flip?' flip':'')+'" onclick="flipCard()" aria-label="Перевернуть карточку">'+
+      '<span class="face front"><span><span class="badge">№'+d.n+'</span><span class="tag">'+d.sec+'</span>'+tierBadge(d)+'</span>'+
+        '<span class="q">'+d.q+'</span>'+qimgHtml(d)+'<ol>'+opts+'</ol>'+
+        '<span class="hint">нажми, чтобы увидеть ответ</span></span>'+
+      '<span class="face back"><span><span class="badge">№'+d.n+'</span><span class="tag">'+d.sec+'</span></span>'+
+        '<span class="ansbox"><span class="lbl">'+answerLabel+'</span><span class="txt" style="display:block">'+d.opts[d.a-1]+'</span></span>'+
+        (d.note?'<span class="note"><b>Пояснение:</b> '+d.note+'</span>':'')+
+        '<span class="hint">оцени себя кнопками ниже</span></span>'+
+    '</button></div>'+
+    '<div class="rowbtns">'+
+      '<button class="btn badb" onclick="markCard(false)">Ещё учить</button>'+
+      '<button class="btn okb" onclick="markCard(true)">Знал</button>'+
+    '</div>';
+}
+
+/* ---------- quiz ---------- */
+function startQuiz(){
+  quiz.order=shuffle(pool()); quiz.pos=0; quiz.right=0; quiz.wrong=0; quiz.answered=false; quiz.mistakes=[]; quiz.perm=[];
+  makePerm();
+}
+function startQuizFrom(list){
+  quiz.order=shuffle(list.slice()); quiz.pos=0; quiz.right=0; quiz.wrong=0; quiz.answered=false; quiz.mistakes=[]; quiz.perm=[];
+  makePerm(); render();
+}
+function makePerm(){ var d=DATA[quiz.order[quiz.pos]]; quiz.perm=d?permFor(d):[]; }
+function answer(slot, el){
+  if(quiz.answered || quiz.pos>=quiz.order.length) return;
+  var d=DATA[quiz.order[quiz.pos]];
+  if(slot>=quiz.perm.length) return;
+  var chosen=quiz.perm[slot];
+  var good=isOkOpt(d,chosen);
+  quiz.answered=true; quiz.chosen=chosen;
+  track(d.n, good);
+  if(good){ quiz.right++; streak++; if(streak>store.best){store.best=streak; saveStore();} sndOk(); burstAt(el,16); }
+  else { quiz.wrong++; quiz.mistakes.push(quiz.order[quiz.pos]); streak=0; sndBad(); }
+  quiz.good=good; render();
+}
+function nextQ(){ if(!quiz.answered) return; quiz.pos++; quiz.answered=false; makePerm(); render(); }
+function renderQuiz(el){
+  var ord=quiz.order;
+  if(!ord.length){ el.innerHTML='<div class="empty">Нет вопросов в этой подборке.</div>'; return; }
+  if(quiz.pos>=ord.length){
+    var pct=Math.round(100*quiz.right/ord.length);
+    var cls=pct>=85?'good':(pct>=60?'mid':'badv');
+    el.innerHTML='<div class="result">'+
+      '<div class="big '+cls+'">'+pct+'%</div>'+
+      '<p>верно '+quiz.right+' из '+ord.length+(quiz.mistakes.length?' · ошибки: '+quiz.mistakes.map(function(i){return '№'+DATA[i].n;}).join(', '):'')+'</p>'+
+      '<div class="rowbtns" style="max-width:460px;margin:0 auto">'+
+      (quiz.mistakes.length?'<button class="btn badb" onclick="startQuizFrom(quiz.mistakes)">Повторить ошибки ('+quiz.mistakes.length+')</button>':'')+
+      '<button class="btn primary" onclick="startQuiz();render()">Пройти ещё раз</button>'+
+      '</div></div>';
+    return;
+  }
+  var d=DATA[ord[quiz.pos]];
+  var pct2=Math.round(100*quiz.pos/ord.length);
+  var btns=quiz.perm.map(function(oi,slot){
+    var cls='opt', dis=quiz.answered?' disabled':'';
+    if(quiz.answered){ if(isOkOpt(d,oi)) cls+=' correct'; else if(oi===quiz.chosen) cls+=' wrong'; }
+    return '<button class="'+cls+'"'+dis+' onclick="answer('+slot+',this)"><span class="k">'+(slot+1)+'</span><span>'+d.opts[oi]+'</span></button>';
+  }).join('');
+  el.innerHTML=
+    '<div class="progress"><i style="width:'+pct2+'%"></i></div>'+
+    '<div class="meta"><span>вопрос '+(quiz.pos+1)+' / '+ord.length+'</span><span>верно '+quiz.right+' · ошибки '+quiz.wrong+'</span></div>'+
+    '<div class="qcard"><span><span class="badge">№'+d.n+'</span><span class="tag">'+d.sec+'</span>'+tierBadge(d)+'</span>'+
+    '<div class="q">'+d.q+'</div>'+qimgHtml(d)+'<div class="opts">'+btns+'</div>'+
+    (quiz.answered?('<div class="verdict '+(quiz.good?'good':'badv')+'">'+(quiz.good?'Верно!':'Неверно — правильный ответ подсвечен')+'</div>'+
+      (d.note?'<div class="note"><b>Пояснение:</b> '+d.note+'</div>':'')):'')+
+    '</div>'+
+    '<div class="rowbtns"><button class="btn primary" '+(quiz.answered?'':'disabled')+' onclick="nextQ()">Дальше →</button></div>';
+}
+
+/* ---------- экзамен: билет из выбранной подборки, оценки 50/75/90 ---------- */
+var EX_N=25, EX_LIMIT=30*60*1000; /* лимит времени: 30 минут */
+function examGrade(right, total){
+  var p = 100*right/Math.max(1,total);
+  return p>=90 ? 5 : p>=75 ? 4 : p>=50 ? 3 : 2;
+}
+function buildTicket(){
+  return shuffle(pool()).slice(0, EX_N);
+}
+function startExam(){ killExamTick(); exam={stage:'intro',order:[],pos:0,chosen:[],right:0,t0:0,dur:0,perm:[],saved:false,tick:null}; }
+function beginExam(){
+  exam.order=buildTicket(); exam.pos=0; exam.chosen=[]; exam.right=0; exam.saved=false; exam.timedOut=false;
+  if(!exam.order.length){ exam.stage='intro'; render(); return; }
+  exam.stage='run'; exam.t0=Date.now(); makeExamPerm();
+  exam.tick=setInterval(function(){
+    if(exam.stage==='run' && Date.now()-exam.t0>=EX_LIMIT){ finishExam(true); return; }
+    var el=document.getElementById('extime');
+    if(el){ el.textContent=examTime(); el.style.color = (EX_LIMIT-(Date.now()-exam.t0) < 5*60*1000) ? 'var(--bad)' : ''; }
+  },1000);
+  render();
+}
+function killExamTick(){ if(exam.tick){ clearInterval(exam.tick); exam.tick=null; } }
+function examTime(){
+  /* обратный отсчёт при run, затраченное время после */
+  if(exam.stage==='run'){
+    var left=Math.max(0, Math.floor((EX_LIMIT-(Date.now()-exam.t0))/1000));
+    return Math.floor(left/60)+':'+('0'+(left%60)).slice(-2);
+  }
+  var s=Math.floor(exam.dur/1000);
+  return Math.floor(s/60)+':'+('0'+(s%60)).slice(-2);
+}
+function finishExam(timedOut){
+  exam.stage='done'; exam.dur=Math.min(Date.now()-exam.t0, EX_LIMIT); exam.timedOut=!!timedOut; killExamTick();
+  while(exam.chosen.length<exam.order.length) exam.chosen.push(-1); /* без ответа = ошибка */
+  if(!exam.saved){ exam.saved=true;
+    store.exams.push({d:new Date().toISOString().slice(0,16).replace('T',' '), r:exam.right, t:exam.order.length, g:examGrade(exam.right,exam.order.length), sec:Math.floor(exam.dur/1000)});
+    if(store.exams.length>20) store.exams=store.exams.slice(-20);
+    saveStore();
+  }
+  var g=examGrade(exam.right,exam.order.length);
+  if(g>=4){ sndRound(); burst(innerWidth/2,170,g===5?90:50); }
+  render();
+}
+function makeExamPerm(){ var d=DATA[exam.order[exam.pos]]; exam.perm=d?permFor(d):[]; }
+function answerExam(slot){
+  if(exam.stage!=='run' || slot>=exam.perm.length) return;
+  var d=DATA[exam.order[exam.pos]];
+  var chosen=exam.perm[slot];
+  exam.chosen.push(chosen);
+  if(isOkOpt(d,chosen)) exam.right++;
+  track(d.n, isOkOpt(d,chosen));
+  exam.pos++;
+  if(exam.pos>=exam.order.length){ finishExam(false); return; }
+  makeExamPerm();
+  render();
+}
+function renderExam(el){
+  if(exam.stage==='intro'){
+    var available=pool().length, ticketN=Math.min(EX_N,available);
+    var sourceName='вся база вопросов';
+    var ticketInfo=available
+      ? '<p><b>Количество вопросов в билете: '+ticketN+'.</b> Источник: '+sourceName+'. '+(available>EX_N?'Случайная выборка':'Все доступные вопросы выбранной темы')+' без повторов. Ответ выбирается один раз, правильный НЕ показывается до конца — как на настоящем экзамене.</p>'
+      : '<div class="empty">В выбранном блоке и теме нет вопросов. Выберите другую тему или полную базу.</div>';
+    var startButton=available?'<div class="rowbtns" style="max-width:420px"><button class="btn primary" onclick="beginExam()">Начать билет →</button></div>':'';
+    var hist='';
+    if(store.exams.length){
+      hist='<div style="margin-top:18px"><b>Мои попытки:</b><table style="margin-top:8px"><thead><tr><th>Когда</th><th>Результат</th><th>Оценка</th><th>Время</th></tr></thead><tbody>'+
+        store.exams.slice().reverse().map(function(e){
+          var cls=e.g>=5?'good':(e.g>=4?'mid':(e.g>=3?'mid':'badv'));
+          return '<tr><td class="num">'+e.d+'</td><td class="num">'+e.r+' / '+e.t+'</td><td><b class="'+(e.g>=4?'okc':'bad')+'">'+e.g+'</b></td><td class="num">'+Math.floor(e.sec/60)+':'+('0'+(e.sec%60)).slice(-2)+'</td></tr>';
+        }).join('')+'</tbody></table></div>';
+    }
+    el.innerHTML='<div class="qcard"><div class="q">🎓 Экзаменационный билет</div>'+
+      ticketInfo+
+      '<p><b>⏱ Время: 30 минут.</b> По истечении билет завершится сам, вопросы без ответа засчитаются как ошибки.</p>'+
+      '<p><b>Оценка:</b> ≥90% — <b>5</b> · ≥75% — <b>4</b> · ≥50% — <b>3</b> · меньше — 2</p>'+
+      startButton+hist+'</div>';
+    return;
+  }
+  if(exam.stage==='run'){
+    var d=DATA[exam.order[exam.pos]];
+    var pct=Math.round(100*exam.pos/exam.order.length);
+    var btns=exam.perm.map(function(oi,slot){
+      return '<button class="opt" onclick="answerExam('+slot+')"><span class="k">'+(slot+1)+'</span><span>'+d.opts[oi]+'</span></button>';
+    }).join('');
+    el.innerHTML='<div class="progress"><i style="width:'+pct+'%"></i></div>'+
+      '<div class="meta"><span>вопрос '+(exam.pos+1)+' / '+exam.order.length+'</span><span>⏱ осталось <span id="extime">'+examTime()+'</span></span></div>'+
+      '<div class="qcard"><span><span class="badge">№'+d.n+'</span><span class="tag">'+d.sec+'</span>'+tierBadge(d)+'</span>'+
+      '<div class="q">'+d.q+'</div>'+qimgHtml(d)+'<div class="opts">'+btns+'</div></div>';
+    return;
+  }
+  var total=exam.order.length, g=examGrade(exam.right,total), pctr=Math.round(100*exam.right/total);
+  var cls=g===5?'good':(g>=3?'mid':'badv');
+  if(exam.stage==='done'){
+    el.innerHTML='<div class="result"><div class="big '+cls+'">'+g+'</div>'+
+      (exam.timedOut?'<p style="color:var(--bad);font-weight:700">⏰ Время вышло — билет завершён автоматически</p>':'')+
+      '<p>«'+(g===5?'отлично':g===4?'хорошо':g===3?'удовлетворительно':'неудовлетворительно')+'» · верно '+exam.right+' из '+total+' ('+pctr+'%) · время '+examTime()+'</p>'+
+      '<div class="rowbtns" style="max-width:560px;margin:0 auto">'+
+      (exam.right<total?'<button class="btn badb" onclick="exam.stage=\'review\';render()">Разбор ошибок ('+(total-exam.right)+')</button>':'')+
+      '<button class="btn primary" onclick="beginExam()">Новый билет</button>'+
+      '<button class="btn ghost" onclick="startExam();render()">К истории</button></div></div>';
+    return;
+  }
+  /* review */
+  var h='<div class="meta"><span>разбор ошибок · '+(total-exam.right)+' из '+total+'</span><span><button class="btn ghost" style="padding:6px 12px" onclick="exam.stage=\'done\';render()">← к результату</button></span></div>';
+  for(var i=0;i<exam.order.length;i++){
+    var d2=DATA[exam.order[i]], ch=exam.chosen[i];
+    if(isOkOpt(d2,ch)) continue;
+    h+='<div class="litem exwrong"><div><span class="badge">№'+d2.n+'</span><span class="tag">'+d2.sec+'</span></div>'+
+      '<p class="q">'+d2.q+'</p>'+qimgHtml(d2)+
+      '<div class="errstat">мой ответ: <b class="bad">'+(ch>=0?d2.opts[ch]:'— нет ответа (время вышло)')+'</b></div>'+
+      '<div class="errstat">правильный: <b class="okc">'+d2.opts[d2.a-1]+'</b></div>'+
+      (d2.note?'<div class="note"><b>Пояснение:</b> '+d2.note+'</div>':'')+'</div>';
+  }
+  el.innerHTML=h;
+}
+
+/* ---------- list ---------- */
+var listSort='num';
+function renderList(el){
+  var p=pool();
+  var q=norm(searchQ||'');
+  var sq=searchQ.trim();
+  var items=p.filter(function(i){
+    if(!q) return true;
+    var d=DATA[i];
+    if(/^№?\d+$/.test(sq)) return d.n===parseInt(sq.replace('№',''),10); /* точный номер (в т.ч. ?q=N) */
+    return (norm(d.q).indexOf(q)>=0)||d.opts.some(function(o){return norm(o).indexOf(q)>=0;});
+  });
+  if(listSort==='mine'){
+    items.sort(function(a,b){ return (store.wrong[qkey(DATA[b].n)]||0)-(store.wrong[qkey(DATA[a].n)]||0) || DATA[a].n-DATA[b].n; });
+  } else if(listSort==='group'&&GSTATS){
+    items.sort(function(a,b){
+      var ga=_gs(DATA[a].n), gb=_gs(DATA[b].n);
+      var ra=ga?ga.w/ga.a:-1, rb=gb?gb.w/gb.a:-1;
+      return rb-ra || DATA[a].n-DATA[b].n;
+    });
+  }
+  var html='<div class="listbar"><input class="search" id="searchbox" placeholder="Поиск по тексту вопроса или номеру…" value="'+searchQ.replace(/"/g,'&quot;')+'">'+
+    '<select class="sel" id="lsort" onchange="listSort=this.value;render()">'+
+    '<option value="num"'+(listSort==='num'?' selected':'')+'>по номеру</option>'+
+    '<option value="mine"'+(listSort==='mine'?' selected':'')+'>сначала мои ошибки</option>'+
+    (GSTATS?'<option value="group"'+(listSort==='group'?' selected':'')+'>сначала ошибки группы</option>':'')+
+    '</select></div>'+
+    (_gload&&!GSTATS?'<div class="errstat">загружаю статистику группы…</div>':'');
+  if(!items.length) html+='<div class="empty">Ничего не найдено.</div>';
+  items.forEach(function(i){
+    var d=DATA[i];
+    var st = store.known.has(qkey(d.n))?'<span class="st known">знаю</span>':(store.hard.has(qkey(d.n))?'<span class="st hard">учить</span>':'');
+    var a=store.att[qkey(d.n)]||0, w=store.wrong[qkey(d.n)]||0, g=_gs(d.n);
+    var es='';
+    if(a||g){
+      es='<div class="errstat">';
+      if(a) es+='мои ошибки: <b class="'+(w?'bad':'okc')+'">'+w+'</b> из '+a+' ответов';
+      if(g) es+=(a?' · ':'')+'группа: <b class="'+(g.w/g.a>=0.3?'bad':'okc')+'">'+Math.round(100*g.w/g.a)+'% ошибок</b> ('+g.a+' отв.)';
+      es+='</div>';
+    }
+    html+='<div class="litem">'+st+'<div><span class="badge">№'+d.n+'</span><span class="tag">'+d.sec+'</span>'+tierBadge(d)+'</div>'+
+      '<p class="q">'+d.q+'</p>'+qimgHtml(d)+es+'<ol>'+
+      d.opts.map(function(o,j){return '<li'+(isOkOpt(d,j)?' class="ok"':'')+'>'+o+'</li>';}).join('')+
+      '</ol>'+(d.note?'<div class="note"><b>Пояснение:</b> '+d.note+'</div>':'')+srcHtml(d)+'</div>';
+  });
+  el.innerHTML=html;
+  var sb=document.getElementById('searchbox');
+  sb.addEventListener('input',function(){ searchQ=sb.value; var pos=sb.selectionStart; renderList(el); var nb=document.getElementById('searchbox'); nb.focus(); nb.setSelectionRange(pos,pos); });
+}
+
+/* ---------- root/keys ---------- */
+function render(){
+  headerSync();
+  var el=document.getElementById('main');
+  if(mode==='learn') renderLearn(el);
+  else if(mode==='cards') renderCards(el);
+  else if(mode==='quiz') renderQuiz(el);
+  else if(mode==='exam') renderExam(el);
+  else renderList(el);
+}
+document.addEventListener('keydown',function(e){
+  if(e.target && (e.target.tagName==='INPUT'||e.target.tagName==='TEXTAREA')) return;
+  var k=parseInt(e.key,10);
+  if(mode==='learn'){
+    if(k>=1&&k<=9&&!learn.answered){ answerLearn(k-1, document.querySelectorAll('.opt')[k-1]); }
+    if((e.code==='ArrowRight'||e.code==='Enter')&&learn.answered){ e.preventDefault(); nextLearn(); }
+    if((e.code==='ArrowRight'||e.code==='Enter')&&!learn.answered&&learn.pos>=learn.queue.length&&learn.queue.length){ e.preventDefault(); buildRound(); render(); }
+  } else if(mode==='cards'){
+    if(e.code==='Space'||e.code==='Enter'){ e.preventDefault(); if(cards.pos<cards.order.length) flipCard(); }
+    if(e.key==='1'&&cards.flip) markCard(false);
+    if(e.key==='2'&&cards.flip) markCard(true);
+    if(e.code==='ArrowRight'&&cards.flip) markCard(true);
+  } else if(mode==='quiz'){
+    if(k>=1&&k<=9&&!quiz.answered) answer(k-1, document.querySelectorAll('.opt')[k-1]);
+    if((e.code==='ArrowRight'||e.code==='Enter')&&quiz.answered){ e.preventDefault(); nextQ(); }
+  } else if(mode==='exam'){
+    if(exam.stage==='run'&&k>=1&&k<=9) answerExam(k-1);
+    if(exam.stage==='intro'&&e.code==='Enter'){ e.preventDefault(); beginExam(); }
+  }
+});
+applyTheme();
+/* ?q=N — прямая ссылка на вопрос (открывает Разбор) */
+var _qm=location.search.match(/[?&]q=(\d+)/);
+if(_qm){ mode='list'; searchQ=_qm[1]; if(/^https?:$/.test(location.protocol)) loadGStats(); }
+startLearn();
+render();
+if(/^https?:$/.test(location.protocol)){
+  var _th=document.getElementById('tohub'); if(_th) _th.style.display='inline-block';
+  var _sl=document.getElementById('statlink'); if(_sl) _sl.style.display='inline-block';
+  if('serviceWorker' in navigator){ try{ navigator.serviceWorker.register('/sw.js'); }catch(e){} }
+}
+</script>
+</body></html>
