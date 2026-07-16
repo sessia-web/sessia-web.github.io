@@ -312,12 +312,17 @@ function loadGStats(){
     function fin(){ GSTATS=res; try{ localStorage.setItem('gstats-cache-'+GNS, JSON.stringify({t:Date.now(), d:res})); }catch(e){} if(mode==='list') render(); }
     function one(t){
       act++;
-      fetch(GAPI+'/get/'+GNS+'/q'+t[2]+t[0]).then(function(r){ return r.ok?r.json():null; })
-        .then(function(j){ var o=res[t[1]]||(res[t[1]]={a:0,w:0}); o[t[0]]=(j&&j.value)||0; })
-        .catch(function(){})
-        .then(function(){ act--; done++; if(done>=todo.length) fin(); else next(); });
+      var attempt=0;
+      function fin1(){ act--; done++; if(done>=todo.length) fin(); else next(); }
+      function go(){
+        fetch(GAPI+'/get/'+GNS+'/q'+t[2]+t[0])
+          .then(function(r){ if(r.status===404) return null; if(!r.ok) throw 0; return r.json(); })
+          .then(function(j){ var o=res[t[1]]||(res[t[1]]={a:0,w:0}); o[t[0]]=(j&&j.value)||0; fin1(); })
+          .catch(function(){ attempt++; if(attempt<4){ setTimeout(go, 350*attempt); } else { fin1(); } });
+      }
+      go();
     }
-    function next(){ while(act<24 && i<todo.length) one(todo[i++]); }
+    function next(){ while(act<8 && i<todo.length) one(todo[i++]); }
     if(todo.length) next(); else fin();
   }catch(e){}
 }
