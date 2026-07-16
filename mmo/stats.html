@@ -39,25 +39,31 @@ var mine = {}, mineIdKeys = false;
 try { var s = JSON.parse(localStorage.getItem(STORE)||'{}'); mine = {att: s.att||{}, wrong: s.wrong||{}, learn: s.learn||{}}; mineIdKeys=(s.idkeys===true); } catch(e){ mine = {att:{},wrong:{},learn:{}}; }
 function mkey(q){ return mineIdKeys ? (q.id||String(q.n)) : String(q.oldn||q.n); }
 var G = {};
+var CK = 'gstats-full-' + GNS;
+try { var _c = JSON.parse(localStorage.getItem(CK) || 'null');
+      if(_c && _c.d && Date.now() - _c.t < 3600000){ G = _c.d; } } catch(e){}
 function esc(t){ var d = document.createElement('i'); d.textContent = t; return d.innerHTML; }
 function load(){
   var todo = [];
   QS.forEach(function(q){ todo.push(['a', q.n, q.oldn||q.n]); todo.push(['w', q.n, q.oldn||q.n]); });
   var i = 0, act = 0, done = 0;
-  function fin(){ render(); }
+  function fin(){ try{ localStorage.setItem(CK, JSON.stringify({t: Date.now(), d: G})); }catch(e){} render(); }
   function one(t){
     act++;
     var attempt = 0;
-    function fin1(){ act--; done++; if(done >= todo.length) fin(); else next(); }
+    function fin1(){ act--; done++;
+      if(done % 20 === 0) render();               /* прогрессивная отрисовка */
+      if(done >= todo.length) fin(); else next(); }
     function go(){
       fetch(GAPI + '/get/' + GNS + '/q' + t[2] + t[0])
         .then(function(r){ if(r.status === 404) return null; if(!r.ok) throw 0; return r.json(); })
         .then(function(j){ var o = G[t[1]] || (G[t[1]] = {a:0, w:0}); o[t[0]] = (j && j.value) || 0; fin1(); })
-        .catch(function(){ attempt++; if(attempt < 4){ setTimeout(go, 350 * attempt); } else { fin1(); } });
+        .catch(function(){ attempt++;
+          if(attempt < 6){ setTimeout(go, 500 * attempt + Math.random() * 300); } else { fin1(); } });
     }
     go();
   }
-  function next(){ while(act < 8 && i < todo.length) one(todo[i++]); }
+  function next(){ while(act < 4 && i < todo.length) one(todo[i++]); }
   if(todo.length) next(); else fin();
 }
 var sortBy = 'grate';
