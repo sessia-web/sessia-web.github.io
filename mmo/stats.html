@@ -43,28 +43,37 @@ var CK = 'gstats-full-' + GNS;
 try { var _c = JSON.parse(localStorage.getItem(CK) || 'null');
       if(_c && _c.d && Date.now() - _c.t < 3600000){ G = _c.d; } } catch(e){}
 function esc(t){ var d = document.createElement('i'); d.textContent = t; return d.innerHTML; }
-function load(){
-  var todo = [];
-  QS.forEach(function(q){ todo.push(['a', q.n, q.oldn||q.n]); todo.push(['w', q.n, q.oldn||q.n]); });
+function saveCache(){ try{ localStorage.setItem(CK, JSON.stringify({t: Date.now(), d: G})); }catch(e){} }
+function sweep(keys, onDone){
+  /* бережный обход: 2 потока, пауза между стартами, длинные ретраи под рейт-лимит */
   var i = 0, act = 0, done = 0;
-  function fin(){ try{ localStorage.setItem(CK, JSON.stringify({t: Date.now(), d: G})); }catch(e){} render(); }
+  var BACKOFF = [1500, 4000, 9000, 18000];
   function one(t){
     act++;
     var attempt = 0;
     function fin1(){ act--; done++;
-      if(done % 20 === 0) render();               /* прогрессивная отрисовка */
-      if(done >= todo.length) fin(); else next(); }
+      if(done % 15 === 0){ render(); saveCache(); }
+      if(done >= keys.length){ onDone(); } else { setTimeout(next, 90); } }
     function go(){
       fetch(GAPI + '/get/' + GNS + '/q' + t[2] + t[0])
         .then(function(r){ if(r.status === 404) return null; if(!r.ok) throw 0; return r.json(); })
         .then(function(j){ var o = G[t[1]] || (G[t[1]] = {a:0, w:0}); o[t[0]] = (j && j.value) || 0; fin1(); })
-        .catch(function(){ attempt++;
-          if(attempt < 6){ setTimeout(go, 500 * attempt + Math.random() * 300); } else { fin1(); } });
+        .catch(function(){
+          if(attempt < BACKOFF.length){ setTimeout(go, BACKOFF[attempt++] + Math.random() * 500); }
+          else { fin1(); } });
     }
     go();
   }
-  function next(){ while(act < 4 && i < todo.length) one(todo[i++]); }
-  if(todo.length) next(); else fin();
+  function next(){ while(act < 2 && i < keys.length) one(keys[i++]); }
+  if(keys.length) next(); else onDone();
+}
+function load(){
+  var ka = QS.map(function(q){ return ['a', q.n, q.oldn||q.n]; });
+  sweep(ka, function(){
+    var kw = QS.filter(function(q){ var g = G[q.n]; return g && g.a > 0; })
+               .map(function(q){ return ['w', q.n, q.oldn||q.n]; });
+    sweep(kw, function(){ saveCache(); render(); });
+  });
 }
 var sortBy = 'grate';
 function render(){
