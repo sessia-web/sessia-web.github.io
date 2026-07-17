@@ -1,0 +1,115 @@
+<!doctype html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Статистика — Сопротивление материалов</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E📊%3C/text%3E%3C/svg%3E">
+<style>
+:root{--bg:#F6F7F4;--surface:#FFF;--ink:#20262B;--muted:#66707A;--line:#DDE2E0;--accent:#2B4BB5;--ok:#177A4C;--bad:#B3362E;--chip:#ECEFF3;--shadow:0 1px 2px rgba(24,32,44,.06),0 6px 18px rgba(24,32,44,.07)}
+@media (prefers-color-scheme: dark){:root{--bg:#14181D;--surface:#1D232A;--ink:#E8ECEF;--muted:#98A2AB;--line:#2C343C;--accent:#7C93E8;--ok:#4CC38A;--bad:#E5766C;--chip:#252C34;--shadow:0 1px 2px rgba(0,0,0,.4)}}
+*{box-sizing:border-box}html,body{margin:0;padding:0}
+body{background:var(--bg);color:var(--ink);font:15px/1.5 "Segoe UI",-apple-system,Arial,sans-serif}
+.wrap{max-width:900px;margin:0 auto;padding:24px 14px 60px}
+h1{font-family:Georgia,serif;font-size:26px;margin:0 0 4px}
+.sub{color:var(--muted);font-size:13px;margin:0 0 18px}
+a.back{color:var(--muted);font-size:12.5px;text-decoration:none}
+.cards{display:flex;gap:12px;flex-wrap:wrap;margin:14px 0 20px}
+.c{background:var(--surface);border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow);padding:12px 18px;text-align:center;min-width:120px}
+.c .v{font-family:Georgia,serif;font-size:26px}.c .l{color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.4px}
+.c.g .v{color:var(--ok)}.c.b .v{color:var(--bad)}.c.a .v{color:var(--accent)}
+table{width:100%;border-collapse:collapse;background:var(--surface);border:1px solid var(--line);border-radius:12px;overflow:hidden;box-shadow:var(--shadow)}
+th,td{padding:8px 10px;text-align:left;border-bottom:1px solid var(--line);font-size:13.5px;vertical-align:top}
+th{background:var(--chip);font-size:11.5px;text-transform:uppercase;letter-spacing:.4px;color:var(--muted);cursor:pointer;user-select:none;white-space:nowrap}
+tr:last-child td{border-bottom:0}
+.q{max-width:420px}
+.bar{position:relative;background:var(--chip);border-radius:6px;height:16px;min-width:110px;overflow:hidden}
+.bar i{position:absolute;left:0;top:0;bottom:0;background:var(--bad);opacity:.75;border-radius:6px}
+.bar span{position:relative;font-size:11px;padding-left:6px;line-height:16px;font-variant-numeric:tabular-nums}
+.num{font-variant-numeric:tabular-nums;white-space:nowrap}
+.load{color:var(--muted);padding:30px;text-align:center}
+.mineB{color:var(--bad);font-weight:700}.mineG{color:var(--ok);font-weight:700}
+</style></head><body><div class="wrap">
+<a class="back" href="./">← к тренажёру</a>
+<h1>📊 Статистика</h1>
+<p class="sub">Сопротивление материалов · группа — анонимные ответы всех, кто занимается на сайте · мои — этот браузер</p>
+<div class="cards" id="cards"></div>
+<div id="tbl" class="load">Загружаю статистику группы…</div>
+<script>
+"use strict";
+var QS = [{"n": 1, "id": "q001", "oldn": 1, "q": "Для определения внутренних силовых факторов (внутренних усилий), действующих в сечениях бруса, используется…"}, {"n": 2, "id": "q002", "oldn": 2, "q": "Если упругие свойства материала одинаковы по всем направлениям, то такой материал называется…"}, {"n": 3, "id": "q003", "oldn": 3, "q": "Напряжение - это…."}, {"n": 4, "id": "q004", "oldn": 4, "q": "Сопротивление материалов - это наука о методах расчета брусьев на…"}, {"n": 5, "id": "q005", "oldn": 5, "q": "Гипотеза, в соответствии с которой материал полностью без пустот заполняет объем бруса, называется…."}, {"n": 6, "id": "q006", "oldn": 6, "q": "Материал, прочностные свойства которого одинаковы во всех точках, называется…"}, {"n": 7, "id": "q007", "oldn": 7, "q": "Способность бруса сохранять первоначальную прямолинейную форму равновесия под действием сжимающих внешних сил называется …."}, {"n": 8, "id": "q008", "oldn": 8, "q": "Объект, все три размера которого являются величинами приблизительно одинаковыми, называется…"}, {"n": 9, "id": "q009", "oldn": 9, "q": "Полное напряжение по площадке, на которой нормальное напряжение равно 4 МПа, а касательное - 3 МПа, равно…"}, {"n": 10, "id": "q010", "oldn": 10, "q": "Материал называется изотропным …"}, {"n": 11, "id": "q011", "oldn": 11, "q": "Принцип Сен-Венана заключается в следующем:"}, {"n": 12, "id": "q012", "oldn": 12, "q": "Силы взаимодействия между частями рассматриваемого БРУСА называются…"}, {"n": 13, "id": "q013", "oldn": 13, "q": "Термин, обозначающий изменения формы и размеров бруса, есть…."}, {"n": 14, "id": "q014", "oldn": 14, "q": "Внутренний силовой фактор (внутреннее усилие), возникающий в поперечном сечении бруса при осевом растяжении, называется…."}, {"n": 15, "id": "q015", "oldn": 15, "q": "Что нельзя определить из условий прочности при осевом растяжении и сжатии"}, {"n": 16, "id": "q016", "oldn": 16, "q": "Закон прямопропорциональной зависимости между относительной деформацией и напряжением носит название…."}, {"n": 17, "id": "q017", "oldn": 17, "q": "Чему равна наибольшая продольная сжимающая нагрузка по величине, которую можно приложить к деревянному столбу без нарушения условия прочност"}, {"n": 18, "id": "q018", "oldn": 18, "q": "Размерностью модуля упругости Е является…."}, {"n": 26, "id": "q026", "oldn": 26, "q": "…коэффициентом Пуассона называется…"}, {"n": 27, "id": "q027", "oldn": 27, "q": "При осевом растяжении стержня в его поперечном сечении возникают…"}, {"n": 28, "id": "q028", "oldn": 28, "q": "Напряжение, соответствующее наибольшей нагрузке, выдерживаемой образцом до полного разрушения, называется…."}, {"n": 29, "id": "q029", "oldn": 29, "q": "Пределом прочности (временным сопротивлением) называется…"}, {"n": 30, "id": "q030", "oldn": 30, "q": "Относительное остаточное удлинение стержня δ измеряется в …"}, {"n": 31, "id": "q031", "oldn": 31, "q": "Чистый сдвиг имеет место…"}, {"n": 32, "id": "q032", "oldn": 32, "q": "Максимальный крутящий момент в сечениях вала при М=20 кН·м равен…"}, {"n": 33, "id": "q033", "oldn": 33, "q": "При кручении вала круглого поперечного сечения максимальные касательные напряжения возникают …"}, {"n": 34, "id": "q034", "oldn": 34, "q": "Касательные напряжения, возникающие при кручении в сплошном круглом поперечном сечении вала, изменяются …"}];
+var GNS = 'sessia-sopromat', GAPI = 'https://abacus.jasoncameron.dev', STORE = 'sopromat-trainer-v1';
+var mine = {}, mineIdKeys = false;
+try { var s = JSON.parse(localStorage.getItem(STORE)||'{}'); mine = {att: s.att||{}, wrong: s.wrong||{}, learn: s.learn||{}}; mineIdKeys=(s.idkeys===true); } catch(e){ mine = {att:{},wrong:{},learn:{}}; }
+function mkey(q){ return mineIdKeys ? (q.id||String(q.n)) : String(q.oldn||q.n); }
+var G = {};
+var CK = 'gstats-full-' + GNS;
+try { var _c = JSON.parse(localStorage.getItem(CK) || 'null');
+      if(_c && _c.d && Date.now() - _c.t < 3600000){ G = _c.d; } } catch(e){}
+function esc(t){ var d = document.createElement('i'); d.textContent = t; return d.innerHTML; }
+function saveCache(){ try{ localStorage.setItem(CK, JSON.stringify({t: Date.now(), d: G})); }catch(e){} }
+function sweep(keys, onDone){
+  /* бережный обход: 2 потока, пауза между стартами, длинные ретраи под рейт-лимит */
+  var i = 0, act = 0, done = 0;
+  var BACKOFF = [1500, 4000, 9000, 18000];
+  function one(t){
+    act++;
+    var attempt = 0;
+    function fin1(){ act--; done++;
+      if(done % 15 === 0){ render(); saveCache(); }
+      if(done >= keys.length){ onDone(); } else { setTimeout(next, 90); } }
+    function go(){
+      fetch(GAPI + '/get/' + GNS + '/q' + t[2] + t[0])
+        .then(function(r){ if(r.status === 404) return null; if(!r.ok) throw 0; return r.json(); })
+        .then(function(j){ var o = G[t[1]] || (G[t[1]] = {a:0, w:0}); o[t[0]] = (j && j.value) || 0; fin1(); })
+        .catch(function(){
+          if(attempt < BACKOFF.length){ setTimeout(go, BACKOFF[attempt++] + Math.random() * 500); }
+          else { fin1(); } });
+    }
+    go();
+  }
+  function next(){ while(act < 2 && i < keys.length) one(keys[i++]); }
+  if(keys.length) next(); else onDone();
+}
+function load(){
+  var ka = QS.map(function(q){ return ['a', q.n, q.oldn||q.n]; });
+  sweep(ka, function(){
+    var kw = QS.filter(function(q){ var g = G[q.n]; return g && g.a > 0; })
+               .map(function(q){ return ['w', q.n, q.oldn||q.n]; });
+    sweep(kw, function(){ saveCache(); render(); });
+  });
+}
+var sortBy = 'grate';
+function render(){
+  var ga = 0, gw = 0, hard = 0;
+  QS.forEach(function(q){ var g = G[q.n]; if(g && g.a){ ga += g.a; gw += g.w; if(g.w/g.a >= 0.4) hard++; } });
+  var myAtt = 0, myW = 0, myM = 0;
+  QS.forEach(function(q){ var k=mkey(q); myAtt += mine.att[k]||0; myW += mine.wrong[k]||0; if((mine.learn[k]||0) >= 3) myM++; });
+  document.getElementById('cards').innerHTML =
+    '<div class="c a"><div class="v">' + ga + '</div><div class="l">ответов группы</div></div>' +
+    '<div class="c b"><div class="v">' + (ga ? Math.round(100*gw/ga) : 0) + '%</div><div class="l">ошибок группы</div></div>' +
+    '<div class="c b"><div class="v">' + hard + '</div><div class="l">сложных (&ge;40%)</div></div>' +
+    '<div class="c"><div class="v">' + myAtt + '</div><div class="l">моих ответов</div></div>' +
+    '<div class="c b"><div class="v">' + myW + '</div><div class="l">моих ошибок</div></div>' +
+    '<div class="c g"><div class="v">' + myM + '</div><div class="l">усвоено мной</div></div>';
+  var rows = QS.slice();
+  function grate(q){ var g = G[q.n]; return (g && g.a) ? g.w/g.a : -1; }
+  function mrate(q){ var k=mkey(q), a = mine.att[k]||0; return a ? (mine.wrong[k]||0)/a : -1; }
+  if(sortBy === 'num') rows.sort(function(x,y){ return x.n - y.n; });
+  else if(sortBy === 'mine') rows.sort(function(x,y){ return mrate(y) - mrate(x) || x.n - y.n; });
+  else rows.sort(function(x,y){ return grate(y) - grate(x) || x.n - y.n; });
+  var h = '<table><thead><tr>' +
+    '<th onclick="sortBy=\'num\';render()">№</th><th>Вопрос</th>' +
+    '<th onclick="sortBy=\'grate\';render()">Группа: ошибки ▾</th>' +
+    '<th onclick="sortBy=\'mine\';render()">Мои</th></tr></thead><tbody>';
+  rows.forEach(function(q){
+    var k=mkey(q), g = G[q.n], a = mine.att[k]||0, w = mine.wrong[k]||0;
+    var gp = (g && g.a) ? Math.round(100*g.w/g.a) : null;
+    h += '<tr><td class="num">' + q.n + '</td><td class="q">' + esc(q.q) + '</td><td>' +
+      (gp === null ? '<span style="color:var(--muted);font-size:12px">нет данных</span>'
+        : '<div class="bar"><i style="width:' + gp + '%"></i><span>' + gp + '% из ' + g.a + '</span></div>') +
+      '</td><td class="num">' + (a ? ('<span class="' + (w ? 'mineB' : 'mineG') + '">' + w + '</span>/' + a) : '—') + '</td></tr>';
+  });
+  h += '</tbody></table>';
+  document.getElementById('tbl').innerHTML = h;
+  document.getElementById('tbl').classList.remove('load');
+}
+render(); load();
+</script>
+</div></body></html>
