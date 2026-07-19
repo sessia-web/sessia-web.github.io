@@ -1,0 +1,257 @@
+<!doctype html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Шпаргалка — сопротивление материалов</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E⚡%3C/text%3E%3C/svg%3E"><style>
+:root{--bg:#f6f7f4;--surface:#fff;--ink:#20262b;--muted:#66707a;--line:#dde2e0;--accent:#3156bf;--accent-soft:#e9edfa;--ok:#177a4c;--ok-bg:#e7f4ec;--warn:#9a6200;--warn-bg:#fff3d6;--danger:#b3362e;--chip:#eceff3;--shadow:0 1px 2px rgba(24,32,44,.06),0 6px 18px rgba(24,32,44,.07)}
+@media(prefers-color-scheme:dark){:root{--bg:#14181d;--surface:#1d232a;--ink:#e8ecef;--muted:#98a2ab;--line:#2c343c;--accent:#8ca3f2;--accent-soft:#232c42;--ok:#4cc38a;--ok-bg:rgba(76,195,138,.13);--warn:#e6b45a;--warn-bg:rgba(230,180,90,.12);--danger:#ef766d;--chip:#252c34;--shadow:0 1px 2px rgba(0,0,0,.4)}}
+*{box-sizing:border-box}html{scroll-behavior:smooth}html,body{margin:0;padding:0}body{background:var(--bg);color:var(--ink);font:16px/1.62 "Segoe UI",-apple-system,BlinkMacSystemFont,Arial,sans-serif}.wrap{max-width:900px;margin:0 auto;padding:24px 16px 82px}h1,h2{font-family:Georgia,"Times New Roman",serif}h1{font-size:30px;line-height:1.2;margin:4px 0 5px}h2{font-size:23px;line-height:1.28;margin:0 0 14px;color:var(--accent)}h3{font-size:17px;line-height:1.35;margin:20px 0 7px}h4{font-size:15px;margin:14px 0 5px}p{margin:8px 0}ul,ol{margin:8px 0;padding-left:24px}li{margin:4px 0}a{color:var(--accent)}a.back{color:var(--muted);font-size:13px;text-decoration:none}.sub{color:var(--muted);font-size:13.5px;margin:0 0 20px}.hero-note{background:linear-gradient(135deg,var(--accent-soft),var(--surface));border:1px solid var(--line);border-radius:14px;padding:13px 16px;margin:14px 0 20px}.toc{background:var(--surface);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow);padding:16px 20px;margin-bottom:24px}.toc b{display:block;margin-bottom:8px}.toc a{display:flex;justify-content:space-between;gap:12px;text-decoration:none;padding:4px 0;font-size:14.5px}.toc span{color:var(--muted);font-size:12px;white-space:nowrap}section{background:var(--surface);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow);padding:24px 26px;margin-bottom:18px;scroll-margin-top:12px}.how,.warn,.ex,.cheat{border-radius:9px;padding:11px 15px;margin:11px 0;font-size:15px}.how{background:var(--accent-soft);border-left:3px solid var(--accent)}.warn{background:var(--warn-bg);border-left:3px solid var(--warn)}.ex{background:var(--chip);border:1px solid var(--line)}.cheat{background:var(--ok-bg);border-left:3px solid var(--ok)}.cheat b:first-child{color:var(--ok)}.formula{display:inline-block;background:var(--chip);border:1px solid var(--line);border-radius:6px;padding:1px 7px;font:600 .94em/1.6 Consolas,"Segoe UI",sans-serif;white-space:nowrap}.formula.block{display:block;width:max-content;max-width:100%;margin:8px auto;padding:6px 12px;overflow-x:auto}.muted{color:var(--muted)}.small{font-size:13px}.nowrap{white-space:nowrap}sub{font-size:.72em;line-height:0;vertical-align:-.28em}sup{font-size:.72em;line-height:0;vertical-align:.5em}.table-wrap{overflow-x:auto;margin:10px 0}table{width:100%;border-collapse:collapse;min-width:560px}th,td{padding:7px 10px;border-bottom:1px solid var(--line);font-size:14px;text-align:left;vertical-align:top}th{color:var(--muted);font-size:11.5px;text-transform:uppercase;letter-spacing:.35px}tr:last-child td{border-bottom:0}details{background:var(--chip);border:1px solid var(--line);border-radius:9px;padding:9px 13px;margin:8px 0}details summary{cursor:pointer;font-weight:650;color:var(--accent)}details[open] summary{margin-bottom:7px}.qa{margin:15px 0 4px}.qa>p{font-weight:650;margin-bottom:4px}.remember{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:6px 18px;margin:8px 0;padding-left:20px}.top{position:fixed;right:18px;bottom:18px;background:var(--accent);color:#fff;border-radius:999px;padding:9px 13px;text-decoration:none;font-size:13px;box-shadow:var(--shadow)}#readbar{position:fixed;top:0;left:0;height:4px;background:var(--accent);width:0;z-index:20}.kbd{border:1px solid var(--line);background:var(--chip);border-radius:5px;padding:0 5px;font-family:Consolas,monospace}.score{font-weight:700;color:var(--ok)}
+@media(max-width:640px){.wrap{padding:18px 10px 72px}section{padding:19px 16px}h1{font-size:26px}h2{font-size:21px}.toc{padding:14px 15px}.toc a{display:block}.toc span{margin-left:4px}.formula{white-space:normal}.top{right:10px;bottom:10px}}
+
+body{font-size:14px;line-height:1.46}.wrap{max-width:1080px;padding-top:18px}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(480px,100%),1fr));gap:10px}.grid>.card{margin:0}.card{background:var(--surface);border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow);padding:12px 14px;break-inside:avoid}.card.wide{grid-column:1/-1}.card h2{font-family:"Segoe UI",sans-serif;font-size:15px;margin:0 0 8px}.card h3{font-size:13px;margin:10px 0 4px}.card ul{margin:0;padding-left:18px}.card li{margin:3px 0}.card table{min-width:0}.card th,.card td{font-size:12px;padding:4px 6px}.card.low{opacity:.8}.lead{margin:0 0 8px;color:var(--muted)}.formula-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:8px 14px}.split,.compact-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px 14px}.formula-group{min-width:0}.k{display:inline-block;max-width:100%;overflow-wrap:anywhere;background:var(--chip);border:1px solid var(--line);border-radius:5px;padding:0 4px;font:600 .9em/1.45 Consolas,"Segoe UI",sans-serif}.print{position:fixed;right:16px;bottom:16px;background:var(--accent);color:#fff;border:0;border-radius:999px;padding:10px 16px;font:650 13px "Segoe UI",sans-serif;cursor:pointer;box-shadow:var(--shadow)}
+@media(max-width:640px){.split,.compact-grid{grid-template-columns:1fr}.card table{display:block;overflow-x:auto;min-width:100%}}
+@page{size:A4;margin:8mm}@media print{*{-webkit-print-color-adjust:exact;print-color-adjust:exact}body{background:#fff!important;color:#000!important;font-size:9.8px;line-height:1.2}.wrap{max-width:none;padding:0}.sub{font-size:8.8px;margin-bottom:5px}.grid{grid-template-columns:1fr 1fr;gap:4px}.formula-grid{grid-template-columns:repeat(3,1fr);gap:3px 7px}.split,.compact-grid{grid-template-columns:1fr 1fr;gap:3px 7px}.card{box-shadow:none;border:1px solid #aaa;border-radius:4px;padding:5px 7px;background:#fff!important;color:#000!important}.card.wide{break-inside:auto}.formula-group,tr,#top-traps li{break-inside:avoid}#top-traps ol{columns:2;column-gap:20px}#low-probability{break-before:page;break-inside:avoid}.card h2{font-size:10.5px;margin-bottom:4px;color:#153b8f!important}.card h3{font-size:9.4px;margin:4px 0 2px}.card li{margin:1px 0}.card table{display:table;overflow:visible;margin:2px 0;min-width:0}.card th,.card td{font-size:8.7px;padding:2px 3px;border-color:#bbb}.formula,.k{border-color:#aaa;background:#f1f1f1!important;padding:0 3px;font-size:8.8px}.print,.screen-nav,.screen-only{display:none!important}h1{font-size:15px}.low{opacity:1!important}}
+</style></head>
+<body><main class="wrap"><nav class="screen-nav"><a class="back" href="./">← к тренажёру</a> · <a class="back" href="theory.html">📖 полная теория</a></nav>
+<h1>⚡ Шпаргалка перед экзаменом</h1><p class="sub">Сопротивление материалов · формулы, знаки и ловушки · печать: 2–3 страницы A4</p>
+<div class="grid"><section class="card wide formulas" id="all-formulas">
+  <h2>🧮 Все формулы</h2>
+  <p class="lead">Сначала выбери вид нагружения, затем формулу. <b>A</b> — площадь сечения (в некоторых заданиях обозначена <b>F</b>), <b>J</b> — момент инерции, <b>W</b> — момент сопротивления.</p>
+  <div class="formula-grid">
+    <div class="formula-group">
+      <h3>Растяжение и сжатие</h3>
+      <ul>
+        <li><span class="k">σ = N/A</span></li>
+        <li><span class="k">ε = Δl/l</span></li>
+        <li><span class="k">σ = Eε</span></li>
+        <li><span class="k">Δl = Nl/(EA)</span>; для ступенчатого стержня <span class="k">Δl = ΣNᵢlᵢ/(EᵢAᵢ)</span></li>
+        <li>Продольная жёсткость: <span class="k">EA</span></li>
+        <li><span class="k">μ = |ε⊥/ε∥|</span></li>
+        <li><span class="k">n = σпред/|σ|</span>; <span class="k">[σ] = σпред/n</span></li>
+        <li>Прочность: <span class="k">|N|max/A ≤ [σ]</span></li>
+        <li><span class="k">δ = (lпосле − l₀)/l₀ · 100%</span></li>
+        <li><span class="k">ψ = (A₀ − Aшейки)/A₀ · 100%</span></li>
+      </ul>
+    </div>
+
+    <div class="formula-group">
+      <h3>Сдвиг и кручение</h3>
+      <ul>
+        <li><span class="k">τ = Gγ</span></li>
+        <li><span class="k">ΔS = Ql/(GA)</span></li>
+        <li><span class="k">G = E/[2(1 + μ)]</span></li>
+        <li><span class="k">τ = Mк·ρ/Jp</span></li>
+        <li><span class="k">τmax = |Mк|max/Wp</span></li>
+        <li><span class="k">Wp = Jp/R</span></li>
+        <li><span class="k">φ = Mкl/(GJp)</span>; общий случай <span class="k">φ = ∫Mк/(GJp) dx</span></li>
+        <li>Жёсткость при кручении: <span class="k">GJp</span></li>
+        <li>Прочность: <span class="k">|Mк|max/Wp ≤ [τ]</span></li>
+        <li>Жёсткость: <span class="k">φmax ≤ [φ]</span></li>
+        <li><span class="k">M = P/ω</span>; при P в кВт и n в об/мин: <span class="k">M ≈ 9550P/n, Н·м</span></li>
+      </ul>
+    </div>
+
+    <div class="formula-group">
+      <h3>Напряжённое состояние</h3>
+      <ul>
+        <li>Полное напряжение: <span class="k">p = √(σ² + τ²)</span></li>
+        <li>Главные напряжения: <span class="k">σ₁ ≥ σ₂ ≥ σ₃</span> алгебраически; на главной площадке <span class="k">τ = 0</span></li>
+        <li>Объёмное состояние: <span class="k">ε₁ = [σ₁ − μ(σ₂ + σ₃)]/E</span> и ещё две циклические формулы</li>
+        <li>Плоское состояние: <span class="k">ε₁ = (σ₁ − μσ₂)/E</span>, <span class="k">ε₂ = (σ₂ − μσ₁)/E</span>, <span class="k">ε₃ = −μ(σ₁ + σ₂)/E</span></li>
+        <li>Линейное состояние: <span class="k">ε₁ = σ₁/E</span>, <span class="k">ε₂ = ε₃ = −μσ₁/E</span></li>
+        <li>Инвариант: <span class="k">σα + σβ + σγ = σ₁ + σ₂ + σ₃</span>; в плоскости <span class="k">σα + σβ = σ₁ + σ₂</span></li>
+        <li>Одноосное растяжение: <span class="k">σα = σ₀cos²α</span></li>
+        <li><span class="k">τmax = (σmax − σmin)/2</span></li>
+        <li><span class="k">K = E/[3(1 − 2μ)]</span>; <span class="k">εV = ε₁ + ε₂ + ε₃ = (σ₁ + σ₂ + σ₃)/(3K)</span></li>
+        <li><span class="k">εV = 0</span> при <span class="k">μ = 0,5</span> или <span class="k">σ₁ + σ₂ + σ₃ = 0</span></li>
+        <li>III теория: <span class="k">σэкв = √(σ² + 4τ²)</span>; IV теория: <span class="k">σэкв = √(σ² + 3τ²)</span></li>
+        <li>Вал: <span class="k">Mэкв,III = √(Ми² + Мк²)</span>; <span class="k">Mэкв,IV = √(Ми² + 0,75Мк²)</span></li>
+        <li>После момента: <span class="k">σэкв = Mэкв/W ≤ [σ]</span></li>
+      </ul>
+    </div>
+
+    <div class="formula-group">
+      <h3>Геометрические характеристики</h3>
+      <ul>
+        <li><span class="k">Sx = ∫y dA</span>; <span class="k">Sy = ∫x dA</span></li>
+        <li><span class="k">Jx = ∫y²dA</span>; <span class="k">Jy = ∫x²dA</span>; <span class="k">Jxy = ∫xy dA</span></li>
+        <li><span class="k">Jp = ∫ρ²dA = Jx + Jy</span></li>
+        <li><span class="k">W = J/ymax</span>; <span class="k">Wp = Jp/R</span></li>
+        <li>Прямоугольник: <span class="k">J = bh³/12</span>, <span class="k">W = bh²/6</span>; ось параллельна стороне <b>b</b></li>
+        <li>Круг: <span class="k">J = πd⁴/64 ≈ 0,05d⁴</span>, <span class="k">W = πd³/32 ≈ 0,10d³</span></li>
+        <li>Круг: <span class="k">Jp = πd⁴/32 ≈ 0,10d⁴</span>, <span class="k">Wp = πd³/16 ≈ 0,20d³</span></li>
+      </ul>
+    </div>
+
+    <div class="formula-group">
+      <h3>Изгиб</h3>
+      <ul>
+        <li><span class="k">σ = My/J</span></li>
+        <li><span class="k">σmax = M/W</span> — в проверке прочности берут <span class="k">|M|max/W ≤ [σ]</span></li>
+        <li>Касательные напряжения: <span class="k">τ = QS/(Jb)</span>, где <b>b</b> — местная ширина сечения</li>
+        <li><span class="k">Q = dM/dx</span></li>
+        <li>В принятой здесь знаковой конвенции: <span class="k">q = dQ/dx = d²M/dx²</span></li>
+        <li><span class="k">EJy″ = M</span>; одно интегрирование даёт угол <span class="k">y′</span>, два — прогиб <span class="k">y</span></li>
+        <li>Заделка: <span class="k">y = 0</span>, <span class="k">y′ = 0</span>; шарнир: <span class="k">y = 0</span></li>
+        <li>Чистый изгиб: <span class="k">Q = 0</span>, <span class="k">M = const</span></li>
+      </ul>
+    </div>
+  </div>
+  <p class="note"><b>О знаках:</b> если в другой конвенции распределённую нагрузку, направленную вниз, считают положительной, в зависимостях для <b>q</b> появляется минус. В задачах сначала смотри принятое направление осей и знаков.</p>
+</section>
+
+<section class="card" id="limits">
+  <h2>📈 Четыре предела</h2>
+  <table>
+    <thead><tr><th>Предел</th><th>Что означает</th><th>Не перепутай</th></tr></thead>
+    <tbody>
+      <tr><td><b>σпц</b><br>пропорциональности</td><td>До него зависимость <b>σ–ε</b> линейна и справедлив закон Гука.</td><td>Это ещё не предел упругости.</td></tr>
+      <tr><td><b>σупр</b><br>упругости</td><td>Наибольшее напряжение, после снятия которого остаточной деформации нет.</td><td>Деформация уже может быть нелинейной, но остаётся обратимой.</td></tr>
+      <tr><td><b>σт</b><br>текучести</td><td>Деформация заметно растёт почти без увеличения нагрузки.</td><td>По нему назначают допускаемое напряжение пластичного материала.</td></tr>
+      <tr><td><b>σв</b><br>прочности</td><td>Условное напряжение, соответствующее максимальной нагрузке при испытании.</td><td>Не напряжение в мгновение окончательного разрыва.</td></tr>
+    </tbody>
+  </table>
+  <p><b>Порядок для типовой диаграммы малоуглеродистой стали:</b> <span class="k">σпц ≤ σупр ≤ σт ≤ σв</span>. Если площадка текучести не выражена, используют <span class="k">σ₀,₂</span> — напряжение при остаточной пластической деформации <b>0,2%</b>. Для пластичного материала опасным считают <b>σт</b>, для хрупкого — <b>σв</b>.</p>
+</section>
+
+<section class="card" id="supports">
+  <h2>🔩 Опоры</h2>
+  <table>
+    <thead><tr><th>Тип</th><th>Как выглядит и что допускает</th><th>Реакции</th></tr></thead>
+    <tbody>
+      <tr><td><b>Шарнирно-подвижная</b></td><td>Треугольник на катках <b>△○○</b>; разрешены поворот и движение вдоль опорной поверхности.</td><td><b>1</b>: сила по нормали к поверхности.</td></tr>
+      <tr><td><b>Шарнирно-неподвижная</b></td><td>Треугольник прямо на основании; разрешён только поворот.</td><td><b>2</b>: <b>Rx</b> и <b>Ry</b>, реактивного момента нет.</td></tr>
+      <tr><td><b>Жёсткая заделка</b></td><td>Конец входит в заштрихованную стену; запрещены оба перемещения и поворот.</td><td><b>3</b>: <b>Rx</b>, <b>Ry</b> и реактивный момент.</td></tr>
+    </tbody>
+  </table>
+  <ul>
+    <li>Идеально гладкая поверхность даёт реакцию только по нормали.</li>
+    <li>Гибкая связь тянет вдоль себя, реакция направлена от удерживаемого тела.</li>
+    <li>Самого подсчёта реакций недостаточно: для определимости нужны независимые связи и геометрическая неизменяемость системы.</li>
+  </ul>
+</section>
+
+<section class="card" id="signs">
+  <h2>📊 Правила знаков и эпюр</h2>
+  <ul>
+    <li><b>N &gt; 0, σ &gt; 0</b> — растяжение; <b>N &lt; 0, σ &lt; 0</b> — сжатие. Положительное нормальное напряжение направлено от сечения по внешней нормали.</li>
+    <li><b>Q &gt; 0</b>, если сила направлена вверх на левой отсечённой части или вниз на правой.</li>
+    <li><b>M &gt; 0</b>, если балка изгибается выпуклостью вниз.</li>
+    <li>Касательное напряжение положительно, если поворот его вектора против часовой стрелки на <b>π/2</b> совмещает его с внешней нормалью.</li>
+    <li>Закон парности: на взаимно перпендикулярных площадках касательные напряжения равны по модулю. В принятой в задачах скалярной записи <span class="k">τβ = −τα</span>, поэтому <b>+50 → −50 МПа</b>; физически знак зависит от ориентации площадок.</li>
+    <li>Сосредоточенная продольная сила даёт скачок <b>N</b>; поперечная сила или реакция — скачок <b>Q</b>.</li>
+    <li>Сосредоточенный момент даёт скачок <b>M</b>, но никак не отмечается на эпюре <b>Q</b>.</li>
+    <li>Если <b>q=0</b>, то <b>Q=const</b>, а <b>M</b> меняется линейно. При <b>q=const</b> эпюра <b>Q</b> линейна, эпюра <b>M</b> — парабола. В записи <b>q=dQ/dx</b> q алгебраическая: направленная вниз нагрузка отрицательна.</li>
+    <li>На концевом шарнире или свободном конце <b>M=0</b>, только если там не приложена сосредоточенная пара сил.</li>
+    <li>При постоянных <b>Mк, G, Jp</b> угол закручивания меняется по участку линейно.</li>
+  </ul>
+</section>
+
+<section class="card" id="units-and-numbers">
+  <h2>📐 СИ и числа-маяки</h2>
+  <div class="split">
+    <div>
+      <h3>Переводы и размерности</h3>
+      <ul>
+        <li><span class="k">1 кН = 10³ Н</span>; <span class="k">1 кН·м = 10³ Н·м</span></li>
+        <li><span class="k">1 МПа = 10⁶ Па = 1 Н/мм²</span>; <span class="k">1 ГПа = 10³ МПа</span></li>
+        <li><span class="k">1 см² = 10⁻⁴ м²</span>; <span class="k">1 мм² = 10⁻⁶ м²</span></li>
+        <li><span class="k">1 см³ = 10⁻⁶ м³</span>; <span class="k">1 мм³ = 10⁻⁹ м³</span></li>
+        <li><span class="k">1 см⁴ = 10⁻⁸ м⁴</span>; <span class="k">1 мм⁴ = 10⁻¹² м⁴</span></li>
+        <li><b>P, N, Q</b> — Н; <b>M</b> — Н·м; <b>q</b> — Н/м.</li>
+        <li><b>σ, τ, E, G</b> — Па; <b>A</b> — м²; <b>J</b> — м⁴; <b>W</b> — м³.</li>
+        <li><b>ε, γ, μ</b> безразмерны; температурный коэффициент — °C⁻¹.</li>
+      </ul>
+    </div>
+    <div>
+      <h3>Увидел числа — вспомни ход</h3>
+      <ul>
+        <li><b>10 МПа · 225 см² → 225 кН</b></li>
+        <li><b>20·10⁶ Н / 2 м² → 10 МПа</b>, но <b>20 Н / 2 м² → 10 Па</b></li>
+        <li>Консоль: <b>5 кН, 1 м, b=6 см, h=10 см → 50 МПа</b></li>
+        <li><b>σmax=80 МПа, σm=20 МПа → σa=60 МПа</b></li>
+        <li><b>30 + 40 → 70 МПа</b> по инварианту</li>
+        <li><b>σ=4 МПа, τ=3 МПа → p=5 МПа</b></li>
+        <li><b>5M − 2M</b> при <b>M=20 кН·м → 60 кН·м</b></li>
+        <li><b>0,3/150 → ε=2·10⁻³</b></li>
+        <li>Внезапная нагрузка: <b>Kд=2</b></li>
+        <li>Длина стержня <b>×3 → Pкр ÷9</b></li>
+        <li>Диаметр вала <b>×2 → τmax ÷8</b>; диаметр <b>÷3 → τmax ×27</b></li>
+        <li>На нейтральной оси балки и на оси круглого вала соответствующее напряжение равно <b>0</b>.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<section class="card" id="effective-length">
+  <h2>📏 Коэффициент приведённой длины</h2>
+  <p><span class="k">lпр = μl</span>, <span class="k">i_min = √(Jmin/A)</span>, <span class="k">λ = lпр/i_min</span>.</p>
+  <table>
+    <thead><tr><th>Закрепление стержня</th><th>μ</th><th>Мнемоника</th></tr></thead>
+    <tbody>
+      <tr><td>Заделка — свободный конец</td><td><b>2</b></td><td>Консоль «вдвое длиннее».</td></tr>
+      <tr><td>Шарнир — шарнир</td><td><b>1</b></td><td>Приведённая длина равна обычной.</td></tr>
+      <tr><td>Заделка — шарнир</td><td><b>0,7</b></td><td>Один конец усилен.</td></tr>
+      <tr><td>Заделка — заделка</td><td><b>0,5</b></td><td>Две заделки — половина.</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<section class="card warn" id="top-traps">
+  <h2>⚠️ Топ-10 ловушек</h2>
+  <ol>
+    <li><b>Сен-Венан:</b> достаточно далеко от места приложения нагрузки напряжения и деформации <b>не зависят</b> от способа её приложения.</li>
+    <li><b>Пределы:</b> пропорциональности → упругости → текучести → прочности. Условный предел <b>σ₀,₂</b> — это остаточная пластическая деформация 0,2%.</li>
+    <li><b>Материал:</b> допускаемое напряжение пластичного материала назначают по <b>σт</b>, хрупкого — по <b>σв</b>.</li>
+    <li><b>Доли и проценты:</b> ε — доля; δ и ψ обычно выражают в процентах. Не теряй множитель 100%.</li>
+    <li><b>Степени длины:</b> A — м², W — м³, J — м⁴. В <b>bh³/12</b> в кубе размер, перпендикулярный оси.</li>
+    <li><b>Опоры:</b> подвижный шарнир / неподвижный шарнир / заделка дают соответственно <b>1 / 2 / 3</b> реакции.</li>
+    <li><b>Кручение:</b> τmax обратно пропорционально d³; на оси τ=0, на поверхности максимум.</li>
+    <li><b>Главные напряжения:</b> упорядочивай алгебраически, не по модулю. Для произвольной площадки <span class="k">σ₂ ≤ σα ≤ σ₁</span>; строгие знаки — только если площадка не главная.</li>
+    <li><b>Два закона Гука:</b> в плоском состоянии два ненулевых главных напряжения, в объёмном — три. Не выбрасывай σ₃ без основания.</li>
+    <li><b>Эпюры:</b> сила скачком меняет Q, момент — M; чистый изгиб имеет Q=0. В теориях прочности: III содержит <b>4τ²</b>, IV — <b>3τ²</b>.</li>
+  </ol>
+</section>
+
+<section class="card wide low" id="low-probability">
+  <h2>🩶 Чего скорее всего не будет</h2>
+  <p><b>Это низкий приоритет, а не нулевая вероятность.</b> Сначала закрепи основные шесть тем, затем просмотри этот блок для узнавания формулировок.</p>
+  <div class="compact-grid">
+    <div>
+      <h3>Устойчивость</h3>
+      <ul>
+        <li><span class="k">Pкр = π²EJmin/(μl)²</span></li>
+        <li><span class="k">σкр = π²E/λ²</span></li>
+        <li>Эйлер — большая гибкость: <span class="k">λ ≥ λпред</span>, эквивалентно <span class="k">σкр ≤ σпц</span>.</li>
+        <li>Ясинский — средняя гибкость: <span class="k">σкр = a − bλ</span>, <span class="k">Pкр = (a − bλ)A</span>.</li>
+        <li>Малая гибкость — расчёт как на сжатие, приближённо <span class="k">Pкр = σтA</span>; с учётом продольного изгиба <span class="k">P/A ≤ [σ]у = φ[σ]</span>.</li>
+        <li>Увеличение длины в три раза уменьшает силу Эйлера в девять раз.</li>
+      </ul>
+    </div>
+    <div>
+      <h3>Усталость и динамика</h3>
+      <ul>
+        <li><span class="k">σm = (σmax + σmin)/2</span>; <span class="k">σa = (σmax − σmin)/2</span></li>
+        <li><span class="k">R = σmin/σmax</span>; симметричный цикл: <span class="k">R = −1</span>, предел обозначают <b>σ₋₁</b>.</li>
+        <li>Удар: <span class="k">Kд = 1 + √(1 + 2h/Δст)</span>; внезапное приложение <span class="k">h=0 ⇒ Kд=2</span>.</li>
+        <li>Гармоническая нагрузка без демпфирования: <span class="k">Kд = 1/|1 − (ω/ω₀)²|</span>; коэффициент может быть больше или меньше единицы.</li>
+      </ul>
+    </div>
+    <div>
+      <h3>Сложное сопротивление</h3>
+      <ul>
+        <li>Внецентренное сжатие: <span class="k">σ = −P(1/A + yp·y/Jz + zp·z/Jy)</span>; возникают <b>N, My, Mz</b> и только нормальные напряжения.</li>
+        <li>Косой изгиб: <span class="k">σ = Mz·y/Jz + My·z/Jy</span>; <span class="k">f = √(fy² + fz²)</span>.</li>
+        <li>Ядро сечения — область приложения силы, при которой во всём сечении напряжения сохраняют один знак.</li>
+      </ul>
+    </div>
+    <div>
+      <h3>Остальное</h3>
+      <ul>
+        <li>II теория прочности: <span class="k">εmax ≤ [ε]</span>.</li>
+        <li>Степень статической неопределимости = число независимых неизвестных минус число независимых уравнений равновесия; основной способ раскрытия — метод сил.</li>
+        <li>Собственный вес: <span class="k">P/A + γl ≤ [σ]</span>; брус равного сопротивления: <span class="k">A(x) = A₀exp(γx/[σ])</span>.</li>
+        <li>Температурный коэффициент имеет размерность <b>°C⁻¹</b>.</li>
+        <li>Также достаточно узнавать концентрацию напряжений, теории прочности, принцип Даламбера и реакции гибких связей.</li>
+      </ul>
+    </div>
+  </div>
+</section></div><button class="print" type="button" onclick="print()">🖨️ Распечатать</button></main></body></html>
