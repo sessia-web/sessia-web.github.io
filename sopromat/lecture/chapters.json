@@ -1,0 +1,127 @@
+{
+  "version": "sopromat-chapters-v1",
+  "generated_from_master_sha256": "44ef0844be8c52a0f08efcb1b3515c0f2b32fbd5a06bfe51baea171ae54cd01a",
+  "total_duration_seconds": 2386.84,
+  "chapters": [
+    {
+      "id": 1,
+      "title": "🎯 Экзамен без паники",
+      "file": "ch01.mp4",
+      "start_seconds": 0.0,
+      "end_seconds": 169.278,
+      "duration_seconds": 169.278,
+      "sha256": "5ce622d7baa87679d70be851b38e898404a7b87c2b616b3f908c37801b314d55",
+      "size_bytes": 18992928
+    },
+    {
+      "id": 2,
+      "title": "🧱 Модели и метод сечений",
+      "file": "ch02.mp4",
+      "start_seconds": 169.278,
+      "end_seconds": 422.003,
+      "duration_seconds": 252.725,
+      "sha256": "014f7aeed5da939503674b819e550a15c9becac368a4872102c13335f38bf82f",
+      "size_bytes": 30460994
+    },
+    {
+      "id": 3,
+      "title": "🔩 Опоры и реакции",
+      "file": "ch03.mp4",
+      "start_seconds": 422.003,
+      "end_seconds": 615.411,
+      "duration_seconds": 193.408,
+      "sha256": "41961aa1e0d93ab6219b0ad321e96c8228da9e72369376dd328aabca31ccb0e2",
+      "size_bytes": 22240131
+    },
+    {
+      "id": 4,
+      "title": "↔️ Растяжение и сжатие",
+      "file": "ch04.mp4",
+      "start_seconds": 615.411,
+      "end_seconds": 858.165,
+      "duration_seconds": 242.754,
+      "sha256": "589f10c937623cf800ce105c4316aca8b0d4934c3bee1cbe3c53082a7942ffd4",
+      "size_bytes": 30457567
+    },
+    {
+      "id": 5,
+      "title": "📈 Диаграмма материала",
+      "file": "ch05.mp4",
+      "start_seconds": 858.165,
+      "end_seconds": 1086.599,
+      "duration_seconds": 228.434,
+      "sha256": "f2ba429264a11da01310da35a24f64ff1679a09b6ebcc6a813bd1d650b468c69",
+      "size_bytes": 27448798
+    },
+    {
+      "id": 6,
+      "title": "🌀 Сдвиг и кручение",
+      "file": "ch06.mp4",
+      "start_seconds": 1086.599,
+      "end_seconds": 1262.532,
+      "duration_seconds": 175.933,
+      "sha256": "a91547ebb9dd052f5d82d1b7b755a5b109be06035dd28e3fe06073664ea946c2",
+      "size_bytes": 20012973
+    },
+    {
+      "id": 7,
+      "title": "🔷 Напряжённое состояние",
+      "file": "ch07.mp4",
+      "start_seconds": 1262.532,
+      "end_seconds": 1464.839,
+      "duration_seconds": 202.307,
+      "sha256": "29a068a8d207de9d64827e554fa7030d2f751d7d08c61fdbb1a44b58803d91ad",
+      "size_bytes": 26869786
+    },
+    {
+      "id": 8,
+      "title": "📐 Геометрия сечений",
+      "file": "ch08.mp4",
+      "start_seconds": 1464.839,
+      "end_seconds": 1692.879,
+      "duration_seconds": 228.04,
+      "sha256": "aa14b999ae981a5d7cdd9836d06bc3086159c8260617f86656427e4f3f2eac5d",
+      "size_bytes": 26382346
+    },
+    {
+      "id": 9,
+      "title": "〰️ Изгиб и эпюры",
+      "file": "ch09.mp4",
+      "start_seconds": 1692.879,
+      "end_seconds": 1837.949,
+      "duration_seconds": 145.07,
+      "sha256": "69929bb61efbb7a0ed848f4fc61b05eccc7df4bcba8aa9818d697cfc77dc0172",
+      "size_bytes": 19360601
+    },
+    {
+      "id": 10,
+      "title": "📏 Напряжения и прогиб",
+      "file": "ch10.mp4",
+      "start_seconds": 1837.949,
+      "end_seconds": 2031.003,
+      "duration_seconds": 193.054,
+      "sha256": "1cb645176e3717fc9787a8b7ac4a63cc02de66f641d154422d0acd16e7700065",
+      "size_bytes": 25802292
+    },
+    {
+      "id": 11,
+      "title": "🗄️ Маловероятное, но опасное",
+      "file": "ch11.mp4",
+      "start_seconds": 2031.003,
+      "end_seconds": 2205.942,
+      "duration_seconds": 174.939,
+      "sha256": "090eaf840eb33fa0bb5ca81597842e88ef3fe6fcede9a8a3703df720a1a2e615",
+      "size_bytes": 20847122
+    },
+    {
+      "id": 12,
+      "title": "⚡ Финальный блиц",
+      "file": "ch12.mp4",
+      "start_seconds": 2205.942,
+      "end_seconds": 2386.776,
+      "duration_seconds": 180.834,
+      "sha256": "ae83e7d613adb38ae2625df2c31588690005af9812d795be659b2dd135653ea6",
+      "size_bytes": 23405618
+    }
+  ]
+}
