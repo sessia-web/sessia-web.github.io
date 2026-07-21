@@ -66,18 +66,7 @@ sub{font-size:.72em;line-height:0;vertical-align:-.28em}
 sup{font-size:.72em;line-height:0;vertical-align:.5em}
 mark{background:rgba(255,210,61,.45);color:inherit;border-radius:3px;padding:0 1px}
 .empty{text-align:center;color:var(--muted);padding:40px 10px}
-/* билет */
-#ticketcard{display:none;background:var(--surface);border:2px solid var(--accent);border-radius:14px;box-shadow:var(--shadow);padding:20px;margin:0 0 18px}
-#ticketcard.show{display:block}
-#ticketcard h2{font-family:Georgia,serif;font-size:20px;margin:0 0 4px;text-align:center}
-#ticketcard .tsub{text-align:center;color:var(--muted);font-size:12.5px;margin:0 0 12px}
-.tq{display:flex;gap:10px;margin:10px 0;font-size:15.5px}
-.tq b{flex:none}
-#ttimer{font:700 34px/1 Consolas,monospace;text-align:center;margin:14px 0 6px;font-variant-numeric:tabular-nums}
-#ttimer.low{color:var(--bad)}
-.tbtns{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin-top:12px}
-.btn{appearance:none;border:1px solid var(--line);border-radius:10px;background:var(--surface);color:var(--ink);font:600 14.5px/1 "Segoe UI",sans-serif;padding:12px 16px;cursor:pointer;box-shadow:var(--shadow)}
-.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.fullb table{display:block;overflow-x:auto;max-width:100%}
 footer{margin-top:34px;color:var(--muted);font-size:12.5px}
 @media print{
   body{background:none}
@@ -92,25 +81,12 @@ footer{margin-top:34px;color:var(--muted);font-size:12.5px}
   <h1>📖 Теория билетов — комплексный экзамен</h1>
   <p class="sub">Все 106 вопросов из перечня программы: Блок 1 — 51 · Блок 2 — 35 · Блок 3 — 20. В билете 3 вопроса — по одному из каждого блока. На письменный ответ ~1,5 часа, потом устный ответ комиссии ~20 минут.</p>
   <div class="toplinks">
-    <button class="chip primary" onclick="newTicket()">🎲 Вытянуть билет (1+1+1)</button>
+    <a class="chip primary" href="./">🔍 Быстрый поиск ответа — в тренажёре</a>
     <a class="chip" href="cheat.html">⚡ Шпаргалка</a>
     <a class="chip" href="stats.html">📊 Статистика</a>
     <button class="chip" id="btnall" onclick="toggleAll()">Раскрыть всё</button>
     <button class="chip" onclick="window.print()">🖨 Печать</button>
     <button class="chip" id="f-theme" onclick="cycleTheme()">🌓 Тема</button>
-  </div>
-  <div id="ticketcard">
-    <h2>🎓 Экзаменационный билет №<span id="tnum"></span></h2>
-    <p class="tsub">по одному вопросу из каждого блока — как на настоящем экзамене</p>
-    <div id="tqs"></div>
-    <div id="ttimer">90:00</div>
-    <p class="tsub">время на письменную подготовку — 1,5 часа</p>
-    <div class="tbtns">
-      <button class="btn primary" id="tstart" onclick="ticketTimer()">▶ Старт таймера</button>
-      <button class="btn" onclick="revealTicket()">Показать разборы</button>
-      <button class="btn" onclick="newTicket()">Новый билет</button>
-      <button class="btn" onclick="closeTicket()">✕ Закрыть</button>
-    </div>
   </div>
   <input class="search" id="q" placeholder="Поиск: часть названия вопроса, термин, формула… (например: критический путь)" autocomplete="off">
   <p class="hint" id="cnt"></p>
@@ -180,46 +156,6 @@ function render(){
 function tg(id){ expanded[id] = !expanded[id]; var el = document.getElementById(id); if(el) el.classList.toggle('open', !!expanded[id]); }
 function setB(b){ curB = b; document.querySelectorAll('#bfilters .chip').forEach(function(c){ c.classList.toggle('on', +c.dataset.b===b); }); render(); }
 function toggleAll(){ allOpen = !allOpen; if(!allOpen) expanded = {}; document.getElementById('btnall').textContent = allOpen?'Свернуть всё':'Раскрыть всё'; render(); }
-/* ---------- билет ---------- */
-var ticket = null, ttInt = null, ttLeft = 90*60;
-function pick(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
-function newTicket(){
-  ticket = [1,2,3].map(function(b){ return pick(THEORY.filter(function(t){return t.block===b;})); });
-  document.getElementById('tnum').textContent = 1+Math.floor(Math.random()*30);
-  document.getElementById('tqs').innerHTML = ticket.map(function(t,i){
-    return '<div class="tq"><b>Вопрос '+(i+1)+'.</b><span>'+esc(t.title)+' <span style="color:var(--muted);font-size:12px">('+t.block+'.'+t.num+')</span></span></div>';
-  }).join('');
-  killTimer(); ttLeft = 90*60; drawTimer();
-  document.getElementById('tstart').textContent = '▶ Старт таймера';
-  document.getElementById('ticketcard').classList.add('show');
-  location.hash = 'ticket';
-  window.scrollTo({top:0, behavior:'smooth'});
-}
-function killTimer(){ if(ttInt){ clearInterval(ttInt); ttInt = null; } }
-function drawTimer(){
-  var m = Math.floor(ttLeft/60), s = ttLeft%60, el = document.getElementById('ttimer');
-  el.textContent = m+':'+('0'+s).slice(-2);
-  el.classList.toggle('low', ttLeft < 10*60);
-}
-function ticketTimer(){
-  var b = document.getElementById('tstart');
-  if(ttInt){ killTimer(); b.textContent = '▶ Продолжить'; return; }
-  b.textContent = '⏸ Пауза';
-  ttInt = setInterval(function(){
-    ttLeft--; drawTimer();
-    if(ttLeft<=0){ killTimer(); alert('⏰ Полтора часа истекли — на экзамене сейчас сдали бы лист. Проверь себя по разборам.'); }
-  },1000);
-}
-function revealTicket(){
-  if(!ticket) return;
-  document.getElementById('q').value = '';
-  curB = 0; setB(0);
-  expanded = {}; ticket.forEach(function(t){ expanded[t.id] = true; });
-  render();
-  var first = document.getElementById(ticket[0].id);
-  if(first) first.scrollIntoView({behavior:'smooth'});
-}
-function closeTicket(){ killTimer(); document.getElementById('ticketcard').classList.remove('show'); if(location.hash==='#ticket') history.replaceState(null,'',location.pathname); }
 /* ---------- тема ---------- */
 function applyTheme(){ var th = localStorage.getItem('kompleks-theme')||'auto';
   if(th==='auto') document.documentElement.removeAttribute('data-theme'); else document.documentElement.setAttribute('data-theme', th);
@@ -229,8 +165,7 @@ function cycleTheme(){ var th = localStorage.getItem('kompleks-theme')||'auto';
 /* ---------- init ---------- */
 document.getElementById('q').addEventListener('input', render);
 applyTheme(); render();
-if(location.hash==='#ticket') newTicket();
-else if(location.hash.length>1){
+if(location.hash.length>1){
   var id = location.hash.slice(1);
   if(THEORY.some(function(t){return t.id===id;})){ expanded[id]=true; render();
     var el = document.getElementById(id); if(el) el.scrollIntoView(); }
