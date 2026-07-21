@@ -1,0 +1,94 @@
+<!doctype html><html lang='ru'><head><meta charset='utf-8'><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Видеокурс — комплексный экзамен за один просмотр</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E🎬%3C/text%3E%3C/svg%3E">
+<meta name="theme-color" content="#14181D">
+<style>
+:root{ --bg:#F6F7F4; --surface:#FFFFFF; --ink:#20262B; --muted:#66707A; --line:#DDE2E0;
+  --accent:#2B4BB5; --accent-ink:#FFFFFF; --accent-soft:#E9EDFA; --ok:#177A4C; --chip:#ECEFF3;
+  --shadow:0 1px 2px rgba(24,32,44,.06),0 6px 18px rgba(24,32,44,.07); }
+@media (prefers-color-scheme: dark){ :root{ --bg:#14181D; --surface:#1D232A; --ink:#E8ECEF; --muted:#98A2AB; --line:#2C343C;
+  --accent:#7C93E8; --accent-ink:#101625; --accent-soft:#232C42; --ok:#4CC38A; --chip:#252C34;
+  --shadow:0 1px 2px rgba(0,0,0,.4),0 8px 22px rgba(0,0,0,.35); } }
+*{box-sizing:border-box} html,body{margin:0;padding:0}
+body{background:var(--bg);color:var(--ink);font:15px/1.5 "Segoe UI",-apple-system,Arial,sans-serif}
+.wrap{max-width:980px;margin:0 auto;padding:16px 14px 50px}
+h1{font-family:Georgia,serif;font-size:22px;margin:6px 0 2px}
+.sub{color:var(--muted);font-size:13px;margin:0 0 12px}
+a.back{color:var(--muted);font-size:12.5px;text-decoration:none}
+video{width:100%;max-height:62vh;background:#000;border-radius:12px;box-shadow:var(--shadow);display:block}
+.nowbar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:10px 0 6px}
+.now{font-weight:650;font-size:14.5px;flex:1;min-width:200px}
+.chip{border:1px solid var(--line);background:var(--chip);color:var(--ink);border-radius:999px;padding:7px 13px;font:600 13px/1 "Segoe UI",sans-serif;cursor:pointer}
+.chip.on{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.list{margin-top:12px}
+.row{display:flex;gap:10px;align-items:center;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:10px 13px;margin-bottom:7px;cursor:pointer;box-shadow:var(--shadow)}
+.row:hover{border-color:var(--accent)}
+.row.cur{border:2px solid var(--accent);background:var(--accent-soft)}
+.row .n{font:700 12px/1.6 Consolas,monospace;color:var(--accent);border:1px solid var(--accent);border-radius:6px;padding:0 6px;flex:none}
+.row .t{font-weight:600;font-size:14px;flex:1}
+.row .d{color:var(--muted);font-size:12.5px;flex:none;font-variant-numeric:tabular-nums}
+.row .done{color:var(--ok);flex:none;display:none}
+.row.watched .done{display:inline}
+.hint{color:var(--muted);font-size:12.5px;margin-top:12px}
+</style></head><body><div class="wrap">
+<a class="back" href="./">← тренажёр</a>
+<h1>🎬 Комплексный экзамен за один просмотр</h1>
+<p class="sub">62 минуты · 14 глав · все 106 вопросов билетов + все 30 тестовых квизами · смотри со звуком</p>
+<video id="v" controls playsinline preload="metadata"></video>
+<div class="nowbar">
+  <span class="now" id="now"></span>
+  <button class="chip" data-r="1">1×</button>
+  <button class="chip" data-r="1.25">1.25×</button>
+  <button class="chip" data-r="1.5">1.5×</button>
+</div>
+<div class="list" id="list"></div>
+<p class="hint">Позиция запоминается в браузере — можно закрыть и продолжить с того же места. Главы переключаются автоматически. Квизы: жми паузу, отвечай вслух, потом смотри ответ.</p>
+</div>
+<script>
+"use strict";
+var CH = null, cur = 0, KEY = 'kompleks-lecture-v1';
+var v = document.getElementById('v');
+function fmt(s){ s = Math.round(s); return Math.floor(s/60) + ':' + ('0' + s%60).slice(-2); }
+function load(){ try{ return JSON.parse(localStorage.getItem(KEY)||'{}'); }catch(e){ return {}; } }
+function save(p){ try{ localStorage.setItem(KEY, JSON.stringify(p)); }catch(e){} }
+function renderList(){
+  var st = load(), watched = st.watched || {};
+  document.getElementById('list').innerHTML = CH.map(function(c, i){
+    return '<div class="row' + (i===cur?' cur':'') + (watched[i]?' watched':'') + '" onclick="go(' + i + ',0,true)">' +
+      '<span class="n">' + (i+1) + '</span><span class="t">' + c.title + '</span>' +
+      '<span class="done">✓</span><span class="d">' + fmt(c.seconds) + '</span></div>';
+  }).join('');
+  document.getElementById('now').textContent = 'Глава ' + (cur+1) + ' из 14 · ' + CH[cur].title;
+}
+function go(i, t, play){
+  cur = i;
+  v.src = 'lecture/' + CH[i].file;
+  v.currentTime = t || 0;
+  renderList();
+  if(play) v.play();
+}
+v.addEventListener('ended', function(){
+  var st = load(); st.watched = st.watched || {}; st.watched[cur] = 1; save(st);
+  if(cur < CH.length - 1) go(cur + 1, 0, true);
+  else renderList();
+});
+setInterval(function(){
+  if(!v.paused && CH){ var st = load(); st.ch = cur; st.t = v.currentTime; st.rate = v.playbackRate; save(st); }
+}, 4000);
+document.querySelectorAll('.chip[data-r]').forEach(function(b){
+  b.addEventListener('click', function(){
+    v.playbackRate = parseFloat(b.dataset.r);
+    document.querySelectorAll('.chip[data-r]').forEach(function(x){ x.classList.toggle('on', x===b); });
+  });
+});
+fetch('lecture/chapters.json').then(function(r){ return r.json(); }).then(function(ch){
+  CH = ch;
+  var st = load();
+  if(st.rate){ v.playbackRate = st.rate;
+    document.querySelectorAll('.chip[data-r]').forEach(function(x){ x.classList.toggle('on', parseFloat(x.dataset.r)===st.rate); }); }
+  else document.querySelector('.chip[data-r="1"]').classList.add('on');
+  go(Math.min(st.ch||0, ch.length-1), st.t||0, false);
+});
+if(/^https?:$/.test(location.protocol) && 'serviceWorker' in navigator){ try{ navigator.serviceWorker.register('/sw.js'); }catch(e){} }
+</script>
+</body></html>

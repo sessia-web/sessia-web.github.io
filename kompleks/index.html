@@ -222,6 +222,7 @@ footer.app span button{white-space:nowrap}
       <a class="chip" id="statlink" href="stats.html" style="display:none;text-decoration:none" title="Таблица ошибок — твои и всей группы">📊 Статистика</a>
       <a class="chip" id="theorylink" href="theory.html" style="display:none;text-decoration:none" title="Полная теория: развёрнутые разборы, планы ответов, допвопросы">📖 Полная теория</a>
       <a class="chip" id="cheatlink" href="cheat.html" style="display:none;text-decoration:none" title="Всё главное на одной странице — повторить перед экзаменом">⚡ Шпаргалка</a>
+      <a class="chip" id="lectlink" href="lecture.html" style="display:none;text-decoration:none" title="Весь курс видео за 62 минуты: все вопросы билетов + квизы по тесту">🎬 Видеокурс</a>
       <button class="chip" id="f-theme" onclick="cycleTheme()" title="Тема: авто / светлая / тёмная">🌓 Тема</button>
       <span class="stats" id="stats"></span>
     </div>
@@ -1014,8 +1015,9 @@ if(/^https?:$/.test(location.protocol)){
   var _sl=document.getElementById('statlink'); if(_sl) _sl.style.display='inline-block';
   var _tl=document.getElementById('theorylink'); if(_tl) _tl.style.display='inline-block';
   var _cl=document.getElementById('cheatlink'); if(_cl) _cl.style.display='inline-block';
+  var _ll=document.getElementById('lectlink'); if(_ll) _ll.style.display='inline-block';
   if('serviceWorker' in navigator){ try{ navigator.serviceWorker.register('/sw.js'); }catch(e){} }
-  setTimeout(function(){ ['theory.html','cheat.html','stats.html','qmeta.json'].forEach(function(u){ try{ fetch(u).catch(function(){}); }catch(e){} }); }, 2500);
+  setTimeout(function(){ ['theory.html','cheat.html','stats.html','qmeta.json','lecture.html'].forEach(function(u){ try{ fetch(u).catch(function(){}); }catch(e){} }); }, 2500);
 }
 </script>
 </body></html>
