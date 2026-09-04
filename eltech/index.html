@@ -159,8 +159,9 @@ select.sel{border:1px solid var(--line);border-radius:10px;background:var(--surf
 .litem .st.known{color:var(--ok)} .litem .st.hard{color:var(--bad)}
 footer.app{margin-top:26px;color:var(--muted);font-size:12.5px;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;align-items:center}
 footer.app button{appearance:none;border:0;background:none;color:var(--muted);text-decoration:underline;cursor:pointer;font:inherit;padding:0}
-footer.app .author{flex-basis:100%;display:flex;align-items:center;justify-content:center;gap:10px;margin-top:4px;padding-top:14px;border-top:1px solid var(--line)}
-footer.app .author img{width:34px;height:34px;border-radius:50%;object-fit:cover;display:block;border:1.5px solid var(--line)}
+footer.app .author{flex-basis:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;margin-top:4px;padding-top:22px;padding-bottom:8px;border-top:1px solid var(--line)}
+footer.app .author img{width:min(340px,78vw);height:min(340px,78vw);border-radius:50%;object-fit:cover;display:block;border:3px solid var(--line);box-shadow:var(--shadow)}
+footer.app .author>span{font-size:15px;font-weight:600;letter-spacing:.2px}
 .empty{text-align:center;color:var(--muted);padding:40px 10px}
 @media (max-width:520px){
   .wrap{padding:14px 10px 48px}
@@ -235,7 +236,7 @@ footer.app span button{white-space:nowrap}
       <button onclick="importProgress()" title="Вставить код прогресса с другого устройства">Импорт</button> ·
       <button onclick="resetProgress()">Сбросить прогресс</button>
     </span>
-    <span class="author"><img src="author.jpg" alt="Фото создателя тренажёра" width="34" height="34" loading="lazy"><span>Создатель Элтеха</span></span>
+    <span class="author"><img src="author.jpg" alt="Фото создателя тренажёра" width="340" height="340" loading="lazy"><span>Создатель Элтеха</span></span>
   </footer>
 </div>
 <script>
