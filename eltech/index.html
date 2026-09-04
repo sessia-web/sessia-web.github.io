@@ -121,6 +121,11 @@ body.focusmode .tabs{margin-bottom:2px}
 /* --- денис --- */
 #denis{position:fixed;left:50%;top:16%;transform:translateX(-50%);z-index:60;pointer-events:none;display:none;max-width:92vw;text-align:center}
 #denis.on{display:block;opacity:1;animation:dpop .28s cubic-bezier(.2,.8,.3,1)}
+#denis .drow{display:flex;align-items:center;justify-content:center;gap:14px}
+#denis .dface{flex:0 0 auto;line-height:0;filter:drop-shadow(0 6px 14px rgba(0,0,0,.35))}
+#denis .dface svg{display:block;width:76px;height:76px}
+#denis.bad.on .dface{animation:dwobble .55s ease-out .18s}
+@keyframes dwobble{0%,100%{transform:rotate(0)}25%{transform:rotate(-13deg)}55%{transform:rotate(10deg)}80%{transform:rotate(-5deg)}}
 #denis .dtxt{display:inline-block;font-family:Georgia,"Times New Roman",serif;font-weight:700;letter-spacing:.5px;padding:14px 26px;border-radius:14px;border:2px solid;box-shadow:0 10px 34px rgba(0,0,0,.30);text-wrap:balance}
 #denis.bad .dtxt{font-size:46px;line-height:1.05;text-transform:uppercase;color:#fff;background:var(--bad);border-color:var(--bad)}
 #denis.bad.on .dtxt{animation:dshake .5s ease-out .18s}
@@ -129,8 +134,8 @@ body.focusmode .tabs{margin-bottom:2px}
 @keyframes dpop{0%{transform:translateX(-50%) scale(.5);opacity:0}70%{transform:translateX(-50%) scale(1.12);opacity:1}100%{transform:translateX(-50%) scale(1);opacity:1}}
 @keyframes dfade{to{opacity:0;transform:translateX(-50%) scale(.92)}}
 @keyframes dshake{0%,100%{transform:translateX(0)}20%{transform:translateX(-9px)}40%{transform:translateX(8px)}60%{transform:translateX(-5px)}80%{transform:translateX(4px)}}
-@media (max-width:560px){#denis.bad .dtxt{font-size:30px;padding:11px 18px}#denis.ok .dtxt{font-size:19px;padding:11px 18px}}
-@media (prefers-reduced-motion:reduce){#denis.on,#denis.out,#denis.bad.on .dtxt{animation:none}}
+@media (max-width:560px){#denis.bad .dtxt{font-size:30px;padding:11px 18px}#denis.ok .dtxt{font-size:19px;padding:11px 18px}#denis .dface svg{width:48px;height:48px}#denis .drow{gap:9px}}
+@media (prefers-reduced-motion:reduce){#denis.on,#denis.out,#denis.bad.on .dtxt,#denis.bad.on .dface{animation:none}}
 /* result */
 .result{background:var(--surface);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow);padding:34px 24px;text-align:center}
 .result .big{font-family:Georgia,"Times New Roman",serif;font-size:56px;line-height:1;font-variant-numeric:tabular-nums}
@@ -358,6 +363,24 @@ function sndRound(){ _tone(523,0,.10); _tone(659,.09,.10); _tone(784,.18,.10); _
 var DENIS_ON=true;        /* false — выключить прикол целиком */
 var DENIS_IN_CARDS=true;  /* «Карточки»: Знал / Ещё учить */
 var DENIS_IN_EXAM=false;  /* «Экзамен»: выкл — иначе подсказывает правильность до конца билета */
+var DENIS_FACE=true;      /* false — только текст, без рожицы */
+var FACE_BAD='<svg viewBox="0 0 64 64" aria-hidden="true">'+
+  '<circle cx="32" cy="33" r="25" fill="#F3C583" stroke="#8A5A2B" stroke-width="3"/>'+
+  '<path d="M14 22 q6 -9 17 -7" stroke="#6B4420" stroke-width="3" fill="none" stroke-linecap="round"/>'+
+  '<path d="M50 22 q-6 -9 -17 -7" stroke="#6B4420" stroke-width="3" fill="none" stroke-linecap="round"/>'+
+  '<path d="M16 25 L28 29" stroke="#4A3116" stroke-width="3.2" stroke-linecap="round"/>'+
+  '<path d="M48 25 L36 29" stroke="#4A3116" stroke-width="3.2" stroke-linecap="round"/>'+
+  '<ellipse cx="24" cy="35" rx="3.6" ry="4.6" fill="#23282E"/><ellipse cx="40" cy="35" rx="3.6" ry="4.6" fill="#23282E"/>'+
+  '<path d="M21 39 q2.5 7 0 9.5 q-2.5 -2.5 0 -9.5" fill="#5AA2FF"/>'+
+  '<path d="M22 51 Q32 42 42 51" stroke="#8A2B2B" stroke-width="3.6" fill="none" stroke-linecap="round"/></svg>';
+var FACE_OK='<svg viewBox="0 0 64 64" aria-hidden="true">'+
+  '<circle cx="32" cy="33" r="25" fill="#F3C583" stroke="#8A5A2B" stroke-width="3"/>'+
+  '<path d="M15 21 q7 -8 17 -6" stroke="#6B4420" stroke-width="3" fill="none" stroke-linecap="round"/>'+
+  '<path d="M49 21 q-7 -8 -17 -6" stroke="#6B4420" stroke-width="3" fill="none" stroke-linecap="round"/>'+
+  '<path d="M18 33 q6 -5 12 0" stroke="#23282E" stroke-width="3.4" fill="none" stroke-linecap="round"/>'+
+  '<path d="M34 33 q6 -5 12 0" stroke="#23282E" stroke-width="3.4" fill="none" stroke-linecap="round"/>'+
+  '<path d="M22 43 Q32 53 42 43" stroke="#8A2B2B" stroke-width="3.6" fill="none" stroke-linecap="round"/>'+
+  '<circle cx="17" cy="43" r="3.4" fill="#E98C8C" opacity=".75"/><circle cx="47" cy="43" r="3.4" fill="#E98C8C" opacity=".75"/></svg>';
 var DENIS_BAD_TEXT='Денис лох';
 var DENIS_OK_TEXT='Тебе просто повезло, Денис';
 /* «уа-уа-уааа» — стартует после штатного sndBad, чтобы не смешивалось */
@@ -369,8 +392,8 @@ function denisSay(good){
   var el=document.getElementById('denis'); if(!el) return;
   clearTimeout(_denisT); clearTimeout(_denisT2); clearTimeout(_denisT3);
   el.className=''; void el.offsetWidth;            /* рестарт анимации при быстрых ответах подряд */
-  el.innerHTML='<span class="dtxt"></span>';
-  el.firstChild.textContent = good?DENIS_OK_TEXT:DENIS_BAD_TEXT;
+  el.innerHTML='<span class="drow">'+(DENIS_FACE?'<span class="dface">'+(good?FACE_OK:FACE_BAD)+'</span>':'')+'<span class="dtxt"></span></span>';
+  el.querySelector('.dtxt').textContent = good?DENIS_OK_TEXT:DENIS_BAD_TEXT;
   el.className=(good?'ok':'bad')+' on';
   _denisT3=setTimeout(function(){ denisFx(good); },140);   /* ждём, пока баннер выедет на полный размер */
   _denisT=setTimeout(function(){
@@ -402,11 +425,15 @@ function burstEmoji(x,y,n,set){ if(RM) return; var cv=document.getElementById('f
 /* эффект по бокам от надписи: верно — конфетти, неверно — 🍅💩 */
 function denisFx(good){
   if(RM) return;
-  var t=document.querySelector('#denis .dtxt'); if(!t) return;
-  var r=t.getBoundingClientRect(); if(!r.width) return;
+  var row=document.querySelector('#denis .drow')||document.querySelector('#denis .dtxt'); if(!row) return;
+  var r=row.getBoundingClientRect(); if(!r.width) return;
   var my=r.top+r.height/2;
   if(good){ burst(r.left-12,my,20); burst(r.right+12,my,20); }
-  else { burstEmoji(r.left-16,my,8,['🍅','💩']); burstEmoji(r.right+16,my,8,['💩','🍅']); }
+  else {
+    burstEmoji(r.left-16,my,7,['🍅','💩']); burstEmoji(r.right+16,my,7,['💩','🍅']);
+    var f=document.querySelector('#denis .dface');            /* прилетает прямо в рожицу */
+    if(f){ var fr=f.getBoundingClientRect(); burstEmoji(fr.left+fr.width/2, fr.top+fr.height/2, 6, ['🍅','💩']); }
+  }
 }
 function toggleSound(){ store.sound=!store.sound; saveStore(); if(store.sound) sndOk(); render(); }
 
