@@ -209,6 +209,7 @@ footer.app span button{white-space:nowrap}
       <span style="flex-basis:100%;height:0"></span>
       <button class="chip" id="f-hard" onclick="toggleHard()" title="Только карточки, отмеченные как сложные или ещё не выученные">Только невыученные</button>
       <button class="chip" id="f-sound" onclick="toggleSound()">🔊 Звук</button>
+      <button class="chip" id="f-music" onclick="toggleMusic()" title="Фоновая песня — отдельно от звуков ответов">🎵 Песня</button>
       <button class="chip" id="f-focus" onclick="toggleFocus()" title="Скрыть всё лишнее">🎯 Фокус</button>
       <a class="chip" id="statlink" href="stats.html" style="display:none;text-decoration:none" title="Таблица ошибок — твои и всей группы">📊 Статистика</a>
       <button class="chip" id="f-theme" onclick="cycleTheme()" title="Тема: авто / светлая / тёмная">🌓 Тема</button>
@@ -218,6 +219,7 @@ footer.app span button{white-space:nowrap}
   <main id="main"></main>
   <canvas id="fx"></canvas>
   <div id="denis" aria-live="polite"></div>
+  <audio id="bgm" src="ddg.mp3" loop preload="none"></audio>
   <button id="unfocus" onclick="toggleFocus()">✕ выйти из фокуса</button>
   <footer class="app">
     <span>Подсказки: <kbd>Пробел</kbd> — перевернуть, <kbd>1</kbd>–<kbd>9</kbd> — ответ, <kbd>→</kbd> — дальше</span>
@@ -241,11 +243,11 @@ function loadStore(){
   try{ var s = JSON.parse(localStorage.getItem('eltech-trainer-v1')||'{}');
        return { known:new Set(s.known||[]), hard:new Set(s.hard||[]), learn:(s.learn||{}),
                 sound:(s.sound!==false), best:(s.best||0), att:(s.att||{}), wrong:(s.wrong||{}),
-                exams:(s.exams||[]), mastAt:(s.mastAt||{}), theme:(s.theme||'auto'), idkeys:(s.idkeys===true) }; }
-  catch(e){ return { known:new Set(), hard:new Set(), learn:{}, sound:true, best:0, att:{}, wrong:{}, exams:[], mastAt:{}, theme:'auto', idkeys:false }; }
+                exams:(s.exams||[]), mastAt:(s.mastAt||{}), theme:(s.theme||'auto'), idkeys:(s.idkeys===true), music:(s.music!==false) }; }
+  catch(e){ return { known:new Set(), hard:new Set(), learn:{}, sound:true, best:0, att:{}, wrong:{}, exams:[], mastAt:{}, theme:'auto', idkeys:false, music:true }; }
 }
 function saveStore(){
-  try{ localStorage.setItem('eltech-trainer-v1', JSON.stringify({known:[...store.known], hard:[...store.hard], learn:store.learn, sound:store.sound, best:store.best, att:store.att, wrong:store.wrong, exams:store.exams, mastAt:store.mastAt, theme:store.theme, idkeys:store.idkeys})); }catch(e){}
+  try{ localStorage.setItem('eltech-trainer-v1', JSON.stringify({known:[...store.known], hard:[...store.hard], learn:store.learn, sound:store.sound, best:store.best, att:store.att, wrong:store.wrong, exams:store.exams, mastAt:store.mastAt, theme:store.theme, idkeys:store.idkeys, music:store.music})); }catch(e){}
 }
 var QKEY={}, STATKEY={}, LEGACYKEY={};
 DATA.forEach(function(d){ QKEY[d.n]=d.id||String(d.n); STATKEY[d.n]=d.oldn||d.n; LEGACYKEY[String(d.oldn||d.n)]=d.id||String(d.n); });
@@ -388,6 +390,29 @@ function _fxTick(){ var cv=document.getElementById('fx'),ctx=cv.getContext('2d')
   requestAnimationFrame(_fxTick); }
 function burstAt(el,n){ if(!el){ burst(innerWidth/2,180,n); return; } var r=el.getBoundingClientRect(); burst(r.left+r.width/2,r.top+r.height/2,n); }
 function toggleSound(){ store.sound=!store.sound; saveStore(); if(store.sound) sndOk(); render(); }
+
+/* ---------- фоновая песня (отдельно от звуков ответов) ---------- */
+var MUSIC_VOL=0.22;               /* потише фона: 0..1 */
+var _bgmArmed=false;
+function bgmApply(){
+  var a=document.getElementById('bgm'); if(!a) return;
+  a.volume=MUSIC_VOL;
+  if(store.music){
+    var p=a.play();
+    if(p && p.catch) p.catch(function(){ bgmArm(); });   /* автоплей заблокирован — ждём жеста */
+  } else { a.pause(); }
+}
+function bgmArm(){
+  if(_bgmArmed) return; _bgmArmed=true;
+  var go=function(){
+    document.removeEventListener('pointerdown',go,true);
+    document.removeEventListener('keydown',go,true);
+    _bgmArmed=false; if(store.music) bgmApply();
+  };
+  document.addEventListener('pointerdown',go,true);
+  document.addEventListener('keydown',go,true);
+}
+function toggleMusic(){ store.music=!store.music; saveStore(); bgmApply(); render(); }
 function toggleFocus(){ document.body.classList.toggle('focusmode'); render(); }
 
 /* ---------- state ---------- */
@@ -445,6 +470,8 @@ function headerSync(){
   document.getElementById('f-hard').classList.toggle('on',onlyHard);
   var snd=document.getElementById('f-sound');
   snd.textContent=store.sound?'🔊 Звук':'🔇 Звук'; snd.classList.toggle('on',store.sound);
+  var mus=document.getElementById('f-music');
+  if(mus){ mus.textContent=store.music?'🎵 Песня':'🔇 Песня'; mus.classList.toggle('on',store.music); }
   document.getElementById('f-focus').classList.toggle('on',document.body.classList.contains('focusmode'));
   var p=pool(), txt;
   if(mode==='learn'){ var m=p.filter(function(i){return lsc(DATA[i].n)>=NEED;}).length; txt='усвоено '+m+' / '+p.length; }
@@ -896,6 +923,7 @@ var _qm=location.search.match(/[?&]q=(\d+)/);
 if(_qm){ mode='list'; searchQ=_qm[1]; if(/^https?:$/.test(location.protocol)) loadGStats(); }
 startLearn();
 render();
+bgmApply();
 if(/^https?:$/.test(location.protocol)){
   var _th=document.getElementById('tohub'); if(_th) _th.style.display='inline-block';
   var _sl=document.getElementById('statlink'); if(_sl) _sl.style.display='inline-block';
