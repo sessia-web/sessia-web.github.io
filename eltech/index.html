@@ -362,16 +362,17 @@ var DENIS_BAD_TEXT='Денис лох';
 var DENIS_OK_TEXT='Тебе просто повезло, Денис';
 /* «уа-уа-уааа» — стартует после штатного sndBad, чтобы не смешивалось */
 function sndDenisBad(){ _tone(311,.18,.20,'sawtooth',.11); _tone(277,.37,.20,'sawtooth',.11); _tone(233,.56,.26,'sawtooth',.12); _tone(175,.80,.55,'sawtooth',.13); }
-var _denisT=null, _denisT2=null;
+var _denisT=null, _denisT2=null, _denisT3=null;
 function denisSay(good){
   if(!DENIS_ON) return;
   if(!good) sndDenisBad();
   var el=document.getElementById('denis'); if(!el) return;
-  clearTimeout(_denisT); clearTimeout(_denisT2);
+  clearTimeout(_denisT); clearTimeout(_denisT2); clearTimeout(_denisT3);
   el.className=''; void el.offsetWidth;            /* рестарт анимации при быстрых ответах подряд */
   el.innerHTML='<span class="dtxt"></span>';
   el.firstChild.textContent = good?DENIS_OK_TEXT:DENIS_BAD_TEXT;
   el.className=(good?'ok':'bad')+' on';
+  _denisT3=setTimeout(function(){ denisFx(good); },140);   /* ждём, пока баннер выедет на полный размер */
   _denisT=setTimeout(function(){
     el.className=(good?'ok':'bad')+' on out';
     _denisT2=setTimeout(function(){ el.className=''; el.innerHTML=''; }, 420);
@@ -385,10 +386,28 @@ function burst(x,y,n){ if(RM) return; var cv=document.getElementById('fx'); cv.w
   if(!_fxOn){ _fxOn=true; requestAnimationFrame(_fxTick); } }
 function _fxTick(){ var cv=document.getElementById('fx'),ctx=cv.getContext('2d'); ctx.clearRect(0,0,cv.width,cv.height);
   _parts=_parts.filter(function(p){return p.life>0;}); if(!_parts.length){ _fxOn=false; return; }
-  _parts.forEach(function(p){ p.x+=p.vx; p.y+=p.vy; p.vy+=p.g; p.life-=0.02; p.rot+=0.1;
-    ctx.save(); ctx.globalAlpha=Math.max(p.life,0); ctx.translate(p.x,p.y); ctx.rotate(p.rot); ctx.fillStyle=p.c; ctx.fillRect(-p.s/2,-p.s/2,p.s,p.s*0.6); ctx.restore(); });
+  _parts.forEach(function(p){ p.x+=p.vx; p.y+=p.vy; p.vy+=p.g; p.life-=(p.dl||0.02); p.rot+=(p.vr===undefined?0.1:p.vr);
+    ctx.save(); ctx.globalAlpha=Math.max(p.life,0); ctx.translate(p.x,p.y); ctx.rotate(p.rot);
+    if(p.e){ ctx.font=p.s+'px "Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",serif'; ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.fillText(p.e,0,0); }
+    else { ctx.fillStyle=p.c; ctx.fillRect(-p.s/2,-p.s/2,p.s,p.s*0.6); }
+    ctx.restore(); });
   requestAnimationFrame(_fxTick); }
 function burstAt(el,n){ if(!el){ burst(innerWidth/2,180,n); return; } var r=el.getBoundingClientRect(); burst(r.left+r.width/2,r.top+r.height/2,n); }
+/* помидоры и какашки — летят из точки веером вверх */
+function burstEmoji(x,y,n,set){ if(RM) return; var cv=document.getElementById('fx'); cv.width=innerWidth; cv.height=innerHeight;
+  for(var i=0;i<n;i++){ var a=-Math.PI/2+(Math.random()-0.5)*2.0, v=4+Math.random()*5;
+    _parts.push({x:x,y:y,vx:Math.cos(a)*v,vy:Math.sin(a)*v-2,g:0.30,life:1,dl:0.012,e:set[i%set.length],
+                 s:22+Math.random()*16,rot:(Math.random()-0.5)*0.8,vr:(Math.random()-0.5)*0.22}); }
+  if(!_fxOn){ _fxOn=true; requestAnimationFrame(_fxTick); } }
+/* эффект по бокам от надписи: верно — конфетти, неверно — 🍅💩 */
+function denisFx(good){
+  if(RM) return;
+  var t=document.querySelector('#denis .dtxt'); if(!t) return;
+  var r=t.getBoundingClientRect(); if(!r.width) return;
+  var my=r.top+r.height/2;
+  if(good){ burst(r.left-12,my,20); burst(r.right+12,my,20); }
+  else { burstEmoji(r.left-16,my,8,['🍅','💩']); burstEmoji(r.right+16,my,8,['💩','🍅']); }
+}
 function toggleSound(){ store.sound=!store.sound; saveStore(); if(store.sound) sndOk(); render(); }
 
 /* ---------- фоновая песня (отдельно от звуков ответов) ---------- */
